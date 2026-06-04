@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Santron 626 Emulator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="calculator" aria-label="Santron 626 Emulator">
+      <div class="brand"><img src="assets/santron-logo.svg" alt="Santron"></div>
+      <div class="display" aria-live="polite" id="display"></div>
+
+      <div class="keyfield-frame" aria-hidden="true"></div>
+
+      <div class="switch-row">
+        <button class="pill blue small" data-key="GTO">GOTO</button>
+        <div class="switch-group two angle-switch">
+          <div class="switch-labels"><span>RD</span><span>DG</span></div>
+          <div class="switch-track">
+            <input id="angleRad" name="angle" type="radio">
+            <input id="angleDeg" name="angle" type="radio" checked>
+            <label for="angleRad" aria-label="Radiant"></label>
+            <label for="angleDeg" aria-label="Grad"></label>
+            <i></i>
+          </div>
+        </div>
+        <div class="switch-group three mode-switch">
+          <div class="switch-labels"><span>LOAD</span><span>CLR</span><span>RUN</span></div>
+          <div class="switch-track">
+            <input id="modeLoad" name="mode" value="load" type="radio">
+            <input id="modeClear" name="mode" value="clear" type="radio">
+            <input id="modeRun" name="mode" value="run" type="radio" checked>
+            <label for="modeLoad" aria-label="Load"></label>
+            <label for="modeClear" aria-label="Clear"></label>
+            <label for="modeRun" aria-label="Run"></label>
+            <i></i>
+          </div>
+        </div>
+        <div class="switch-group two power-switch">
+          <div class="switch-labels"><span>ON</span><span>OFF</span></div>
+          <div class="switch-track">
+            <input id="powerOn" name="power" type="radio" checked>
+            <input id="powerOff" name="power" type="radio">
+            <label for="powerOn" aria-label="Ein"></label>
+            <label for="powerOff" aria-label="Aus"></label>
+            <i></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <div class="nav-key"><span class="nav-label nav-arrow-label"><span class="nav-arrow arrow-left"></span><span class="nav-word">BST</span></span><button class="pill blue" data-key="BST"> </button></div>
+        <div class="nav-key"><span class="nav-label nav-arrow-label"><span class="nav-arrow arrow-right"></span><span class="nav-word">SST</span></span><button class="pill blue" data-key="SST"> </button></div>
+        <div class="nav-key"><span class="nav-label nav-label-center"><span>R/S</span></span><button class="pill blue" data-key="R/S"> </button></div>
+        <div class="nav-key"><span class="nav-label nav-label-skp"><span class="skp-text">SKP</span><span class="nav-sub">(—)</span></span><button class="pill blue" data-key="SKP"> </button></div>
+      </div>
+
+      <div class="keypad" id="keypad"></div>
+    </section>
+
+    <aside class="panel">
+      <div class="program">
+        <div class="program-head">
+          <h2>Programmspeicher</h2>
+          <button id="clearProgram" type="button">Löschen</button>
+        </div>
+        <ol id="programList"></ol>
+      </div>
+    </aside>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
