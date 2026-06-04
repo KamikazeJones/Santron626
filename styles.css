@@ -13,6 +13,25 @@
   --gray-key: #c7cbd0;
   --led-core: #c9fff6;
   --led-glow: #39f7e6;
+  /* Glow-Stärke: 1 = aktuell, 0.5 = halb, 2 = doppelt */
+  --glow: 1;
+  /* Glow-Radien in px – werden per JS aus --glow berechnet */
+  --ga: 3px;
+  --gb: 7px;
+  --gc: 13px;
+  --gd: 4px;
+  --ge: 10px;
+  --gf: 19px;
+  --gg: 34px;
+  --gh: 3px;
+  --gi: 8px;
+  --gj: 4px;
+  --gk: 9px;
+  --gl: 18px;
+  /* Glow-Intensitäten (Alpha 0–1) */
+  --gi1: 0.5;
+  --gi2: 0.5;
+  --gi3: 0.10;
 }
 
 * {
@@ -43,11 +62,59 @@ input {
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(300px, 430px) minmax(300px, 520px);
+  grid-template-columns: 240px minmax(300px, 430px) minmax(300px, 520px);
   gap: 28px;
   align-items: center;
   justify-content: center;
   padding: 24px;
+}
+
+.glow-control {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 220px;
+}
+
+.glow-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glow-row label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-transform: uppercase;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.glow-row input[type=range] {
+  flex: 1;
+  cursor: pointer;
+  accent-color: var(--cyan);
+}
+
+.glow-row .glow-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  width: 34px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.glow-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 .calculator {
@@ -87,13 +154,16 @@ input {
   content: "";
   position: absolute;
   inset: 6px 6px auto;
-  height: 20.5%;
+  height: 15%;
   z-index: 0;
   pointer-events: none;
   border-radius: 6px 6px 3px 3px;
   background:
-    linear-gradient(180deg, rgba(64, 110, 101, .08), rgba(6, 36, 32, .58) 42%, rgba(3, 12, 12, .62)),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, .018) 0 1px, transparent 1px 3px);
+    /* "blaue" Fläche: dunkelgrün wie Display-Off */
+    linear-gradient(#071111, #071111)
+      0 46px / 100% 58px no-repeat,
+    /* "rote" Fläche: dunkelgrün wie Display-Off */
+    #071111;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .08),
     inset 0 -8px 16px rgba(0, 0, 0, .4);
@@ -106,14 +176,14 @@ input {
 
 .keyfield-frame {
   position: absolute;
-  left: 12px;
-  right: 12px;
+  left: 0;
+  right: 0;
   top: 135px;
-  bottom: 11px;
+  bottom: 0;
   z-index: 0;
   pointer-events: none;
-  border: 2px solid #242b2b;
-  border-radius: 3px 3px 6px 6px;
+  border: 2mm solid #242b2b;
+  border-radius: 0 0 9px 9px;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, .24), rgba(255, 255, 255, .055) 45%, rgba(0, 0, 0, .22)),
     #080a0b;
@@ -139,12 +209,11 @@ input {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .55));
 }
 
-.display {
+.display-wrap {
   position: relative;
   overflow: hidden;
   height: 58px;
   margin: 0 0 18px;
-  padding: 7px 10px;
   border-radius: 4px;
   background:
     radial-gradient(ellipse at 50% 58%, rgba(64, 241, 231, .1), rgba(64, 241, 231, .035) 44%, transparent 76%),
@@ -154,15 +223,13 @@ input {
     inset 0 0 20px rgba(64, 241, 231, .12),
     inset 0 0 0 2px #173231,
     0 0 7px rgba(64, 241, 231, .06);
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 2px;
 }
 
-.display::before {
+.display-wrap::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .07), transparent 22%, rgba(255, 255, 255, .025) 52%, transparent 68%),
@@ -171,17 +238,18 @@ input {
   opacity: .55;
 }
 
-.display::after {
+.display-wrap::after {
   content: "";
   position: absolute;
   inset: -20%;
+  z-index: 0;
   pointer-events: none;
   background: radial-gradient(ellipse at center, rgba(64, 241, 231, .08), transparent 58%);
   filter: blur(14px);
   opacity: .28;
 }
 
-.display.power-off {
+.display-wrap.power-off {
   background:
     linear-gradient(rgba(255, 255, 255, .035), rgba(255, 255, 255, .01)),
     #071111;
@@ -190,12 +258,23 @@ input {
     inset 0 0 0 2px #172222;
 }
 
-.display.power-off::before {
+.display-wrap.power-off::before {
   opacity: .18;
 }
 
-.display.power-off::after {
+.display-wrap.power-off::after {
   opacity: 0;
+}
+
+.display {
+  position: relative;
+  overflow: visible;
+  height: 58px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  z-index: 1;
 }
 
 .digit {
@@ -213,81 +292,78 @@ input {
   height: 100%;
   transform: skewX(-7deg);
   transform-origin: center bottom;
-  isolation: isolate;
   overflow: visible;
 }
 
 .segment-block.lit {
-  filter:
-    drop-shadow(0 0 4px var(--led-core))
-    drop-shadow(0 0 9px rgba(57, 247, 230, .95))
-    drop-shadow(0 0 18px rgba(64, 241, 231, .65));
 }
 
-.seg {
+/* Wrapper: absolut positioniert, kein clip-path → drop-shadow bleibt sichtbar */
+.seg-glow {
   position: absolute;
+  overflow: visible;
+}
+
+.seg-glow.on {
+  filter:
+    drop-shadow(0 0 var(--ga) rgba(201, 255, 246, var(--gi1)))
+    drop-shadow(0 0 var(--gb) rgba(57, 247, 230, var(--gi2)))
+    drop-shadow(0 0 var(--gc) rgba(64, 241, 231, var(--gi3)));
+}
+
+.seg-glow.a,
+.seg-glow.g,
+.seg-glow.d {
+  left: 17%;
+  width: 66%;
+  height: 10%;
+}
+
+.seg-glow.a { top: 0; }
+.seg-glow.g { top: 45%; }
+.seg-glow.d { bottom: 0; }
+
+.seg-glow.b,
+.seg-glow.c,
+.seg-glow.e,
+.seg-glow.f {
+  width: 21%;
+  height: 40%;
+}
+
+.seg-glow.b { top: 6%; right: 2%; }
+.seg-glow.c { bottom: 6%; right: 2%; }
+.seg-glow.e { bottom: 6%; left: 2%; }
+.seg-glow.f { top: 6%; left: 2%; }
+
+/* Segment selbst: füllt den Wrapper, behält clip-path für die Form */
+.seg {
+  display: block;
+  width: 100%;
+  height: 100%;
   opacity: .12;
   background: var(--cyan);
-  box-shadow: none;
   overflow: visible;
-  transition: opacity .08s linear, box-shadow .08s linear;
-}
-
-.seg::before {
-  content: "";
-  position: absolute;
-  inset: -70%;
-  opacity: 0;
-  background: var(--led-glow);
-  clip-path: inherit;
-  filter: blur(9px);
   transition: opacity .08s linear;
 }
 
 .seg.on {
   opacity: 1;
   background: linear-gradient(90deg, var(--led-glow), var(--led-core), var(--led-glow));
-  filter:
-    drop-shadow(0 0 3px var(--led-core))
-    drop-shadow(0 0 7px var(--led-glow))
-    drop-shadow(0 0 13px rgba(64, 241, 231, .75));
-  box-shadow:
-    0 0 4px var(--led-core),
-    0 0 10px var(--led-glow),
-    0 0 19px rgba(64, 241, 231, .72),
-    0 0 34px rgba(64, 241, 231, .34);
-}
-
-.seg.on::before {
-  opacity: .55;
 }
 
 .seg.a,
 .seg.g,
 .seg.d {
-  left: 17%;
-  width: 66%;
-  height: 10%;
   clip-path: polygon(12% 0, 88% 0, 100% 50%, 88% 100%, 12% 100%, 0 50%);
 }
-
-.seg.a { top: 0; }
-.seg.g { top: 45%; }
-.seg.d { bottom: 0; }
 
 .seg.b,
 .seg.c,
 .seg.e,
 .seg.f {
-  width: 21%;
-  height: 40%;
   clip-path: polygon(50% 0, 100% 10%, 100% 90%, 50% 100%, 0 90%, 0 10%);
 }
-
-.seg.b { top: 6%; right: 2%; }
-.seg.c { bottom: 6%; right: 2%; }
-.seg.e { bottom: 6%; left: 2%; }
-.seg.f { top: 6%; left: 2%; }
 
 .dot {
   position: absolute;
@@ -305,12 +381,12 @@ input {
   opacity: 1;
   background: var(--led-core);
   filter:
-    drop-shadow(0 0 3px var(--led-core))
-    drop-shadow(0 0 8px var(--led-glow));
+    drop-shadow(0 0 var(--ga) rgba(201, 255, 246, .5))
+    drop-shadow(0 0 var(--gh) rgba(57, 247, 230, .5));
   box-shadow:
-    0 0 4px var(--led-core),
-    0 0 10px var(--led-glow),
-    0 0 18px rgba(64, 241, 231, .65);
+    0 0 var(--gd) rgba(201, 255, 246, .5),
+    0 0 var(--ge) rgba(57, 247, 230, .5),
+    0 0 var(--gi) rgba(64, 241, 231, .083);
 }
 
 .switch-row {
@@ -547,6 +623,13 @@ input {
   white-space: nowrap;
 }
 
+.operator-symbol {
+  display: inline-block;
+  font-size: 1.55em;
+  line-height: .62;
+  transform: translateY(2px);
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -635,6 +718,53 @@ input {
   line-height: 1.5;
 }
 
+.run-options {
+  border: 1px solid #354242;
+  border-radius: 8px;
+  background: rgba(10, 16, 17, .74);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.speed-control {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) 54px;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.speed-control input {
+  width: 100%;
+  accent-color: var(--cyan);
+}
+
+.speed-control output {
+  color: #dbeeee;
+  font-family: Consolas, monospace;
+  text-align: right;
+}
+
+.run-display-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  color: #dbeeee;
+  font-size: 12px;
+}
+
+.run-display-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.run-display-options input {
+  accent-color: var(--cyan);
+}
+
 .program {
   border: 1px solid #354242;
   border-radius: 8px;
@@ -652,7 +782,32 @@ input {
   justify-content: space-between;
 }
 
-.program-head button {
+.program-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.program-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.program-name input {
+  width: 150px;
+  border: 1px solid #536060;
+  border-radius: 6px;
+  background: #0d1515;
+  color: #e9f3f2;
+  padding: 6px 8px;
+}
+
+.program-head button,
+.program-actions button {
   border: 1px solid #536060;
   border-radius: 6px;
   background: #182020;

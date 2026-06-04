@@ -8,9 +8,46 @@
 </head>
 <body>
   <main class="shell">
+    <div class="glow-control" aria-label="Glow-Einstellungen">
+      <span class="glow-section-label">Stufe 1</span>
+      <div class="glow-row">
+        <label for="gr1">R</label>
+        <input id="gr1" type="range" min="0" max="20" step="0.1" value="3">
+        <span class="glow-value" id="gr1v">3.0 px</span>
+      </div>
+      <div class="glow-row">
+        <label for="gi1">I</label>
+        <input id="gi1" type="range" min="0" max="1" step="0.01" value="0.5">
+        <span class="glow-value" id="gi1v">0.50</span>
+      </div>
+      <span class="glow-section-label">Stufe 2</span>
+      <div class="glow-row">
+        <label for="gr2">R</label>
+        <input id="gr2" type="range" min="0" max="30" step="0.1" value="7">
+        <span class="glow-value" id="gr2v">7.0 px</span>
+      </div>
+      <div class="glow-row">
+        <label for="gi2">I</label>
+        <input id="gi2" type="range" min="0" max="1" step="0.01" value="0.5">
+        <span class="glow-value" id="gi2v">0.50</span>
+      </div>
+      <span class="glow-section-label">Stufe 3</span>
+      <div class="glow-row">
+        <label for="gr3">R</label>
+        <input id="gr3" type="range" min="0" max="50" step="0.5" value="13">
+        <span class="glow-value" id="gr3v">13.0 px</span>
+      </div>
+      <div class="glow-row">
+        <label for="gi3">I</label>
+        <input id="gi3" type="range" min="0" max="1" step="0.01" value="0.10">
+        <span class="glow-value" id="gi3v">0.10</span>
+      </div>
+    </div>
     <section class="calculator" aria-label="Santron 626 Emulator">
       <div class="brand"><img src="assets/santron-logo.svg" alt="Santron"></div>
-      <div class="display" aria-live="polite" id="display"></div>
+      <div class="display-wrap">
+        <div class="display" aria-live="polite" id="display"></div>
+      </div>
 
       <div class="keyfield-frame" aria-hidden="true"></div>
 
@@ -61,15 +98,60 @@
     </section>
 
     <aside class="panel">
+      <div class="run-options">
+        <h2>Programmlauf</h2>
+        <label class="speed-control">
+          <span>Schrittgeschwindigkeit</span>
+          <input id="runSpeed" type="range" min="0" max="51" step="1" value="29">
+          <output id="runSpeedValue" for="runSpeed">150 ms</output>
+        </label>
+        <div class="run-display-options" role="radiogroup" aria-label="Display während Programmlauf">
+          <label><input name="runDisplayMode" type="radio" value="live" checked> Zwischenergebnisse</label>
+          <label><input name="runDisplayMode" type="radio" value="hold"> Letzte Eingabe</label>
+          <label><input name="runDisplayMode" type="radio" value="blank"> Display abdunkeln</label>
+        </div>
+      </div>
+
       <div class="program">
         <div class="program-head">
           <h2>Programmspeicher</h2>
-          <button id="clearProgram" type="button">Löschen</button>
+          <div class="program-actions">
+            <label class="program-name">
+              <span>Name</span>
+              <input id="programName" type="text" value="santron-626-program" spellcheck="false">
+            </label>
+            <button id="saveProgram" type="button">Speichern</button>
+            <button id="loadProgram" type="button">Laden</button>
+            <button id="clearProgram" type="button">Löschen</button>
+          </div>
+          <input id="programFile" type="file" accept=".txt,.lst,.626,text/plain" hidden>
         </div>
         <ol id="programList"></ol>
       </div>
     </aside>
   </main>
   <script src="app.js"></script>
+  <script>
+    const root = document.documentElement;
+    const controls = [
+      { id: 'gr1', prop: '--ga', fmt: v => v.toFixed(1) + ' px' },
+      { id: 'gr2', prop: '--gb', fmt: v => v.toFixed(1) + ' px' },
+      { id: 'gr3', prop: '--gc', fmt: v => v.toFixed(1) + ' px' },
+      { id: 'gi1', prop: '--gi1', fmt: v => v.toFixed(2) },
+      { id: 'gi2', prop: '--gi2', fmt: v => v.toFixed(2) },
+      { id: 'gi3', prop: '--gi3', fmt: v => v.toFixed(2) },
+    ];
+    controls.forEach(({ id, prop, fmt }) => {
+      const input = document.getElementById(id);
+      const display = document.getElementById(id + 'v');
+      const apply = () => {
+        const v = parseFloat(input.value);
+        root.style.setProperty(prop, prop.startsWith('--ga') || prop.startsWith('--gb') || prop.startsWith('--gc') ? v + 'px' : v);
+        display.textContent = fmt(v);
+      };
+      input.addEventListener('input', apply);
+      apply();
+    });
+  </script>
 </body>
 </html>
