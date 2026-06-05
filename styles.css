@@ -61,20 +61,47 @@ input {
 
 .shell {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 240px minmax(300px, 430px) minmax(300px, 520px);
-  gap: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px 56px;
   align-items: center;
   justify-content: center;
   padding: 24px;
 }
 
+.left-panel {
+  order: 1;
+  flex: 0 0 300px;
+  width: 100%;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  justify-items: center;
+  justify-self: stretch;
+  min-width: 0;
+}
+
+.center-panel {
+  order: 2;
+  flex: 0 0 392px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .glow-control {
+  max-width: 300px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
-  width: 220px;
+  width: 100%;
+}
+
+.glow-control h2 {
+  margin: 0 0 6px;
 }
 
 .glow-row {
@@ -89,11 +116,12 @@ input {
   letter-spacing: .06em;
   color: var(--muted);
   text-transform: uppercase;
-  width: 36px;
+  width: 76px;
   flex-shrink: 0;
 }
 
 .glow-row input[type=range] {
+  min-width: 0;
   flex: 1;
   cursor: pointer;
   accent-color: var(--cyan);
@@ -693,13 +721,29 @@ input {
 .gray { background: var(--gray-key); color: #121212; }
 
 .panel {
-  max-width: 520px;
-  width: min(100%, 520px);
+  order: 3;
+  flex: 0 0 520px;
+  width: 100%;
   height: calc(100vh - 24px);
   align-self: start;
   display: grid;
   gap: 18px;
   align-content: stretch;
+}
+
+@media (max-width: 1520px) and (min-width: 969px) {
+  .left-panel {
+    order: 3;
+    flex-basis: 968px;
+  }
+
+  .center-panel {
+    order: 1;
+  }
+
+  .panel {
+    order: 2;
+  }
 }
 
 .panel h1,
@@ -719,12 +763,15 @@ input {
 }
 
 .run-options {
-  border: 1px solid #354242;
-  border-radius: 8px;
-  background: rgba(10, 16, 17, .74);
-  padding: 12px;
+  max-width: 300px;
+  min-width: 0;
+  padding: 0;
   display: grid;
   gap: 12px;
+}
+
+.run-options h2 {
+  margin: 0;
 }
 
 .speed-control {
@@ -737,6 +784,7 @@ input {
 }
 
 .speed-control input {
+  min-width: 0;
   width: 100%;
   accent-color: var(--cyan);
 }
@@ -745,6 +793,14 @@ input {
   color: #dbeeee;
   font-family: Consolas, monospace;
   text-align: right;
+}
+
+.left-panel .speed-control {
+  grid-template-columns: 1fr 54px;
+}
+
+.left-panel .speed-control span {
+  grid-column: 1 / -1;
 }
 
 .run-display-options {
@@ -756,6 +812,7 @@ input {
 }
 
 .run-display-options label {
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -765,11 +822,20 @@ input {
   accent-color: var(--cyan);
 }
 
+.program-loader,
 .program {
   border: 1px solid #354242;
   border-radius: 8px;
   background: rgba(10, 16, 17, .74);
   padding: 12px;
+}
+
+.program-loader {
+  display: grid;
+  gap: 10px;
+}
+
+.program {
   min-height: 0;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -818,44 +884,16 @@ input {
 
 .server-program-source {
   margin-top: 10px;
-  display: grid;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
 }
 
-.server-program-source label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.server-program-source input {
-  accent-color: var(--cyan);
-}
-
-.server-program-controls {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) auto;
-  gap: 6px;
-}
-
-.server-program-controls select {
+.server-program-source select {
+  width: 100%;
   min-width: 0;
   border: 1px solid #536060;
   border-radius: 6px;
   background: #0d1515;
   color: #e9f3f2;
   padding: 6px 8px;
-}
-
-.server-program-controls button {
-  border: 1px solid #536060;
-  border-radius: 6px;
-  background: #182020;
-  color: #e9f3f2;
-  padding: 6px 10px;
-  cursor: pointer;
 }
 
 #programList {
@@ -884,13 +922,19 @@ input {
 }
 
 @media (max-width: 860px) {
-  .shell {
-    grid-template-columns: 1fr;
-    justify-items: center;
+  .center-panel,
+  .panel {
+    flex-basis: min(100%, 520px);
+    width: min(100%, 520px);
   }
 
   .panel {
     height: auto;
+  }
+
+  .left-panel {
+    flex-basis: min(100%, 520px);
+    width: min(100%, 520px);
   }
 
   #programList {

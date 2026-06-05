@@ -58,8 +58,8 @@ const state = {
   mode: "run",
   angle: "deg",
   displayFormat: { mode: "auto", decimals: null },
-  runSpeed: 150,
-  runDisplayMode: "live",
+  runSpeed: 0,
+  runDisplayMode: "blank",
   heldRunDisplay: null,
   power: "on",
   running: false,
@@ -74,10 +74,7 @@ const keypad = document.querySelector("#keypad");
 const programList = document.querySelector("#programList");
 const programFile = document.querySelector("#programFile");
 const programName = document.querySelector("#programName");
-const serverPrograms = document.querySelector("#serverPrograms");
-const serverProgramControls = document.querySelector("#serverProgramControls");
 const serverProgramSelect = document.querySelector("#serverProgramSelect");
-const openServerProgram = document.querySelector("#openServerProgram");
 const runSpeed = document.querySelector("#runSpeed");
 const runSpeedValue = document.querySelector("#runSpeedValue");
 
@@ -416,6 +413,11 @@ async function loadServerProgramManifest() {
 
 function fillServerProgramSelect(programs) {
   serverProgramSelect.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Programm aus Repository öffnen...";
+  serverProgramSelect.append(placeholder);
+
   programs.forEach((program, idx) => {
     const option = document.createElement("option");
     option.value = String(idx);
@@ -424,20 +426,23 @@ function fillServerProgramSelect(programs) {
   });
 }
 
-async function enableServerPrograms() {
-  serverProgramControls.hidden = false;
+async function initializeServerPrograms() {
   try {
     const programs = await loadServerProgramManifest();
     fillServerProgramSelect(programs);
-    openServerProgram.disabled = programs.length === 0;
+    serverProgramSelect.disabled = programs.length === 0;
   } catch (error) {
-    serverPrograms.checked = false;
-    serverProgramControls.hidden = true;
-    alert(error.message);
+    serverProgramSelect.innerHTML = "";
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Repository-Programme nicht verfügbar";
+    serverProgramSelect.append(option);
+    serverProgramSelect.disabled = true;
   }
 }
 
 async function openSelectedServerProgram() {
+  if (serverProgramSelect.value === "") return;
   const programs = await loadServerProgramManifest();
   const program = programs[Number(serverProgramSelect.value)];
   if (!program) return;
@@ -446,6 +451,7 @@ async function openSelectedServerProgram() {
     const response = await fetch(`programs/${program.file}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`${program.name} konnte nicht geladen werden.`);
     applyProgramListing(await response.text(), program.file);
+    serverProgramSelect.value = "";
   } catch (error) {
     alert(error.message);
   }
@@ -959,14 +965,7 @@ programFile.addEventListener("change", () => {
   loadProgramFile(programFile.files[0]);
   programFile.value = "";
 });
-serverPrograms.addEventListener("change", () => {
-  if (serverPrograms.checked) {
-    enableServerPrograms();
-  } else {
-    serverProgramControls.hidden = true;
-  }
-});
-openServerProgram.addEventListener("click", openSelectedServerProgram);
+serverProgramSelect.addEventListener("change", openSelectedServerProgram);
 
 function initializeControls() {
   document.querySelector("#powerOn").checked = true;
@@ -992,5 +991,6 @@ function initializeControls() {
 makeDisplay();
 makeKeypad();
 initializeControls();
+initializeServerPrograms();
 renderPower();
 renderNow();

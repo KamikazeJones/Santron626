@@ -8,41 +8,58 @@
 </head>
 <body>
   <main class="shell">
+    <aside class="left-panel">
     <div class="glow-control" aria-label="Glow-Einstellungen">
+      <h2>Display-Glow</h2>
       <span class="glow-section-label">Stufe 1</span>
       <div class="glow-row">
-        <label for="gr1">R</label>
+        <label for="gr1">Radius</label>
         <input id="gr1" type="range" min="0" max="20" step="0.1" value="3">
         <span class="glow-value" id="gr1v">3.0 px</span>
       </div>
       <div class="glow-row">
-        <label for="gi1">I</label>
+        <label for="gi1">Intensität</label>
         <input id="gi1" type="range" min="0" max="1" step="0.01" value="0.5">
         <span class="glow-value" id="gi1v">0.50</span>
       </div>
       <span class="glow-section-label">Stufe 2</span>
       <div class="glow-row">
-        <label for="gr2">R</label>
+        <label for="gr2">Radius</label>
         <input id="gr2" type="range" min="0" max="30" step="0.1" value="7">
         <span class="glow-value" id="gr2v">7.0 px</span>
       </div>
       <div class="glow-row">
-        <label for="gi2">I</label>
+        <label for="gi2">Intensität</label>
         <input id="gi2" type="range" min="0" max="1" step="0.01" value="0.5">
         <span class="glow-value" id="gi2v">0.50</span>
       </div>
       <span class="glow-section-label">Stufe 3</span>
       <div class="glow-row">
-        <label for="gr3">R</label>
+        <label for="gr3">Radius</label>
         <input id="gr3" type="range" min="0" max="50" step="0.5" value="13">
         <span class="glow-value" id="gr3v">13.0 px</span>
       </div>
       <div class="glow-row">
-        <label for="gi3">I</label>
+        <label for="gi3">Intensität</label>
         <input id="gi3" type="range" min="0" max="1" step="0.01" value="0.10">
         <span class="glow-value" id="gi3v">0.10</span>
       </div>
     </div>
+      <div class="run-options">
+        <h2>Programmlauf</h2>
+        <label class="speed-control">
+          <span>Schrittgeschwindigkeit</span>
+          <input id="runSpeed" type="range" min="0" max="51" step="1" value="0">
+          <output id="runSpeedValue" for="runSpeed">0 ms</output>
+        </label>
+        <div class="run-display-options" role="radiogroup" aria-label="Display während Programmlauf">
+          <label><input name="runDisplayMode" type="radio" value="live"> Zwischenergebnisse</label>
+          <label><input name="runDisplayMode" type="radio" value="hold"> Letzte Eingabe</label>
+          <label><input name="runDisplayMode" type="radio" value="blank" checked> Display abdunkeln</label>
+        </div>
+      </div>
+    </aside>
+    <section class="center-panel">
     <section class="calculator" aria-label="Santron 626 Emulator">
       <div class="brand"><img src="assets/santron-logo.svg" alt="Santron"></div>
       <div class="display-wrap">
@@ -96,25 +113,12 @@
 
       <div class="keypad" id="keypad"></div>
     </section>
+    </section>
 
     <aside class="panel">
-      <div class="run-options">
-        <h2>Programmlauf</h2>
-        <label class="speed-control">
-          <span>Schrittgeschwindigkeit</span>
-          <input id="runSpeed" type="range" min="0" max="51" step="1" value="29">
-          <output id="runSpeedValue" for="runSpeed">150 ms</output>
-        </label>
-        <div class="run-display-options" role="radiogroup" aria-label="Display während Programmlauf">
-          <label><input name="runDisplayMode" type="radio" value="live" checked> Zwischenergebnisse</label>
-          <label><input name="runDisplayMode" type="radio" value="hold"> Letzte Eingabe</label>
-          <label><input name="runDisplayMode" type="radio" value="blank"> Display abdunkeln</label>
-        </div>
-      </div>
-
-      <div class="program">
+      <div class="program-loader">
         <div class="program-head">
-          <h2>Programmspeicher</h2>
+          <h2>Programme</h2>
           <div class="program-actions">
             <label class="program-name">
               <span>Name</span>
@@ -127,12 +131,14 @@
           <input id="programFile" type="file" accept=".txt,.lst,.626,text/plain" hidden>
         </div>
         <div class="server-program-source">
-          <label><input id="serverPrograms" type="checkbox"> Programme aus Repository</label>
-          <div id="serverProgramControls" class="server-program-controls" hidden>
-            <select id="serverProgramSelect" aria-label="Repository-Programm"></select>
-            <button id="openServerProgram" type="button">Öffnen</button>
-          </div>
+          <select id="serverProgramSelect" aria-label="Repository-Programm">
+            <option value="">Programm aus Repository öffnen...</option>
+          </select>
         </div>
+      </div>
+
+      <div class="program">
+        <h2>Programmspeicher</h2>
         <ol id="programList"></ol>
       </div>
     </aside>
