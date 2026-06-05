@@ -816,6 +816,48 @@ input {
   cursor: pointer;
 }
 
+.server-program-source {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.server-program-source label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.server-program-source input {
+  accent-color: var(--cyan);
+}
+
+.server-program-controls {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto;
+  gap: 6px;
+}
+
+.server-program-controls select {
+  min-width: 0;
+  border: 1px solid #536060;
+  border-radius: 6px;
+  background: #0d1515;
+  color: #e9f3f2;
+  padding: 6px 8px;
+}
+
+.server-program-controls button {
+  border: 1px solid #536060;
+  border-radius: 6px;
+  background: #182020;
+  color: #e9f3f2;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
 #programList {
   margin: 12px 0 0;
   padding-left: 0;

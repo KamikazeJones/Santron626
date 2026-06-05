@@ -74,12 +74,17 @@ const keypad = document.querySelector("#keypad");
 const programList = document.querySelector("#programList");
 const programFile = document.querySelector("#programFile");
 const programName = document.querySelector("#programName");
+const serverPrograms = document.querySelector("#serverPrograms");
+const serverProgramControls = document.querySelector("#serverProgramControls");
+const serverProgramSelect = document.querySelector("#serverProgramSelect");
+const openServerProgram = document.querySelector("#openServerProgram");
 const runSpeed = document.querySelector("#runSpeed");
 const runSpeedValue = document.querySelector("#runSpeedValue");
 
 let renderQueued = false;
 let runDisplayBlanked = false;
 let runDisplayHeld = false;
+let serverProgramManifest = null;
 
 function makeDisplay() {
   display.innerHTML = "";
@@ -345,8 +350,29 @@ function runSpeedFromSlider(value) {
   return 1000 + (step - 46) * 200;
 }
 
-function saveProgramFile() {
-  const blob = new Blob([`${makeProgramListing()}\n`], { type: "text/plain" });
+async function saveProgramFile() {
+  const listing = `${makeProgramListing()}\n`;
+  if ("showSaveFilePicker" in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: programFilename(),
+        types: [{
+          description: "Santron 626 Programmlisting",
+          accept: { "text/plain": [".lst", ".txt", ".626"] },
+        }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(listing);
+      await writable.close();
+      return;
+    } catch (error) {
+      if (error.name === "AbortError") return;
+      alert("Die Programmdatei konnte nicht gespeichert werden.");
+      return;
+    }
+  }
+
+  const blob = new Blob([listing], { type: "text/plain" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = programFilename();
@@ -359,11 +385,7 @@ function loadProgramFile(file) {
   const reader = new FileReader();
   reader.addEventListener("load", () => {
     try {
-      state.program = parseProgramListing(String(reader.result || ""));
-      state.pc = 0;
-      state.shift = false;
-      if (programName) programName.value = programNameFromFile(file.name);
-      render();
+      applyProgramListing(String(reader.result || ""), file.name);
     } catch (error) {
       alert(error.message);
     }
@@ -372,6 +394,61 @@ function loadProgramFile(file) {
     alert("Die Programmdatei konnte nicht gelesen werden.");
   });
   reader.readAsText(file);
+}
+
+function applyProgramListing(text, name) {
+  state.program = parseProgramListing(text);
+  state.pc = 0;
+  state.shift = false;
+  if (programName) programName.value = programNameFromFile(name);
+  render();
+}
+
+async function loadServerProgramManifest() {
+  if (serverProgramManifest) return serverProgramManifest;
+  const response = await fetch("programs/manifest.json", { cache: "no-store" });
+  if (!response.ok) throw new Error("Programmliste konnte nicht geladen werden.");
+  const data = await response.json();
+  const programs = Array.isArray(data.programs) ? data.programs : [];
+  serverProgramManifest = programs.filter((item) => item && item.name && item.file);
+  return serverProgramManifest;
+}
+
+function fillServerProgramSelect(programs) {
+  serverProgramSelect.innerHTML = "";
+  programs.forEach((program, idx) => {
+    const option = document.createElement("option");
+    option.value = String(idx);
+    option.textContent = program.name;
+    serverProgramSelect.append(option);
+  });
+}
+
+async function enableServerPrograms() {
+  serverProgramControls.hidden = false;
+  try {
+    const programs = await loadServerProgramManifest();
+    fillServerProgramSelect(programs);
+    openServerProgram.disabled = programs.length === 0;
+  } catch (error) {
+    serverPrograms.checked = false;
+    serverProgramControls.hidden = true;
+    alert(error.message);
+  }
+}
+
+async function openSelectedServerProgram() {
+  const programs = await loadServerProgramManifest();
+  const program = programs[Number(serverProgramSelect.value)];
+  if (!program) return;
+
+  try {
+    const response = await fetch(`programs/${program.file}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`${program.name} konnte nicht geladen werden.`);
+    applyProgramListing(await response.text(), program.file);
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function resetCalculatorState() {
@@ -882,6 +959,14 @@ programFile.addEventListener("change", () => {
   loadProgramFile(programFile.files[0]);
   programFile.value = "";
 });
+serverPrograms.addEventListener("change", () => {
+  if (serverPrograms.checked) {
+    enableServerPrograms();
+  } else {
+    serverProgramControls.hidden = true;
+  }
+});
+openServerProgram.addEventListener("click", openSelectedServerProgram);
 
 function initializeControls() {
   document.querySelector("#powerOn").checked = true;

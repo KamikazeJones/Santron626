@@ -1,0 +1,12 @@
+{
+  "programs": [
+    {
+      "name": "Quadrat",
+      "file": "quadrat.lst"
+    },
+    {
+      "name": "Fakultät",
+      "file": "fakultaet.lst"
+    }
+  ]
+}

@@ -126,6 +126,13 @@
           </div>
           <input id="programFile" type="file" accept=".txt,.lst,.626,text/plain" hidden>
         </div>
+        <div class="server-program-source">
+          <label><input id="serverPrograms" type="checkbox"> Programme aus Repository</label>
+          <div id="serverProgramControls" class="server-program-controls" hidden>
+            <select id="serverProgramSelect" aria-label="Repository-Programm"></select>
+            <button id="openServerProgram" type="button">Öffnen</button>
+          </div>
+        </div>
         <ol id="programList"></ol>
       </div>
     </aside>
