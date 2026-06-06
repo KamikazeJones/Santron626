@@ -59,6 +59,10 @@ input {
   font: inherit;
 }
 
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 button,
 label,
 input,
@@ -693,7 +697,13 @@ select {
   font-weight: 800;
   letter-spacing: 0;
   cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .22), 0 2px 2px rgba(0, 0, 0, .25);
+}
+
+.pill:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .pill:active {

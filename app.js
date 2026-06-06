@@ -86,7 +86,6 @@ let programRenderDirty = true;
 let renderedProgramCursor = null;
 let renderedProgramCursorVisible = null;
 let lastPointerKeyTime = 0;
-let keyPointerStart = null;
 
 function makeDisplay() {
   display.innerHTML = "";
@@ -930,21 +929,16 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("pointerdown", (event) => {
   const button = event.target.closest("[data-key]");
-  keyPointerStart = button && event.pointerType !== "mouse"
-    ? { id: event.pointerId, x: event.clientX, y: event.clientY }
-    : null;
+  if (!button || event.pointerType === "mouse") return;
+  event.preventDefault();
+  lastPointerKeyTime = performance.now();
+  pressKeyButton(button);
 });
 
 document.addEventListener("pointerup", (event) => {
   const button = event.target.closest("[data-key]");
   if (!button || event.pointerType === "mouse") return;
-  if (!keyPointerStart || keyPointerStart.id !== event.pointerId) return;
-  const distance = Math.hypot(event.clientX - keyPointerStart.x, event.clientY - keyPointerStart.y);
-  keyPointerStart = null;
-  if (distance > 10) return;
   event.preventDefault();
-  lastPointerKeyTime = performance.now();
-  pressKeyButton(button);
 });
 
 function pressKeyButton(button) {
