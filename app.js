@@ -949,6 +949,7 @@ document.addEventListener("click", (event) => {
 document.addEventListener("pointerdown", (event) => {
   const button = event.target.closest("[data-key]");
   if (!button) return;
+  vibrateKeyFeedback();
   event.preventDefault();
   lastPointerKeyTime = performance.now();
   pressKeyButton(button);
@@ -962,7 +963,6 @@ document.addEventListener("pointerup", (event) => {
 
 function pressKeyButton(button) {
   showKeyPress(button);
-  vibrateKeyFeedback();
   let key = button.dataset.key;
   if (state.shift) {
     const shifted = {
@@ -984,7 +984,7 @@ function showKeyPress(button) {
 
 function vibrateKeyFeedback() {
   if (!("vibrate" in navigator)) return;
-  navigator.vibrate(8);
+  navigator.vibrate([18]);
 }
 
 document.querySelectorAll("input[name='mode']").forEach((input) => {
