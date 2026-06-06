@@ -1076,6 +1076,15 @@ function showMobileCalculator() {
   });
 }
 
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {
+      // The emulator still works when install support is unavailable.
+    });
+  });
+}
+
 makeDisplay();
 makeKeypad();
 initializeControls();
@@ -1083,4 +1092,5 @@ initializeServerPrograms();
 renderPower();
 renderNow();
 showMobileCalculator();
+registerServiceWorker();
 window.addEventListener("pageshow", showMobileCalculator);

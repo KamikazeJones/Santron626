@@ -1,0 +1,25 @@
+{
+  "name": "Santron 626 Emulator",
+  "short_name": "Santron 626",
+  "description": "Santron 626 calculator emulator",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#071111",
+  "theme_color": "#071111",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "Santron626.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "Santron626.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
