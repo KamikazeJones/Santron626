@@ -65,6 +65,7 @@ const state = {
   programPaused: false,
   pendingPrecision: false,
   pendingGotoDigits: null,
+  gotoPreview: null,
   runTimer: null,
 };
 
@@ -149,6 +150,9 @@ function normalDisplayText() {
   if (state.mode === "load") {
     const code = String(state.program[state.pc]).padStart(3, "0");
     return `${code} ${String(state.pc).padStart(2, "0")}`.padStart(12, " ");
+  }
+  if (state.pendingGotoDigits || state.gotoPreview !== null) {
+    return String(state.gotoPreview ?? "00").padStart(12, " ");
   }
   const n = Number(state.x);
   if (!Number.isFinite(n)) return "Error".padStart(12, " ");
@@ -276,21 +280,29 @@ function markProgramRenderDirty() {
 
 function enterManualGoto() {
   state.pendingGotoDigits = [];
+  state.gotoPreview = "00";
   state.entering = false;
+  render();
 }
 
 function applyManualGotoDigit(key) {
   if (!state.pendingGotoDigits) return false;
   if (!/^[0-9]$/.test(key)) {
     state.pendingGotoDigits = null;
+    state.gotoPreview = null;
     return false;
   }
 
   state.pendingGotoDigits.push(Number(key));
+  state.gotoPreview = state.pendingGotoDigits.join("").padStart(2, "0");
   if (state.pendingGotoDigits.length === 2) {
     const target = state.pendingGotoDigits[0] * 10 + state.pendingGotoDigits[1];
     state.pc = target % state.program.length;
     state.pendingGotoDigits = null;
+    window.setTimeout(() => {
+      state.gotoPreview = null;
+      render();
+    }, 250);
   }
   render();
   return true;
@@ -509,6 +521,7 @@ function resetCalculatorState() {
   state.displayFormat = { mode: "auto", decimals: null };
   state.pendingPrecision = false;
   state.pendingGotoDigits = null;
+  state.gotoPreview = null;
   state.pendingMemory = null;
   state.parenStack = [];
   resetExpression();
@@ -958,6 +971,7 @@ document.querySelectorAll("input[name='mode']").forEach((input) => {
     if (input.checked) state.mode = input.value;
     if (state.mode !== "run") stopProgram();
     state.pendingGotoDigits = null;
+    state.gotoPreview = null;
     state.pendingPrecision = false;
     render();
   });
@@ -995,6 +1009,7 @@ document.querySelector("#clearProgram").addEventListener("click", () => {
   state.program.fill(99);
   state.pc = 0;
   state.pendingGotoDigits = null;
+  state.gotoPreview = null;
   state.pendingPrecision = false;
   markProgramRenderDirty();
   render();
@@ -1028,6 +1043,7 @@ function initializeControls() {
   resetExpression();
   state.pendingPrecision = false;
   state.pendingGotoDigits = null;
+  state.gotoPreview = null;
   runSpeedValue.textContent = `${state.runSpeed} ms`;
 }
 
