@@ -35,7 +35,7 @@ const PI_VALUE = 3.141592654;
 
 const KEYS = [
   [{ key: "F", label: "F", color: "red" }, { key: "SIN", label: "sin", shift: "sin^-1", color: "gray" }, { key: "COS", label: "cos", shift: "cos^-1", color: "gray" }, { key: "TAN", label: "tan", shift: "tan^-1", color: "gray" }, { key: "PS", label: "PS", color: "gray" }],
-  [{ key: "EX", label: "e^x", shift: "ln", color: "gray" }, { key: "LOG", label: "log", shift: "10^x", color: "gray" }, { key: "Y^X", label: "y^x", color: "gray" }, { key: "STO", label: "STOn", color: "gray" }, { key: "RCL", label: "RCLn", color: "gray" }],
+  [{ key: "EX", label: "e^x", shift: "ln", color: "gray" }, { key: "LOG", label: "log", shift: "11^y", color: "gray" }, { key: "Y^X", label: "y^x", color: "gray" }, { key: "STO", label: "STOn", color: "gray" }, { key: "RCL", label: "RCLn", color: "gray" }],
   [{ key: "SQRT", label: "sqrt", shift: "x^2", color: "red" }, { key: "1/X", label: "1/x", color: "red" }, { key: "X<>Y", label: "x-y", color: "blue" }, { key: "(", label: "(", color: "blue" }, { key: ")", label: ")", color: "blue" }],
   [{ key: "EXP", label: "EXP", color: "red" }, { key: "7", label: "7", color: "white" }, { key: "8", label: "8", color: "white" }, { key: "9", label: "9", color: "white" }, { key: "/", label: "÷", shift: "Mn÷", color: "blue" }],
   [{ key: "PI", label: "π", color: "red" }, { key: "4", label: "4", color: "white" }, { key: "5", label: "5", color: "white" }, { key: "6", label: "6", color: "white" }, { key: "*", label: "×", shift: "Mn×", color: "blue" }],
@@ -141,7 +141,6 @@ function makeKeypad() {
 
 function keyLabelHtml(text) {
   return text
-    .replace(/(10)\^x/g, '$1<sup class="wide-exp">x</sup>')
     .replace(/([A-Za-z0-9]+)\^(-?\d+|x)/g, "$1<sup>$2</sup>")
     .replace(/[×÷]/g, (symbol) => `<span class="operator-symbol">${symbol}</span>`);
 }

@@ -704,11 +704,6 @@ select {
   transform: translateY(-5px);
 }
 
-.pill sup.wide-exp {
-  font-size: .82em;
-  transform: translateY(-7px);
-}
-
 .pill {
   display: inline-flex;
   align-items: center;
