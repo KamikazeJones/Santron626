@@ -41,4 +41,4 @@ trap - EXIT
 echo "Updated build stamp: $next_stamp"
 git add .
 git commit -m "$*"
-git push
+# git push

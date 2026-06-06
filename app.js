@@ -948,6 +948,7 @@ document.addEventListener("pointerup", (event) => {
 });
 
 function pressKeyButton(button) {
+  vibrateKeyFeedback();
   let key = button.dataset.key;
   if (state.shift) {
     const shifted = {
@@ -958,6 +959,11 @@ function pressKeyButton(button) {
     state.shift = false;
   }
   execute(key);
+}
+
+function vibrateKeyFeedback() {
+  if (!("vibrate" in navigator)) return;
+  navigator.vibrate(8);
 }
 
 document.querySelectorAll("input[name='mode']").forEach((input) => {
