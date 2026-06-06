@@ -686,6 +686,29 @@ select {
   transform: translateY(2px);
 }
 
+.shift sup {
+  font-size: .58em;
+  line-height: 0;
+  vertical-align: super;
+}
+
+.shift sup {
+  transform: translateY(-1px);
+}
+
+.pill sup {
+  display: inline-block;
+  font-size: .72em;
+  line-height: 0;
+  margin-left: 1px;
+  transform: translateY(-5px);
+}
+
+.pill sup.wide-exp {
+  font-size: .82em;
+  transform: translateY(-7px);
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
