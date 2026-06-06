@@ -47,7 +47,6 @@ const state = {
   x: "0",
   y: 0,
   pending: null,
-  expression: null,
   parenStack: [],
   entering: false,
   exponentEntry: null,
@@ -615,83 +614,52 @@ function pushDigit(key) {
   if (state.x.replace("-", "").replace(".", "").length < 10) state.x += key;
 }
 
-function newExpression() {
-  return { total: 0, addOp: "+", term: null, mulOp: null };
-}
-
-function expression() {
-  if (!state.expression) state.expression = newExpression();
-  return state.expression;
-}
-
-function applyAdd(total, op, value) {
-  return roundInternal(op === "-" ? total - value : total + value);
-}
-
-function applyMul(left, op, right) {
-  if (left === null) return roundInternal(right);
+function applyPendingOperator(left, op, right) {
+  if (op === "+") return roundInternal(left + right);
+  if (op === "-") return roundInternal(left - right);
   if (op === "*") return roundInternal(left * right);
   if (op === "/") return roundInternal(left / right);
   if (op === "Y^X") return roundInternal(Math.pow(left, right));
   return roundInternal(right);
 }
 
-function commitTerm(value) {
-  const expr = expression();
-  expr.term = applyMul(expr.term, expr.mulOp, value);
-  expr.mulOp = null;
-  state.y = expr.term;
-  return expr.term;
-}
-
-function commitExpression(value) {
-  const expr = expression();
-  const term = commitTerm(value);
-  expr.total = applyAdd(expr.total, expr.addOp, term);
-  expr.term = null;
-  expr.addOp = "+";
-  state.y = expr.total;
-  return expr.total;
+function commitPendingOperator() {
+  if (!state.pending) return Number(state.x);
+  const result = applyPendingOperator(state.y, state.pending, Number(state.x));
+  state.y = result;
+  setX(result);
+  state.pending = null;
+  return result;
 }
 
 function queueOperator(key) {
   finishExponentEntry();
-  const value = Number(state.x);
-  if (["*", "/", "Y^X"].includes(key)) {
-    const term = commitTerm(value);
-    setX(term);
-    expression().mulOp = key;
-  } else {
-    const total = commitExpression(value);
-    setX(total);
-    expression().addOp = key;
-  }
+  commitPendingOperator();
+  state.y = Number(state.x);
   state.pending = key;
   state.entering = false;
 }
 
-function currentExpressionValue() {
-  const expr = expression();
-  const value = Number(state.x);
-  const term = applyMul(expr.term, expr.mulOp, value);
-  return applyAdd(expr.total, expr.addOp, term);
-}
-
 function resetExpression() {
-  state.expression = newExpression();
   state.pending = null;
+  state.parenStack = [];
 }
 
 function openParen() {
-  state.parenStack.push(expression());
-  state.expression = newExpression();
+  state.parenStack.push({ y: state.y, pending: state.pending });
+  state.y = 0;
+  state.pending = null;
+  state.x = "0";
   state.entering = false;
+  state.exponentEntry = null;
 }
 
 function closeParen() {
   if (!state.parenStack.length) return;
-  const value = currentExpressionValue();
-  state.expression = state.parenStack.pop();
+  const value = commitPendingOperator();
+  const context = state.parenStack.pop();
+  state.y = context.y;
+  state.pending = context.pending;
   setX(value);
 }
 
@@ -768,11 +736,9 @@ function execute(key, fromProgram = false) {
   else if (["+", "-", "*", "/", "Y^X"].includes(key)) {
     queueOperator(key);
   } else if (key === "=") {
-    setX(currentExpressionValue());
-    resetExpression();
-    state.parenStack = [];
+    commitPendingOperator();
   } else if (key === "C/CE") {
-    state.x = "0"; state.y = 0; resetExpression(); state.parenStack = []; state.exponentEntry = null; state.entering = false;
+    state.x = "0"; state.y = 0; resetExpression(); state.exponentEntry = null; state.entering = false;
   } else if (key === "+/-") {
     if (toggleExponentSign()) {
       // Exponent sign changed.

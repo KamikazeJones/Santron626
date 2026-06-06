@@ -1,0 +1,25 @@
+http://www.rskey.org/pr56d
+
+As popular a "store brand" in Germany as Radio Shack is in the United States, Privileg released 
+many OEM calculators during the seventies. Some of these, the PR56D-NC among them, were 
+programmable. Its programming model is a telltale version common to calculators that use 
+MOS chipsets, and similar to the classic Commodore PR-100. (Another calculator with the same 
+chipset that's used in the PR56D-NC is the Sanyo CZ-0911PG.)
+
+Despite their obvious limitations, I remain curiously attached to calculators of this type. 
+No doubt it is due to the fact that the first programmable I ever owned, a Hungarian version 
+of the PR-100, had the same programming model. Although the PR-100 has more functions, 
+the PR56D-NC has a huge advantage when it comes to programming: its programming model is 
+partially merged, meanings that the ARC/F (second function) key does not count as an extra 
+keystroke. This subtle difference can mean a huge savings in program steps, making it possible 
+to implement algorithms that just wouldn't fit into the 72-step unmerged program space of the 
+PR-100.
+
+Case in question: my favorite programming example, the Gamma function. Just today I received 
+an e-mail from Robert H. Windschitl who showed that Stirling's formula can, in fact, be used 
+to derive another approximation, particularly efficient because it requires no constants that 
+consume either precious register space or an inordinate number of programming steps. His 
+approximation requires the hyperbolic sine function; although not present on the PR56D-NC's 
+keyboard, it can be computed easily enough (sinh x=(ex-e-x)/2). Even with a correction factor 
+and an iterative loop for arguments less than 3, the program conveniently fits into the 
+calculator's 72-step program memory.

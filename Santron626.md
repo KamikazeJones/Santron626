@@ -41,8 +41,10 @@
 - Dezimalpunkt wird bei normalen Zahlen immer angezeigt; die `.`-Taste markiert nur den Beginn der Nachkommastellen.
 - Interne Rechenergebnisse werden auf 10 signifikante Stellen gerundet.
 - Klammern `(` und `)` eingebaut.
-- Operator-Hierarchie umgesetzt: Potenz/Multiplikation/Division vor Addition/Subtraktion.
-- Zwischenergebnisse werden beim Druecken weiterer Operatoren angezeigt, soweit mathematisch sinnvoll.
+- Operator-Hierarchie zurueckgenommen: Der Rechner rechnet laut Handbuch nicht Punkt vor Strich.
+- Grundoperatoren `+`, `-`, `x`, `÷` und `yx` schliessen die vorherige Rechnung wie `=` ab und setzen den naechsten Operator.
+- `gamma.lst` korrigiert: fehlende schliessende Klammer vor der ersten Quadratwurzel ergaenzt.
+- `=` schliesst offene Klammerregister nicht mehr pauschal; das ist fuer Programme mit Zwischenergebnissen in Klammern noetig.
 - Speicheroperationen `STO`, `RCL`, `M+`, `M-`, `Mn×`, `Mn÷` weiterentwickelt.
 - Layout mehrfach ueberarbeitet:
   - links Einstellungen
@@ -71,7 +73,7 @@ Der Emulator ist inzwischen deutlich naeher am realen bzw. baugleichen Rechner:
 - Die Programmlogik ist grundsaetzlich benutzbar.
 - Programmlistings koennen gespeichert, geladen und aus dem Repository geoeffnet werden.
 - Die Anzeige verhaelt sich wesentlich santron-typischer, inklusive DP/PS, EXP und wissenschaftlicher Darstellung.
-- Die Rechenlogik beruecksichtigt Operator-Hierarchie und Klammern.
+- Die Rechenlogik folgt staerker der Registerlogik aus dem Handbuch: Grundoperatoren schliessen die vorherige Rechnung ab.
 - Der Programmlauf ist performanter und hat konfigurierbares Anzeigeverhalten.
 - Das Layout ist funktional in drei Bereiche getrennt.
 
@@ -91,12 +93,14 @@ Der Emulator ist inzwischen deutlich naeher am realen bzw. baugleichen Rechner:
   - Rundung auf 10 Stellen
   - trigonometrische Ergebnisse
   - Exponentialdarstellung
+  - Klammerregister/P-Register mit verschachtelten Klammern
+  - Gamma-Programm als anspruchsvoller Programmlauf
 - Repository-Programme erweitern:
   - Fakultät
   - Performance-Index-Testprogramm
   - kleine Demo-Programme
 - Eventuell echte Tests/Szenarien als kleine Testliste dokumentieren:
-  - `2 + 5 × 7 = 37`
+  - `2 + 5 × 7 = 49` laut Handbuchlogik ohne Punkt-vor-Strich
   - `(2 + 3) × 4 = 20`
   - `1.23 EXP +/- 6`
   - `PI × 100`
