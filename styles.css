@@ -661,19 +661,19 @@ select {
 
 .key-wrap {
   display: grid;
-  grid-template-rows: 16px 28px;
+  grid-template-rows: 18px 28px;
   gap: 2px;
   width: 54px;
-  height: 48px;
+  height: 50px;
   justify-items: center;
   align-items: end;
 }
 
 .shift {
-  min-height: 16px;
+  min-height: 18px;
   max-width: 60px;
   color: #f0f5f6;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
@@ -681,25 +681,79 @@ select {
 
 .operator-symbol {
   display: inline-block;
-  font-size: 1.55em;
-  line-height: .62;
+  font-size: 1em;
+  line-height: 1;
+  transform: none;
+}
+
+.pi-symbol {
+  display: inline-block;
+  font-family: Georgia, "Times New Roman", "Noto Serif", serif;
+  font-size: 1.18em;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.root-symbol {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: Georgia, "Times New Roman", "Noto Serif", serif;
+  font-size: 1.05em;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.root-mark {
+  font-size: 1.28em;
+  line-height: .85;
   transform: translateY(2px);
 }
 
-.shift sup {
-  font-size: .58em;
+.root-radicand {
+  display: inline-block;
+  min-width: .62em;
+  border-top: 2px solid currentColor;
+  font-style: italic;
+  line-height: .82;
+  margin-left: -1px;
+  padding: 1px 1px 0 2px;
+}
+
+.shift sup,
+.pill sup {
+  display: inline-block;
   line-height: 0;
   vertical-align: super;
 }
 
-.shift sup {
-  transform: translateY(-1px);
+.shift sup.power-exp {
+  font-size: .92em;
+  margin-left: 1px;
+  transform: translateY(-7px);
 }
 
-.pill sup {
-  display: inline-block;
+.shift sup.numeric-exp {
   font-size: .72em;
-  line-height: 0;
+  transform: translateY(-6px);
+}
+
+.shift sup.inverse-exp {
+  font-size: .52em;
+  transform: translateY(-4px);
+}
+
+.pill sup.power-exp {
+  font-size: .82em;
+  margin-left: 1px;
+  transform: translateY(-7px);
+}
+
+.pill sup.inverse-exp {
+  font-size: .58em;
   margin-left: 1px;
   transform: translateY(-5px);
 }
