@@ -61,6 +61,7 @@ input {
 
 button {
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 button,
@@ -702,11 +703,15 @@ select {
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .22), 0 2px 2px rgba(0, 0, 0, .25);
 }
 
+.pill[data-key] {
+  touch-action: none;
+}
+
 .pill:focus:not(:focus-visible) {
   outline: none;
 }
 
-.pill:active {
+.pill.is-pressed {
   transform: translateY(1px);
 }
 

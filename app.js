@@ -929,7 +929,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("pointerdown", (event) => {
   const button = event.target.closest("[data-key]");
-  if (!button || event.pointerType === "mouse") return;
+  if (!button) return;
   event.preventDefault();
   lastPointerKeyTime = performance.now();
   pressKeyButton(button);
@@ -937,11 +937,12 @@ document.addEventListener("pointerdown", (event) => {
 
 document.addEventListener("pointerup", (event) => {
   const button = event.target.closest("[data-key]");
-  if (!button || event.pointerType === "mouse") return;
+  if (!button) return;
   event.preventDefault();
 });
 
 function pressKeyButton(button) {
+  showKeyPress(button);
   vibrateKeyFeedback();
   let key = button.dataset.key;
   if (state.shift) {
@@ -953,6 +954,13 @@ function pressKeyButton(button) {
     state.shift = false;
   }
   execute(key);
+}
+
+function showKeyPress(button) {
+  button.classList.add("is-pressed");
+  window.setTimeout(() => {
+    button.classList.remove("is-pressed");
+  }, 85);
 }
 
 function vibrateKeyFeedback() {
