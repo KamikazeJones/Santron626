@@ -762,7 +762,11 @@ function execute(key, fromProgram = false) {
   else if (["+", "-", "*", "/", "Y^X"].includes(key)) {
     queueOperator(key);
   } else if (key === "=") {
-    commitPendingOperator();
+    if (state.pending) {
+      commitPendingOperator();
+    } else {
+      setX(Number(state.x));
+    }
   } else if (key === "C/CE") {
     state.x = "0"; state.y = 0; resetExpression(); state.exponentEntry = null; state.entering = false;
   } else if (key === "+/-") {
