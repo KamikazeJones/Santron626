@@ -167,7 +167,13 @@ function normalDisplayText() {
   const n = Number(state.x);
   if (!Number.isFinite(n)) return "Error".padStart(12, " ");
   if (state.exponentEntry) return fitDisplayText(formatExponential(n));
-  if (state.entering) return fitDisplayText(withVisibleDecimalPoint(state.x));
+  if (state.entering) {
+    return fitDisplayText(withVisibleDecimalPoint(state.x));
+  }
+  return formatNumberDisplay(n);
+}
+
+function formatNumberDisplay(n) {
   if (Object.is(n, -0) || n === 0) {
     const zero = state.displayFormat.mode === "fixed" ? Number(0).toFixed(state.displayFormat.decimals) : "0";
     return fitDisplayText(withVisibleDecimalPoint(zero));
@@ -799,17 +805,25 @@ function execute(key, fromProgram = false) {
   } else if (["STO", "RCL", "M+", "M-", "MX", "MDIV"].includes(key)) {
     state.pendingMemory = key;
   } else if (key === "BST") {
-    state.pc = (state.pc + state.program.length - 1) % state.program.length;
+    if (state.mode !== "run") state.pc = (state.pc + state.program.length - 1) % state.program.length;
   } else if (key === "SST") {
-    state.pc = (state.pc + 1) % state.program.length;
+    if (!fromProgram && state.mode === "run") {
+      runSingleProgramStep();
+    } else {
+      state.pc = (state.pc + 1) % state.program.length;
+    }
   } else if (key === "R/S") {
     if (fromProgram) {
       pauseProgram();
     } else {
       toggleProgramRun();
     }
-  } else if (key === "SKP" && Number(state.x) < 0) {
-    state.pc = (state.pc + 1) % state.program.length;
+  } else if (key === "SKP") {
+    if (!fromProgram && state.mode === "run") {
+      skipToNextProgramStop();
+    } else if (Number(state.x) < 0) {
+      state.pc = (state.pc + 1) % state.program.length;
+    }
   }
   if (!fromProgram) render();
 }
@@ -885,6 +899,26 @@ function runOneProgramStep() {
   executeProgramCode(code);
   if (state.pc >= state.program.length) stopProgram();
   return state.running;
+}
+
+function runSingleProgramStep() {
+  if (state.mode !== "run" || state.power === "off" || state.running) return;
+  state.running = true;
+  state.programPaused = false;
+  runOneProgramStep();
+  state.running = false;
+  clearProgramTimer();
+  render();
+}
+
+function skipToNextProgramStop() {
+  if (state.mode !== "run" || state.power === "off" || state.running) return;
+  while (state.pc < state.program.length) {
+    const code = state.program[state.pc];
+    state.pc += 1;
+    if (code === KEY_CODES["R/S"]) break;
+  }
+  if (state.pc >= state.program.length) state.pc = state.program.length;
 }
 
 function stepProgram() {
