@@ -9,8 +9,8 @@
       "file": "fakultaet.lst"
     },
     {
-      "name": "Gamma-Funktion",
-      "file": "gamma.lst"
+      "name": "Stirling-Formel",
+      "file": "stirling-formula.lst"
     }    
   ]
 }
