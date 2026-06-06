@@ -82,6 +82,11 @@ let renderQueued = false;
 let runDisplayBlanked = false;
 let runDisplayHeld = false;
 let serverProgramManifest = null;
+let programRenderDirty = true;
+let renderedProgramCursor = null;
+let renderedProgramCursorVisible = null;
+let lastPointerKeyTime = 0;
+let keyPointerStart = null;
 
 function makeDisplay() {
   display.innerHTML = "";
@@ -232,13 +237,24 @@ function renderDisplay(text) {
 }
 
 function renderProgram(showActive = true) {
+  if (!programRenderDirty && renderedProgramCursor === state.pc && renderedProgramCursorVisible === showActive) return;
+
   programList.innerHTML = "";
+  const fragment = document.createDocumentFragment();
   state.program.forEach((code, idx) => {
     const li = document.createElement("li");
     li.className = showActive && idx === state.pc ? "active" : "";
     li.textContent = `${String(idx).padStart(2, "0")}  ${String(code).padStart(3, "0")}  ${codeName(code)}`;
-    programList.append(li);
+    fragment.append(li);
   });
+  programList.append(fragment);
+  programRenderDirty = false;
+  renderedProgramCursor = state.pc;
+  renderedProgramCursorVisible = showActive;
+}
+
+function markProgramRenderDirty() {
+  programRenderDirty = true;
 }
 
 function enterManualGoto() {
@@ -402,6 +418,7 @@ function applyProgramListing(text, name) {
   state.pc = 0;
   state.shift = false;
   if (programName) programName.value = programNameFromFile(name);
+  markProgramRenderDirty();
   render();
 }
 
@@ -478,6 +495,7 @@ function resetCalculatorState() {
   state.pendingMemory = null;
   state.parenStack = [];
   resetExpression();
+  markProgramRenderDirty();
 }
 
 function renderNow() {
@@ -693,11 +711,13 @@ function execute(key, fromProgram = false) {
     if (key === "R/S") {
       state.program.fill(99);
       state.pc = 0;
+      markProgramRenderDirty();
     } else if (key === "BST" || key === "SST") {
       state.program[state.pc] = 99;
       state.pc = key === "BST"
         ? (state.pc + state.program.length - 1) % state.program.length
         : (state.pc + 1) % state.program.length;
+      markProgramRenderDirty();
     }
     render();
     return;
@@ -710,6 +730,7 @@ function execute(key, fromProgram = false) {
     }
     state.program[state.pc] = KEY_CODES[key] ?? 99;
     state.pc = (state.pc + 1) % state.program.length;
+    markProgramRenderDirty();
     render();
     return;
   }
@@ -901,8 +922,32 @@ function executeProgramCode(code) {
 }
 
 document.addEventListener("click", (event) => {
+  if (performance.now() - lastPointerKeyTime < 500) return;
   const button = event.target.closest("[data-key]");
   if (!button) return;
+  pressKeyButton(button);
+});
+
+document.addEventListener("pointerdown", (event) => {
+  const button = event.target.closest("[data-key]");
+  keyPointerStart = button && event.pointerType !== "mouse"
+    ? { id: event.pointerId, x: event.clientX, y: event.clientY }
+    : null;
+});
+
+document.addEventListener("pointerup", (event) => {
+  const button = event.target.closest("[data-key]");
+  if (!button || event.pointerType === "mouse") return;
+  if (!keyPointerStart || keyPointerStart.id !== event.pointerId) return;
+  const distance = Math.hypot(event.clientX - keyPointerStart.x, event.clientY - keyPointerStart.y);
+  keyPointerStart = null;
+  if (distance > 10) return;
+  event.preventDefault();
+  lastPointerKeyTime = performance.now();
+  pressKeyButton(button);
+});
+
+function pressKeyButton(button) {
   let key = button.dataset.key;
   if (state.shift) {
     const shifted = {
@@ -913,7 +958,7 @@ document.addEventListener("click", (event) => {
     state.shift = false;
   }
   execute(key);
-});
+}
 
 document.querySelectorAll("input[name='mode']").forEach((input) => {
   input.addEventListener("change", () => {
@@ -958,6 +1003,7 @@ document.querySelector("#clearProgram").addEventListener("click", () => {
   state.pc = 0;
   state.pendingGotoDigits = null;
   state.pendingPrecision = false;
+  markProgramRenderDirty();
   render();
 });
 
