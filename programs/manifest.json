@@ -2,7 +2,7 @@
   "programs": [
     {
       "name": "Quadrat",
-      "file": "quadrat.lst"
+      "file": "square.lst"
     },
     {
       "name": "Fakultät",
@@ -11,6 +11,10 @@
     {
       "name": "Stirling-Formel",
       "file": "stirling-formula.lst"
+    },
+    {
+      "name": "Gamma-Funktion",
+      "file": "gamma-function.lst"
     }    
   ]
 }

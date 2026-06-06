@@ -307,7 +307,7 @@ function applyManualGotoDigit(key) {
   state.gotoPreview = state.pendingGotoDigits.join("").padStart(2, "0");
   if (state.pendingGotoDigits.length === 2) {
     const target = state.pendingGotoDigits[0] * 10 + state.pendingGotoDigits[1];
-    state.pc = target % state.program.length;
+    if (target < state.program.length) state.pc = target;
     state.pendingGotoDigits = null;
     window.setTimeout(() => {
       state.gotoPreview = null;
@@ -338,7 +338,7 @@ function applyPrecisionDigit(key) {
 
 function codeName(code) {
   const found = Object.entries(KEY_CODES).find(([, value]) => value === code);
-  return found ? found[0] : code === 99 ? "END" : "";
+  return found ? found[0] : "";
 }
 
 function programListingLine(code, idx) {
@@ -625,6 +625,18 @@ function finishExponentEntry() {
   state.exponentEntry = null;
 }
 
+function applyMemoryCommand(command, idx) {
+  const x = roundInternal(Number(state.x));
+  if (command === "STO") state.memories[idx] = x;
+  if (command === "RCL") setX(state.memories[idx]);
+  if (command === "M+") state.memories[idx] = roundInternal(state.memories[idx] + x);
+  if (command === "M-") state.memories[idx] = roundInternal(state.memories[idx] - x);
+  if (command === "MX") state.memories[idx] = roundInternal(state.memories[idx] * x);
+  if (command === "MDIV") state.memories[idx] = roundInternal(state.memories[idx] / x);
+  state.exponentEntry = null;
+  state.entering = false;
+}
+
 function pushDigit(key) {
   if (state.exponentEntry && key === ".") return;
   if (pushExponentDigit(key)) return;
@@ -744,17 +756,8 @@ function execute(key, fromProgram = false) {
     return;
   }
   if (state.pendingMemory && /^[0-9]$/.test(key)) {
-    const idx = Number(key);
-    const x = roundInternal(Number(state.x));
-    if (state.pendingMemory === "STO") state.memories[idx] = x;
-    if (state.pendingMemory === "RCL") setX(state.memories[idx]);
-    if (state.pendingMemory === "M+") state.memories[idx] = roundInternal(state.memories[idx] + x);
-    if (state.pendingMemory === "M-") state.memories[idx] = roundInternal(state.memories[idx] - x);
-    if (state.pendingMemory === "MX") state.memories[idx] = roundInternal(state.memories[idx] * x);
-    if (state.pendingMemory === "MDIV") state.memories[idx] = roundInternal(state.memories[idx] / x);
+    applyMemoryCommand(state.pendingMemory, Number(key));
     state.pendingMemory = null;
-    state.exponentEntry = null;
-    state.entering = false;
   } else if (/^[0-9.]$/.test(key)) pushDigit(key);
   else if (["+", "-", "*", "/", "Y^X"].includes(key)) {
     queueOperator(key);
@@ -836,6 +839,7 @@ function pauseProgram() {
   state.running = false;
   state.programPaused = true;
   state.heldRunDisplay = null;
+  state.pendingMemory = null;
   clearProgramTimer();
   render();
 }
@@ -844,6 +848,7 @@ function stopProgram() {
   state.running = false;
   state.programPaused = false;
   state.heldRunDisplay = null;
+  state.pendingMemory = null;
   clearProgramTimer();
   render();
 }
@@ -861,19 +866,20 @@ function scheduleProgramStep(delay = state.runSpeed) {
 }
 
 function runOneProgramStep() {
-  if (!state.running || state.mode !== "run" || state.power === "off") {
+  if (!state.running || state.mode !== "run" || state.power === "off" || state.pc >= state.program.length) {
     stopProgram();
     return false;
   }
 
   const code = state.program[state.pc];
+  state.pc += 1;
   if (code === 99) {
-    stopProgram();
-    return false;
+    if (state.pc >= state.program.length) stopProgram();
+    return true;
   }
 
-  state.pc = (state.pc + 1) % state.program.length;
   executeProgramCode(code);
+  if (state.pc >= state.program.length) stopProgram();
   return state.running;
 }
 
@@ -899,11 +905,29 @@ function digitFromCode(code) {
 }
 
 function readGotoAddress() {
+  if (state.pc + 1 >= state.program.length) {
+    stopProgram();
+    return null;
+  }
   const tens = digitFromCode(state.program[state.pc]);
-  const ones = digitFromCode(state.program[(state.pc + 1) % state.program.length]);
-  state.pc = (state.pc + 2) % state.program.length;
+  const ones = digitFromCode(state.program[state.pc + 1]);
+  state.pc += 2;
   if (tens === null || ones === null) return null;
   return tens * 10 + ones;
+}
+
+function readProgramMemoryIndex() {
+  if (state.pc >= state.program.length) {
+    stopProgram();
+    return null;
+  }
+  const idx = digitFromCode(state.program[state.pc]);
+  state.pc += 1;
+  if (idx === null) {
+    stopProgram();
+    return null;
+  }
+  return idx;
 }
 
 function executeProgramCode(code) {
@@ -912,15 +936,27 @@ function executeProgramCode(code) {
 
   if (key === "GTO") {
     const target = readGotoAddress();
-    if (target !== null) state.pc = target % state.program.length;
+    if (target !== null) {
+      if (target >= state.program.length) {
+        stopProgram();
+      } else {
+        state.pc = target;
+      }
+    }
+    return;
+  }
+
+  if (["STO", "RCL", "M+", "M-", "MX", "MDIV"].includes(key)) {
+    const idx = readProgramMemoryIndex();
+    if (idx !== null) applyMemoryCommand(key, idx);
     return;
   }
 
   if (key === "SKP") {
     if (Number(state.x) < 0) {
-      state.pc = state.program[state.pc] === KEY_CODES["GTO"]
-        ? (state.pc + 3) % state.program.length
-        : (state.pc + 1) % state.program.length;
+      const skipWidth = state.program[state.pc] === KEY_CODES["GTO"] ? 3 : 1;
+      state.pc += skipWidth;
+      if (state.pc >= state.program.length) stopProgram();
     }
     return;
   }
