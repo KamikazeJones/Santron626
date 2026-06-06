@@ -1025,6 +1025,15 @@ select {
     aspect-ratio: 0.48;
   }
 
+  .display-wrap::after {
+    display: none;
+  }
+
+  .seg-glow.on,
+  .dot.on {
+    filter: drop-shadow(0 0 var(--ga) rgba(64, 241, 231, .65));
+  }
+
   #programList {
     max-height: none;
     column-count: 2;

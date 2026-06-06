@@ -86,19 +86,26 @@ let programRenderDirty = true;
 let renderedProgramCursor = null;
 let renderedProgramCursorVisible = null;
 let lastPointerKeyTime = 0;
+let displayCells = [];
+let lastRenderedDisplay = null;
 
 function makeDisplay() {
   display.innerHTML = "";
+  displayCells = [];
   for (let i = 0; i < 12; i += 1) {
     const digit = document.createElement("div");
     digit.className = "digit";
     const block = document.createElement("div");
     block.className = "segment-block";
+    const segments = {};
+    const glows = {};
     "abcdefg".split("").forEach((name) => {
       const wrap = document.createElement("div");
       wrap.className = `seg-glow ${name}`;
       const seg = document.createElement("span");
       seg.className = `seg ${name}`;
+      segments[name] = seg;
+      glows[name] = wrap;
       wrap.append(seg);
       block.append(wrap);
     });
@@ -106,7 +113,9 @@ function makeDisplay() {
     dot.className = "dot";
     digit.append(block, dot);
     display.append(digit);
+    displayCells.push({ block, dot, segments, glows, char: null, dotOn: null });
   }
+  lastRenderedDisplay = null;
 }
 
 function makeKeypad() {
@@ -208,6 +217,9 @@ function fitDisplayText(text) {
 }
 
 function renderDisplay(text) {
+  if (text === lastRenderedDisplay) return;
+  lastRenderedDisplay = text;
+
   const chars = [];
   const dots = [];
   for (const ch of text) {
@@ -222,16 +234,23 @@ function renderDisplay(text) {
     chars.unshift(" ");
     dots.unshift(false);
   }
-  chars.slice(-12).forEach((ch, idx) => {
-    const digit = display.children[idx];
+  const visibleChars = chars.slice(-12);
+  const visibleDots = dots.slice(-12);
+  visibleChars.forEach((ch, idx) => {
+    const cell = displayCells[idx];
+    const dotOn = visibleDots[idx];
+    if (cell.char === ch && cell.dotOn === dotOn) return;
+
     const lit = SEGMENTS[ch] || "";
-    digit.querySelector(".segment-block").classList.toggle("lit", lit.length > 0);
-    digit.querySelectorAll(".seg").forEach((seg) => {
-      const on = lit.includes(seg.classList[1]);
+    cell.block.classList.toggle("lit", lit.length > 0);
+    Object.entries(cell.segments).forEach(([name, seg]) => {
+      const on = lit.includes(name);
       seg.classList.toggle("on", on);
-      seg.parentElement.classList.toggle("on", on);
+      cell.glows[name].classList.toggle("on", on);
     });
-    digit.querySelector(".dot").classList.toggle("on", dots.slice(-12)[idx]);
+    cell.dot.classList.toggle("on", dotOn);
+    cell.char = ch;
+    cell.dotOn = dotOn;
   });
 }
 
