@@ -447,7 +447,7 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  text-align: center;
+  text-align: right;
   width: 100%;
 }
 
@@ -636,6 +636,22 @@ select {
   gap: 14px 15px;
   align-items: center;
   justify-content: center;
+}
+
+.build-stamp {
+  position: absolute;
+  left: auto;
+  right: 22px;
+  bottom: 8px;
+  width: max-content;
+  z-index: 2;
+  color: rgba(64, 241, 231, .38);
+  font-family: "Courier New", Consolas, monospace;
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
 }
 
 .key-wrap {
