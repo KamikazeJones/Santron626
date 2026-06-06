@@ -7,6 +7,10 @@
     {
       "name": "Fakultät",
       "file": "fakultaet.lst"
-    }
+    },
+    {
+      "name": "Gamma-Funktion",
+      "file": "gamma.lst"
+    }    
   ]
 }

@@ -59,6 +59,13 @@ input {
   font: inherit;
 }
 
+button,
+label,
+input,
+select {
+  touch-action: manipulation;
+}
+
 .shell {
   min-height: 100vh;
   display: flex;
@@ -922,29 +929,80 @@ input {
 }
 
 @media (max-width: 860px) {
-  .center-panel,
-  .panel {
-    flex-basis: min(100%, 520px);
-    width: min(100%, 520px);
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior-x: contain;
   }
 
+  .shell {
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shell::-webkit-scrollbar {
+    display: none;
+  }
+
+  .left-panel,
+  .center-panel,
   .panel {
-    height: auto;
+    flex: 0 0 100vw;
+    width: 100vw;
+    min-width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    padding: 14px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   .left-panel {
-    flex-basis: min(100%, 520px);
-    width: min(100%, 520px);
+    align-content: center;
+    justify-items: center;
+  }
+
+  .center-panel {
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .panel {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-self: stretch;
+  }
+
+  .calculator {
+    width: min(calc(100dvw - 28px), calc((100dvh - 28px) * .48), 392px);
+    aspect-ratio: 0.48;
   }
 
   #programList {
-    max-height: 70vh;
+    max-height: none;
+    column-count: 2;
   }
 }
 
 @media (max-width: 440px) {
   .shell {
-    padding: 12px;
+    padding: 0;
   }
 
   .calculator {
@@ -958,7 +1016,7 @@ input {
 
 @media (max-width: 380px) {
   .shell {
-    padding: 8px 4px;
+    padding: 0;
   }
 
   .keypad {

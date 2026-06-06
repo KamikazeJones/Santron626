@@ -141,23 +141,22 @@ function normalDisplayText() {
   const n = Number(state.x);
   if (!Number.isFinite(n)) return "Error".padStart(12, " ");
   if (state.exponentEntry) return fitDisplayText(formatExponential(n));
-  if (state.entering) return fitDisplayText(state.x);
+  if (state.entering) return fitDisplayText(withVisibleDecimalPoint(state.x));
   if (Object.is(n, -0) || n === 0) {
     const zero = state.displayFormat.mode === "fixed" ? Number(0).toFixed(state.displayFormat.decimals) : "0";
-    return zero.padStart(12, " ");
+    return fitDisplayText(withVisibleDecimalPoint(zero));
   }
-  const abs = Math.abs(n);
   let s;
   if (state.displayFormat.mode === "fixed") {
     s = n.toFixed(state.displayFormat.decimals);
-    if (s.length > 12) s = formatExponential(n);
+    if (displayCellCount(s) > 12) s = formatExponential(n);
   } else {
     s = String(Number(n.toPrecision(8)));
     if (s.includes("e")) s = formatExponential(n);
-    if (s.length > 12) s = formatExponential(n);
+    if (displayCellCount(s) > 12) s = formatExponential(n);
     if (digitCount(s) > 8) s = formatExponential(n);
   }
-  return fitDisplayText(s);
+  return fitDisplayText(withVisibleDecimalPoint(s));
 }
 
 function formatExponential(value) {
@@ -176,6 +175,11 @@ function formatExponential(value) {
   const mantissaPadding = " ".repeat(Math.max(0, 8 - digitCount(mantissaText)));
   const exponentDigits = String(Math.abs(exponentNumber)).padStart(2, "0").slice(-2);
   return `${mantissaSign}${mantissaPadding}${mantissaText}${exponentSign}${exponentDigits}`;
+}
+
+function withVisibleDecimalPoint(text) {
+  if (text.includes(".") || /[A-Za-z]/.test(text)) return text;
+  return `${text}.`;
 }
 
 function digitCount(text) {
@@ -988,9 +992,22 @@ function initializeControls() {
   runSpeedValue.textContent = `${state.runSpeed} ms`;
 }
 
+function showMobileCalculator() {
+  const shell = document.querySelector(".shell");
+  const centerPanel = document.querySelector(".center-panel");
+  if (!shell || !centerPanel) return;
+  if (!window.matchMedia("(max-width: 860px)").matches) return;
+
+  requestAnimationFrame(() => {
+    shell.scrollTo({ left: centerPanel.offsetLeft, behavior: "auto" });
+  });
+}
+
 makeDisplay();
 makeKeypad();
 initializeControls();
 initializeServerPrograms();
 renderPower();
 renderNow();
+showMobileCalculator();
+window.addEventListener("pageshow", showMobileCalculator);
