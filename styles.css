@@ -681,7 +681,9 @@ select {
 
 .operator-symbol {
   display: inline-block;
+  font-family: "DejaVu Sans", "Noto Sans Symbols", "Segoe UI Symbol", Arial, Helvetica, sans-serif;
   font-size: 1em;
+  font-weight: 700;
   line-height: 1;
   transform: none;
 }
@@ -837,6 +839,7 @@ select {
   height: calc(100vh - 24px);
   align-self: start;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 18px;
   align-content: stretch;
 }
@@ -948,7 +951,7 @@ select {
 .program {
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
 }
 
 .program-head {
@@ -1006,10 +1009,44 @@ select {
   padding: 6px 8px;
 }
 
+.program-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.program-tab {
+  border: 1px solid #536060;
+  border-radius: 6px 6px 0 0;
+  background: #101818;
+  color: var(--muted);
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.program-tab.active {
+  border-bottom-color: #142020;
+  background: #142020;
+  color: #e9f3f2;
+}
+
+.program-tab-panel {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: none;
+}
+
+.program-tab-panel.active {
+  display: block;
+}
+
 #programList {
   margin: 12px 0 0;
   padding-left: 0;
   max-height: none;
+  height: calc(100% - 12px);
   min-height: 0;
   overflow: auto;
   font-family: Consolas, monospace;
@@ -1029,6 +1066,19 @@ select {
 #programList li.active {
   color: var(--cyan);
   text-shadow: 0 0 10px var(--cyan);
+}
+
+.program-comments {
+  min-height: 0;
+  max-height: none;
+  height: calc(100% - 12px);
+  margin: 12px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: #dbeeee;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 @media (max-width: 860px) {

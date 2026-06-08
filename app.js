@@ -31,7 +31,7 @@ const KEY_CODES = {
 
 for (let i = 0; i <= 9; i += 1) KEY_CODES[String(i)] = 100 + i;
 
-const PI_VALUE = 3.141592654;
+const PI_VALUE = 3.141592653;
 
 const KEYS = [
   [{ key: "F", label: "F", color: "red" }, { key: "SIN", label: "sin", shift: "sin^-1", color: "gray" }, { key: "COS", label: "cos", shift: "cos^-1", color: "gray" }, { key: "TAN", label: "tan", shift: "tan^-1", color: "gray" }, { key: "PS", label: "PS", color: "gray" }],
@@ -57,6 +57,7 @@ const state = {
   mode: "run",
   angle: "deg",
   displayFormat: { mode: "auto", decimals: null },
+  programComments: "",
   runSpeed: 0,
   runDisplayMode: "blank",
   heldRunDisplay: null,
@@ -72,6 +73,11 @@ const state = {
 const display = document.querySelector("#display");
 const keypad = document.querySelector("#keypad");
 const programList = document.querySelector("#programList");
+const programComments = document.querySelector("#programComments");
+const programMemoryTab = document.querySelector("#programMemoryTab");
+const programCommentTab = document.querySelector("#programCommentTab");
+const programMemoryPanel = document.querySelector("#programMemoryPanel");
+const programCommentPanel = document.querySelector("#programCommentPanel");
 const programFile = document.querySelector("#programFile");
 const programName = document.querySelector("#programName");
 const serverProgramSelect = document.querySelector("#serverProgramSelect");
@@ -205,8 +211,9 @@ function formatExponential(value) {
     ? mantissaValue.replace(/\d/g, () => mantissaDigits.shift() ?? "").replace(/\D+$/, "")
     : mantissaValue;
   const mantissaPadding = " ".repeat(Math.max(0, 8 - digitCount(mantissaText)));
+  const mantissaDisplay = mantissaText.includes(".") ? mantissaText : `${mantissaText}.`;
   const exponentDigits = String(Math.abs(exponentNumber)).padStart(2, "0").slice(-2);
-  return `${mantissaSign}${mantissaPadding}${mantissaText}${exponentSign}${exponentDigits}`;
+  return `${mantissaSign}${mantissaPadding}${mantissaDisplay}${exponentSign}${exponentDigits}`;
 }
 
 function withVisibleDecimalPoint(text) {
@@ -290,6 +297,11 @@ function renderProgram(showActive = true) {
   renderedProgramCursorVisible = showActive;
 }
 
+function renderProgramComments() {
+  if (!programComments) return;
+  programComments.textContent = state.programComments || "Keine Kommentare.";
+}
+
 function markProgramRenderDirty() {
   programRenderDirty = true;
 }
@@ -365,15 +377,22 @@ function isValidProgramCode(code) {
 function parseProgramListing(text) {
   const program = Array(72).fill(99);
   const seen = new Set();
+  const comments = [];
+  let beforeListing = true;
 
   text.split(/\r?\n/).forEach((line, lineIdx) => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith(";")) return;
+    if (!trimmed || trimmed.startsWith(";")) return;
+    if (trimmed.startsWith("#")) {
+      if (beforeListing) comments.push(trimmed.replace(/^#\s?/, ""));
+      return;
+    }
 
     const match = trimmed.match(/^(\d{1,2})\s+(\d{2,3})\b/);
     if (!match) {
       throw new Error(`Zeile ${lineIdx + 1}: erwartet "Zelle KeyCode Zeichen"`);
     }
+    beforeListing = false;
 
     const address = Number(match[1]);
     const code = Number(match[2]);
@@ -389,7 +408,7 @@ function parseProgramListing(text) {
   });
 
   if (!seen.size) throw new Error("Die Datei enthaelt kein Programmlisting");
-  return program;
+  return { program, comments: comments.join("\n").trim() };
 }
 
 function programFilename() {
@@ -459,11 +478,14 @@ function loadProgramFile(file) {
 }
 
 function applyProgramListing(text, name) {
-  state.program = parseProgramListing(text);
+  const parsed = parseProgramListing(text);
+  state.program = parsed.program;
+  state.programComments = parsed.comments;
   state.pc = 0;
   state.shift = false;
   if (programName) programName.value = programNameFromFile(name);
   markProgramRenderDirty();
+  renderProgramComments();
   render();
 }
 
@@ -529,6 +551,7 @@ function resetCalculatorState() {
   state.y = 0;
   state.pc = 0;
   state.program.fill(99);
+  state.programComments = "";
   state.memories.fill(0);
   state.shift = false;
   state.entering = false;
@@ -542,6 +565,7 @@ function resetCalculatorState() {
   state.parenStack = [];
   resetExpression();
   markProgramRenderDirty();
+  renderProgramComments();
 }
 
 function renderNow() {
@@ -589,7 +613,14 @@ function renderPower() {
 }
 
 function roundInternal(value) {
-  return Number.isFinite(value) ? Number(value.toPrecision(10)) : value;
+  if (!Number.isFinite(value) || value === 0) return value;
+  const sign = Math.sign(value);
+  const abs = Math.abs(value);
+  const exponent = Math.floor(Math.log10(abs));
+  const scale = 10 ** (9 - exponent);
+  const scaled = abs * scale;
+  const tolerance = Math.abs(scaled) * Number.EPSILON * 8;
+  return sign * (Math.trunc(scaled + tolerance) / scale);
 }
 
 function setX(value) {
@@ -608,7 +639,9 @@ function updateExponentValue() {
 }
 
 function startExponentEntry() {
-  state.exponentEntry = { mantissa: Number(state.x), sign: 1, digits: "" };
+  const mantissa = state.entering ? Number(state.x) : 1;
+  state.exponentEntry = { mantissa, sign: 1, digits: "" };
+  state.x = String(mantissa);
   state.entering = false;
 }
 
@@ -1091,13 +1124,28 @@ document.querySelectorAll("input[name='runDisplayMode']").forEach((input) => {
 });
 document.querySelector("#clearProgram").addEventListener("click", () => {
   state.program.fill(99);
+  state.programComments = "";
   state.pc = 0;
   state.pendingGotoDigits = null;
   state.gotoPreview = null;
   state.pendingPrecision = false;
   markProgramRenderDirty();
+  renderProgramComments();
   render();
 });
+
+function selectProgramTab(tabName) {
+  const comments = tabName === "comments";
+  programMemoryTab.classList.toggle("active", !comments);
+  programCommentTab.classList.toggle("active", comments);
+  programMemoryTab.setAttribute("aria-selected", String(!comments));
+  programCommentTab.setAttribute("aria-selected", String(comments));
+  programMemoryPanel.classList.toggle("active", !comments);
+  programCommentPanel.classList.toggle("active", comments);
+}
+
+programMemoryTab.addEventListener("click", () => selectProgramTab("memory"));
+programCommentTab.addEventListener("click", () => selectProgramTab("comments"));
 
 document.querySelector("#saveProgram").addEventListener("click", saveProgramFile);
 document.querySelector("#loadProgram").addEventListener("click", () => {
@@ -1156,6 +1204,7 @@ makeKeypad();
 initializeControls();
 initializeServerPrograms();
 renderPower();
+renderProgramComments();
 renderNow();
 showMobileCalculator();
 registerServiceWorker();

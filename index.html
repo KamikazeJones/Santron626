@@ -120,7 +120,7 @@
       </div>
 
       <div class="keypad" id="keypad"></div>
-      <div class="build-stamp" aria-label="Build-Version">Build 18 2026-06-06 22:33</div>
+      <div class="build-stamp" aria-label="Build-Version">Build 19 2026-06-08 18:23</div>
     </section>
     </section>
 
@@ -148,7 +148,16 @@
 
       <div class="program">
         <h2>Programmspeicher</h2>
-        <ol id="programList"></ol>
+        <div class="program-tabs" role="tablist" aria-label="Programmansicht">
+          <button id="programMemoryTab" class="program-tab active" type="button" role="tab" aria-selected="true" aria-controls="programMemoryPanel">Speicher</button>
+          <button id="programCommentTab" class="program-tab" type="button" role="tab" aria-selected="false" aria-controls="programCommentPanel">Kommentar</button>
+        </div>
+        <div id="programMemoryPanel" class="program-tab-panel active" role="tabpanel" aria-labelledby="programMemoryTab">
+          <ol id="programList"></ol>
+        </div>
+        <div id="programCommentPanel" class="program-tab-panel" role="tabpanel" aria-labelledby="programCommentTab">
+          <pre id="programComments" class="program-comments">Keine Kommentare.</pre>
+        </div>
       </div>
     </aside>
   </main>

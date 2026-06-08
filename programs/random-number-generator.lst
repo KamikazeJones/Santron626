@@ -1,0 +1,30 @@
+# This program calculates uniformly distributed
+# pseudo random numbers U[i] in the range 0 <= U[i] <= 1
+#
+# U[i] = Fractional part of (PI + U[i-1])^5
+#
+# The user has to specify the starting value U[0] such that
+# 0 <= U[0] <= 1
+#
+00 090 R/S
+01 010 +
+02 065 PI
+03 014 Y^X
+04 105 5
+05 080 =
+06 055 STO
+07 100 0
+08 010 +
+09 063 EXP
+10 109 9
+11 011 -
+12 063 EXP
+13 109 9
+14 011 -
+15 056 RCL
+16 100 0
+17 064 X<>Y
+18 080 =
+19 093 GTO
+20 100 0
+21 100 0

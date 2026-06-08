@@ -15,6 +15,10 @@
     {
       "name": "Gamma-Funktion",
       "file": "gamma-function.lst"
+    },
+    {
+      "name": "Pseudo-Random-Number-Generator",
+      "file": "random-number-generator.lst"
     }    
   ]
 }
