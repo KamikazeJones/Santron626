@@ -22,11 +22,11 @@ const SEGMENTS = {
 };
 
 const KEY_CODES = {
-  "+": 10, "-": 11, "*": 12, "/": 13, "Y^X": 14, "1/X": 17, "X2": 18, "SQRT": 19,
+  "+": 10, "-": 11, "*": 12, "/": 13, "Y^X": 14, "1/X": 17, "X^2": 18, "SQRT": 19,
   "SIN": 20, "COS": 21, "TAN": 22, "ASIN": 30, "ACOS": 31, "ATAN": 32,
-  "LN": 40, "LOG": 41, "EX": 42, "10X": 43, "M+": 50, "M-": 51, "MX": 52, "MDIV": 53,
+  "LN": 40, "LOG": 41, "E^X": 42, "10^X": 43, "M+": 50, "M-": 51, "M*": 52, "M/": 53,
   "STO": 55, "RCL": 56, "C/CE": 60, "+/-": 62, "EXP": 63, "X<>Y": 64, "PI": 65,
-  ".": 70, "PS": 71, "=": 80, "(": 81, ")": 82, "R/S": 90, "GTO": 93, "SKP": 96,
+  ".": 70, "PS": 71, "=": 80, "(": 81, ")": 82, "R/S": 90, "GOTO": 93, "SKP": 96,
 };
 
 for (let i = 0; i <= 9; i += 1) KEY_CODES[String(i)] = 100 + i;
@@ -35,7 +35,7 @@ const PI_VALUE = 3.141592653;
 
 const KEYS = [
   [{ key: "F", label: "F", color: "red" }, { key: "SIN", label: "sin", shift: "sin^-1", color: "gray" }, { key: "COS", label: "cos", shift: "cos^-1", color: "gray" }, { key: "TAN", label: "tan", shift: "tan^-1", color: "gray" }, { key: "PS", label: "PS", color: "gray" }],
-  [{ key: "EX", label: "e^x", shift: "ln", color: "gray" }, { key: "LOG", label: "log", shift: "10^x", color: "gray" }, { key: "Y^X", label: "y^x", color: "gray" }, { key: "STO", label: "STOn", color: "gray" }, { key: "RCL", label: "RCLn", color: "gray" }],
+  [{ key: "E^X", label: "e^x", shift: "ln", color: "gray" }, { key: "LOG", label: "log", shift: "10^x", color: "gray" }, { key: "Y^X", label: "y^x", color: "gray" }, { key: "STO", label: "STOn", color: "gray" }, { key: "RCL", label: "RCLn", color: "gray" }],
   [{ key: "SQRT", label: "√x", shift: "X^2", color: "red" }, { key: "1/X", label: "1/x", color: "red" }, { key: "X<>Y", label: "x-y", color: "blue" }, { key: "(", label: "(", color: "blue" }, { key: ")", label: ")", color: "blue" }],
   [{ key: "EXP", label: "EXP", color: "red" }, { key: "7", label: "7", color: "white" }, { key: "8", label: "8", color: "white" }, { key: "9", label: "9", color: "white" }, { key: "/", label: "÷", shift: "Mn÷", color: "blue" }],
   [{ key: "PI", label: "π", color: "red" }, { key: "4", label: "4", color: "white" }, { key: "5", label: "5", color: "white" }, { key: "6", label: "6", color: "white" }, { key: "*", label: "×", shift: "Mn×", color: "blue" }],
@@ -166,9 +166,6 @@ function normalDisplayText() {
   if (state.mode === "load") {
     const code = String(state.program[state.pc]).padStart(3, "0");
     return `${code} ${String(state.pc).padStart(2, "0")}`.padStart(12, " ");
-  }
-  if (state.pendingGotoDigits || state.gotoPreview !== null) {
-    return String(state.gotoPreview ?? "00").padStart(12, " ");
   }
   const n = Number(state.x);
   if (!Number.isFinite(n)) return "Error".padStart(12, " ");
@@ -308,7 +305,6 @@ function markProgramRenderDirty() {
 
 function enterManualGoto() {
   state.pendingGotoDigits = [];
-  state.gotoPreview = "00";
   state.entering = false;
   render();
 }
@@ -322,15 +318,10 @@ function applyManualGotoDigit(key) {
   }
 
   state.pendingGotoDigits.push(Number(key));
-  state.gotoPreview = state.pendingGotoDigits.join("").padStart(2, "0");
   if (state.pendingGotoDigits.length === 2) {
     const target = state.pendingGotoDigits[0] * 10 + state.pendingGotoDigits[1];
     if (target < state.program.length) state.pc = target;
     state.pendingGotoDigits = null;
-    window.setTimeout(() => {
-      state.gotoPreview = null;
-      render();
-    }, 250);
   }
   render();
   return true;
@@ -670,8 +661,8 @@ function applyMemoryCommand(command, idx) {
   if (command === "RCL") setX(state.memories[idx]);
   if (command === "M+") state.memories[idx] = roundInternal(state.memories[idx] + x);
   if (command === "M-") state.memories[idx] = roundInternal(state.memories[idx] - x);
-  if (command === "MX") state.memories[idx] = roundInternal(state.memories[idx] * x);
-  if (command === "MDIV") state.memories[idx] = roundInternal(state.memories[idx] / x);
+  if (command === "M*") state.memories[idx] = roundInternal(state.memories[idx] * x);
+  if (command === "M/") state.memories[idx] = roundInternal(state.memories[idx] / x);
   state.exponentEntry = null;
   state.entering = false;
 }
@@ -750,10 +741,10 @@ function unary(key) {
     "ATAN": fromRadians(Math.atan(x)),
     "LN": Math.log(x),
     "LOG": Math.log10(x),
-    "EX": Math.exp(x),
-    "10X": Math.pow(10, x),
+    "E^X": Math.exp(x),
+    "10^X": Math.pow(10, x),
     "SQRT": Math.sqrt(x),
-    "X2": x * x,
+    "X^2": x * x,
     "1/X": 1 / x,
   };
   if (key in map) setX(map[key]);
@@ -822,7 +813,7 @@ function execute(key, fromProgram = false) {
     const old = Number(state.x);
     setX(state.y);
     state.y = old;
-  } else if (["SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN", "LN", "LOG", "EX", "10X", "SQRT", "X2", "1/X"].includes(key)) {
+  } else if (["SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN", "LN", "LOG", "E^X", "10^X", "SQRT", "X^2", "1/X"].includes(key)) {
     unary(key);
   } else if (key === "F") {
     state.shift = !state.shift;
@@ -830,12 +821,12 @@ function execute(key, fromProgram = false) {
     openParen();
   } else if (key === ")") {
     closeParen();
-  } else if (key === "GTO" && !fromProgram && state.mode === "run") {
+  } else if (key === "GOTO" && !fromProgram && state.mode === "run") {
     enterManualGoto();
   } else if (key === "PS") {
     state.pendingPrecision = true;
     state.entering = false;
-  } else if (["STO", "RCL", "M+", "M-", "MX", "MDIV"].includes(key)) {
+  } else if (["STO", "RCL", "M+", "M-", "M*", "M/"].includes(key)) {
     state.pendingMemory = key;
   } else if (key === "BST") {
     if (state.mode !== "run") state.pc = (state.pc + state.program.length - 1) % state.program.length;
@@ -1005,7 +996,7 @@ function executeProgramCode(code) {
   const key = keyFromCode(code);
   if (!key) return;
 
-  if (key === "GTO") {
+  if (key === "GOTO") {
     const target = readGotoAddress();
     if (target !== null) {
       if (target >= state.program.length) {
@@ -1017,7 +1008,7 @@ function executeProgramCode(code) {
     return;
   }
 
-  if (["STO", "RCL", "M+", "M-", "MX", "MDIV"].includes(key)) {
+  if (["STO", "RCL", "M+", "M-", "M*", "M/"].includes(key)) {
     const idx = readProgramMemoryIndex();
     if (idx !== null) applyMemoryCommand(key, idx);
     return;
@@ -1025,7 +1016,7 @@ function executeProgramCode(code) {
 
   if (key === "SKP") {
     if (Number(state.x) < 0) {
-      const skipWidth = state.program[state.pc] === KEY_CODES["GTO"] ? 3 : 1;
+      const skipWidth = state.program[state.pc] === KEY_CODES["GOTO"] ? 3 : 1;
       state.pc += skipWidth;
       if (state.pc >= state.program.length) stopProgram();
     }
@@ -1062,8 +1053,8 @@ function pressKeyButton(button) {
   let key = button.dataset.key;
   if (state.shift) {
     const shifted = {
-      SIN: "ASIN", COS: "ACOS", TAN: "ATAN", EX: "LN", LOG: "10X", SQRT: "X2",
-      "+": "M+", "-": "M-", "*": "MX", "/": "MDIV",
+      SIN: "ASIN", COS: "ACOS", TAN: "ATAN", "E^X": "LN", LOG: "10^X", SQRT: "X^2",
+      "+": "M+", "-": "M-", "*": "M*", "/": "M/",
     };
     key = shifted[key] || key;
     state.shift = false;
