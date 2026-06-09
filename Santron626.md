@@ -110,7 +110,7 @@ Wichtige Optionen:
 - `load "datei.lst"` laedt im Szenario ein Programmlisting.
 - `save "datei.lst"` speichert im Szenario den aktuellen Programmspeicher als Listing.
 - `list` gibt den aktuellen Programmspeicher dreispaltig aus.
-- `--scenario-file <file>` liest das gleiche Szenarioformat aus einer Datei. Zeilen, die mit `#` beginnen, werden ignoriert.
+- `--scenario-file <file>` liest das gleiche Szenarioformat aus einer Datei. `#` bis zum Zeilenende wird als Kommentar ignoriert, ausser innerhalb von Anfuehrungszeichen.
 
 ## Wo wir stehen
 

@@ -6,8 +6,6 @@ const path = require("path");
 const SantronCore = require("./santron-core");
 
 const { KEY_CODES, createCalculator, codeName, isValidProgramCode, keyFromCode, roundInternal } = SantronCore;
-const calculator = createCalculator();
-const { state } = calculator;
 const DEBUG_NUMBER_WIDTH = 18;
 const DEBUG_MEMORY_VALUE_WIDTH = 15;
 const DEBUG_DISPLAY_WIDTH = 18;
@@ -48,6 +46,7 @@ Options:
   --dp <n>                  Set display precision 0..7, or 8/9 for auto/scientific mode
   --mode <switches...>      Initial switches, e.g. --mode /DG /RUN /ON
   --trace                  Print each program step while running
+  --key-trace              Print each key/switch token as it is executed
   --debug                  Print program step and calculator status before each step
   --mem                    Print memories
   --help                   Show this help
@@ -61,7 +60,15 @@ Examples:
   node ${script} --scenario 'load "mein-programm.lst"; list'
   node ${script} --scenario '/CLR R/S; load "mein-programm.lst"; /RUN 5 R/S; expect 25.'
   node ${script} --scenario ':LOAD X^2 R/S GOTO 0 0; :RUN GOTO 0 0 2 R/S{4}'
+  node ${script} --scenario '/LOAD %loop X^2 R/S GOTO &loop; /RUN 3 R/S'
+  node ${script} --scenario '/LOAD GOTO &end X^2 %end =; list'
   node ${script} --program programs/mastermind.lst --scenario "1 2 3 4 R/S; expect 1234.21; 5 6 2 1 R/S; expect 5621.12"
+
+Label syntax (2-pass):
+  %name    Defines a label at the current program address (only in /LOAD mode)
+  &name    References a label – replaced by the two-digit address (e.g. 2 7 for address 27)
+           In /LOAD mode: two placeholder cells (pass 1), patched in pass 2
+           In /RUN mode:  direct replacement by the address digits
 
 Switch tokens:
   /RD /DG /LOAD /CLR /RUN /ON /OFF
@@ -108,6 +115,7 @@ function parseArgs(argv) {
       if (!options.mode.length) throw new Error("--mode erwartet mindestens einen Schalter");
     }
     else if (arg === "--trace") options.trace = true;
+    else if (arg === "--key-trace") options.keyTrace = true;
     else if (arg === "--debug") options.debug = true;
     else if (arg === "--mem") options.mem = true;
     else throw new Error(`Unbekannte Option: ${arg}`);
@@ -115,35 +123,11 @@ function parseArgs(argv) {
   return options;
 }
 
-function loadProgram(filename) {
-  const text = fs.readFileSync(filename, "utf8");
-  return calculator.loadProgramListing(text);
-}
-
-function saveProgram(filename) {
-  fs.writeFileSync(filename, `${calculator.makeProgramListing()}\n`, "utf8");
-}
-
 function programListingEntry(code, idx) {
   const address = String(idx).padStart(2, "0");
   const keyCode = String(code).padStart(3, "0");
   const name = codeName(code).padEnd(4, " ");
   return `${address}: ${keyCode} ${name}`;
-}
-
-function printProgramList() {
-  const rowsPerColumn = 25;
-  const columns = [];
-  for (let start = 0; start < state.program.length; start += rowsPerColumn) {
-    columns.push(state.program.slice(start, start + rowsPerColumn).map((code, offset) => (
-      programListingEntry(code, start + offset)
-    )));
-  }
-  const widths = columns.map((column) => Math.max(...column.map((line) => line.length)));
-  const rowCount = Math.max(...columns.map((column) => column.length));
-  for (let row = 0; row < rowCount; row += 1) {
-    console.log(columns.map((column, idx) => (column[row] || "").padEnd(widths[idx])).join("  ").trimEnd());
-  }
 }
 
 function parseKeys(text) {
@@ -158,6 +142,8 @@ function parseKeys(text) {
   };
   const keyNames = new Map(Object.keys(KEY_CODES).map((key) => [key.toUpperCase(), key]));
   const parseOne = (raw) => {
+    if (raw.startsWith('%') && raw.length > 1) return { label: raw.slice(1) };
+    if (raw.startsWith('&') && raw.length > 1) return { ref: raw.slice(1) };
     const codeMatch = raw.match(/^\$(\d{1,3})$/);
     if (codeMatch) return { code: Number(codeMatch[1]) };
     const upper = raw.toUpperCase();
@@ -172,47 +158,64 @@ function parseKeys(text) {
   });
 }
 
-function applySwitch(token, options = {}) {
-  const normalized = String(token).toUpperCase().replace(/^:/, "/");
-  if (normalized === "/RD") {
-    state.angle = "rad";
-    return true;
+function simulateModeAndPc(tokens, pc, mode, labelMap) {
+  for (const token of tokens) {
+    if (token === null || token === undefined) continue;
+    if (typeof token === "object") {
+      if ("label" in token) {
+        if (mode === "load" || mode === "clear") labelMap[token.label] = pc;
+        continue;
+      }
+      if ("ref" in token) {
+        if (mode === "load" || mode === "clear") pc += 2;
+        continue;
+      }
+      if (mode === "load" || mode === "clear") pc += 1;
+      continue;
+    }
+    if (typeof token === "string") {
+      if (isSwitchToken(token)) {
+        const norm = token.toUpperCase().replace(/^:/, "/");
+        if (norm === "/LOAD") mode = "load";
+        else if (norm === "/CLR") mode = "clear";
+        else if (norm === "/RUN") mode = "run";
+        continue;
+      }
+      if (mode === "load" || mode === "clear") pc += 1;
+    }
   }
-  if (normalized === "/DG") {
-    state.angle = "deg";
-    return true;
+  return { pc, mode };
+}
+
+function buildLabelMap(actions, startPc, startMode) {
+  const labelMap = {};
+  let pc = startPc;
+  let mode = startMode;
+  for (const action of actions) {
+    if (/^expect/i.test(action) || /^load\s/i.test(action) || /^save\s/i.test(action) || /^list$/i.test(action)) continue;
+    const keyText = action.replace(/^(keys|press)\s+/i, "");
+    let tokens;
+    try { tokens = parseKeys(keyText); } catch (e) { continue; }
+    ({ pc, mode } = simulateModeAndPc(tokens, pc, mode, labelMap));
   }
-  if (normalized === "/LOAD") {
-    state.mode = "load";
-    calculator.stopProgram();
-    state.pendingGotoDigits = null;
-    state.gotoPreview = null;
-    state.pendingPrecision = false;
-    return true;
+  return labelMap;
+}
+
+function applyLabelMap(tokens, labelMap) {
+  if (!tokens.some((t) => t && typeof t === "object" && ("label" in t || "ref" in t))) {
+    return tokens;
   }
-  if (normalized === "/CLR") {
-    state.mode = "clear";
-    calculator.stopProgram();
-    state.pendingGotoDigits = null;
-    state.gotoPreview = null;
-    state.pendingPrecision = false;
-    return true;
-  }
-  if (normalized === "/RUN") {
-    state.mode = "run";
-    return true;
-  }
-  if (normalized === "/ON") {
-    if (!options.initial && state.power !== "on") calculator.resetCalculatorState();
-    state.power = "on";
-    return true;
-  }
-  if (normalized === "/OFF") {
-    calculator.stopProgram();
-    state.power = "off";
-    return true;
-  }
-  return false;
+  return tokens.flatMap((token) => {
+    if (token === null || token === undefined) return [token];
+    if (typeof token === "object" && "label" in token) return [];
+    if (typeof token === "object" && "ref" in token) {
+      const addr = labelMap[token.ref];
+      if (addr === undefined) throw new Error(`unknown label: &${token.ref}`);
+      if (addr < 0 || addr > 72) throw new Error(`label address ${addr} out of range 0-72: &${token.ref}`);
+      return [String(Math.floor(addr / 10)), String(addr % 10)];
+    }
+    return [token];
+  });
 }
 
 function isSwitchToken(token) {
@@ -220,31 +223,15 @@ function isSwitchToken(token) {
   return ["/RD", "/DG", "/LOAD", "/CLR", "/RUN", "/ON", "/OFF"].includes(normalized);
 }
 
-function executeKeyToken(token) {
-  if (typeof token === "string" && isSwitchToken(token)) {
-    if (!applySwitch(token)) throw new Error(`Unbekannter Schalter: ${token}`);
-    return;
-  }
-  if (typeof token === "object" && token !== null && "code" in token) {
-    if (token.code === 99) return;
-    if (!isValidProgramCode(token.code)) throw new Error(`Keycode ${token.code} ist unbekannt`);
-    const key = keyFromCode(token.code);
-    if (!key) return;
-    calculator.execute(key);
-    return;
-  }
-  calculator.execute(token);
-}
-
 function isRunStopToken(token) {
   return typeof token === "string" && String(token).toUpperCase() === "R/S";
 }
 
+// ── SantronRunner class ───────────────────────────────────────────────────────
+
 function traceProgramStep({ steps: stepNo, pc, code, name, display }) {
   console.log(`${String(stepNo).padStart(4, " ")}  ${String(pc).padStart(2, "0")}  ${String(code).padStart(3, "0")}  ${(name || codeName(code) || "?").padEnd(5)}  ${display.trim()}`);
 }
-
-let debugRowsPrinted = 0;
 
 function formatParenStack(parenStack) {
   if (!parenStack.length) return "[]";
@@ -293,26 +280,6 @@ function angleModeText(angle, mode) {
   return `${angle === "rad" ? "RD" : "DG"}/${modeShortName(mode)}`;
 }
 
-function statusLine(steps) {
-  const columns = [
-    debugCell(String(steps ?? 0).padStart(4, "0"), 5),
-    debugCell(String(state.pc).padStart(2, "0"), 3),
-    debugCell("---", 3),
-    debugCell("---", 4),
-    debugCellRight(angleModeText(state.angle, state.mode), 5),
-    "|",
-    debugCellRight(formatDebugDisplay(calculator.displayText()), DEBUG_DISPLAY_WIDTH),
-    "|",
-    debugCellRight(formatDebugNumber(state.x), DEBUG_NUMBER_WIDTH),
-    "|",
-    debugCellRight(formatDebugNumber(state.y), DEBUG_NUMBER_WIDTH),
-    "|",
-    debugCell(state.pending || "", 8),
-    formatParenStack(state.parenStack),
-  ];
-  return columns.join(" ");
-}
-
 function formatDebugNumber(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return String(value);
@@ -348,72 +315,10 @@ function formatDebugMemories(memories) {
   ].join("\n");
 }
 
-function debugProgramStep({ steps: stepNo, pc, code, name, before }) {
-  if (debugRowsPrinted % 10 === 0) console.log(`\n${debugHeader()}`);
-  debugRowsPrinted += 1;
-  const columns = [
-    debugCell(String(stepNo).padStart(4, "0"), 5),
-    debugCell(String(pc).padStart(2, "0"), 3),
-    debugCell(String(code).padStart(3, "0"), 3),
-    debugCell(name || codeName(code) || "?", 4),
-    debugCellRight(angleModeText(before.angle, before.mode), 5),
-    "|",
-    debugCellRight(formatDebugDisplay(before.display), DEBUG_DISPLAY_WIDTH),
-    "|",
-    debugCellRight(formatDebugNumber(before.x), DEBUG_NUMBER_WIDTH),
-    "|",
-    debugCellRight(formatDebugNumber(before.y), DEBUG_NUMBER_WIDTH),
-    "|",
-    debugCell(before.pending || "", 8),
-    formatParenStack(before.parenStack),
-  ];
-  console.log(columns.join(" "));
-  console.log(formatDebugMemories(before.memories));
-}
-
-function programStepObserver(options) {
-  if (!options.trace && !options.debug) return null;
-  return (step) => {
-    const adjustedStep = { ...step, steps: (options.stepOffset || 0) + step.steps };
-    if (options.debug) debugProgramStep(adjustedStep);
-    if (options.trace) traceProgramStep(adjustedStep);
-  };
-}
-
-function runUntilStop(options) {
-  return calculator.runProgram(options.steps, programStepObserver(options));
-}
-
-function printRunStopDisplay(options) {
-  options.runStopCount = (options.runStopCount || 0) + 1;
-  console.log(`R/S ${String(options.runStopCount).padStart(4, "0")}: ${calculator.displayText().trim()}`);
-}
-
-function executeKeyTokenAndMaybeRun(token, options, stepOffset = 0) {
-  const wasRunning = state.running;
-  const wasRunMode = state.mode === "run";
-  const isRunStop = isRunStopToken(token);
-  executeKeyToken(token);
-  if (!wasRunning && state.running) {
-    options.stepOffset = stepOffset;
-    let steps;
-    try {
-      steps = runUntilStop(options);
-    } finally {
-      options.stepOffset = 0;
-    }
-    if (state.running) throw new Error(`Programmlauf nach ${options.steps} Schritten noch nicht gestoppt`);
-    if (isRunStop && wasRunMode) printRunStopDisplay(options);
-    return steps;
-  }
-  if (isRunStop && wasRunMode) printRunStopDisplay(options);
-  return 0;
-}
-
 function normalizeScenarioText(text) {
   return text
     .split(/\r?\n/)
-    .map((line) => line.replace(/^\s*#.*$/, ""))
+    .map((line) => line.replace(/\s*#.*$/, ""))
     .join("\n");
 }
 
@@ -423,74 +328,297 @@ function parseScenarioFileArgument(text) {
   return match[1] || match[2] || match[3];
 }
 
-function scenarioExpectationError(expected, action, actionIndex, steps) {
-  const actual = calculator.displayText().trim();
-  const lines = [
-    `expect failed at scenario step ${actionIndex + 1}`,
-    `action: ${action}`,
-    `expected display: ${expected}`,
-    `actual display:   ${actual}`,
-    "",
-    debugHeader(),
-    statusLine(steps),
-    formatDebugMemories(state.memories),
-  ];
-  if (steps > 0 && state.program.some((code) => code !== 99)) {
-    lines.push("", "program:", calculator.makeProgramListing());
+function formatKeyToken(token) {
+  if (typeof token === "object" && token !== null) {
+    if ("label" in token) return `%${token.label}`;
+    if ("ref" in token) return `&${token.ref}`;
+    if ("code" in token) return `$${String(token.code).padStart(3, "0")}`;
   }
-  return lines.join("\n");
+  return String(token);
 }
 
-function runScenario(text, options) {
-  let steps = 0;
-  const actions = normalizeScenarioText(text).split(/[;\r\n]+/).map((part) => part.trim()).filter(Boolean);
-  actions.forEach((action, actionIndex) => {
-    const expectMatch = action.match(/^expect(?:-display)?\s+(.+)$/i);
-    if (expectMatch) {
-      const expected = expectMatch[1].trim();
-      const actual = calculator.displayText().trim();
-      if (actual !== expected) {
-        throw new Error(scenarioExpectationError(expected, action, actionIndex, steps));
+class SantronRunner {
+  constructor() {
+    this.calculator = createCalculator();
+    this.state = this.calculator.state;
+    this._debugRowsPrinted = 0;
+  }
+
+  loadProgram(filename) {
+    const text = fs.readFileSync(filename, "utf8");
+    return this.calculator.loadProgramListing(text);
+  }
+
+  saveProgram(filename) {
+    fs.writeFileSync(filename, `${this.calculator.makeProgramListing()}\n`, "utf8");
+  }
+
+  printProgramList() {
+    const { state } = this;
+    const rowsPerColumn = 25;
+    const columns = [];
+    for (let start = 0; start < state.program.length; start += rowsPerColumn) {
+      columns.push(state.program.slice(start, start + rowsPerColumn).map((code, offset) => (
+        programListingEntry(code, start + offset)
+      )));
+    }
+    const widths = columns.map((column) => Math.max(...column.map((line) => line.length)));
+    const rowCount = Math.max(...columns.map((column) => column.length));
+    for (let row = 0; row < rowCount; row += 1) {
+      console.log(columns.map((column, idx) => (column[row] || "").padEnd(widths[idx])).join("  ").trimEnd());
+    }
+  }
+
+  applySwitch(token, options = {}) {
+    const { state, calculator } = this;
+    const normalized = String(token).toUpperCase().replace(/^:/, "/");
+    if (normalized === "/RD") { state.angle = "rad"; return true; }
+    if (normalized === "/DG") { state.angle = "deg"; return true; }
+    if (normalized === "/LOAD") {
+      state.mode = "load";
+      calculator.stopProgram();
+      state.pendingGotoDigits = null;
+      state.gotoPreview = null;
+      state.pendingPrecision = false;
+      return true;
+    }
+    if (normalized === "/CLR") {
+      state.mode = "clear";
+      calculator.stopProgram();
+      state.pendingGotoDigits = null;
+      state.gotoPreview = null;
+      state.pendingPrecision = false;
+      return true;
+    }
+    if (normalized === "/RUN") { state.mode = "run"; return true; }
+    if (normalized === "/ON") {
+      if (!options.initial && state.power !== "on") calculator.resetCalculatorState();
+      state.power = "on";
+      return true;
+    }
+    if (normalized === "/OFF") {
+      calculator.stopProgram();
+      state.power = "off";
+      return true;
+    }
+    return false;
+  }
+
+  executeKeyToken(token) {
+    const { calculator } = this;
+    if (typeof token === "object" && token !== null && "label" in token) return; // label definition is skipped during execution
+    if (typeof token === "object" && token !== null && "ref" in token) {
+      throw new Error(`unresolved label reference: &${token.ref} -- applyLabelMap not called?`);
+    }
+    if (typeof token === "string" && isSwitchToken(token)) {
+      if (!this.applySwitch(token)) throw new Error(`unknown switch: ${token}`);
+      return;
+    }
+    if (typeof token === "object" && token !== null && "code" in token) {
+      if (token.code === 99) return;
+      if (!isValidProgramCode(token.code)) throw new Error(`unknown keycode: ${token.code}`);
+      const key = keyFromCode(token.code);
+      if (!key) return;
+      calculator.execute(key);
+      return;
+    }
+    calculator.execute(token);
+  }
+
+  debugProgramStep({ steps: stepNo, pc, code, name, before }) {
+    if (this._debugRowsPrinted % 10 === 0) console.log(`\n${debugHeader()}`);
+    this._debugRowsPrinted += 1;
+    const columns = [
+      debugCell(String(stepNo).padStart(4, "0"), 5),
+      debugCell(String(pc).padStart(2, "0"), 3),
+      debugCell(String(code).padStart(3, "0"), 3),
+      debugCell(name || codeName(code) || "?", 4),
+      debugCellRight(angleModeText(before.angle, before.mode), 5),
+      "|",
+      debugCellRight(formatDebugDisplay(before.display), DEBUG_DISPLAY_WIDTH),
+      "|",
+      debugCellRight(formatDebugNumber(before.x), DEBUG_NUMBER_WIDTH),
+      "|",
+      debugCellRight(formatDebugNumber(before.y), DEBUG_NUMBER_WIDTH),
+      "|",
+      debugCell(before.pending || "", 8),
+      formatParenStack(before.parenStack),
+    ];
+    console.log(columns.join(" "));
+    console.log(formatDebugMemories(before.memories));
+  }
+
+  programStepObserver(options) {
+    if (!options.trace && !options.debug) return null;
+    return (step) => {
+      const adjustedStep = { ...step, steps: (options.stepOffset || 0) + step.steps };
+      if (options.debug) this.debugProgramStep(adjustedStep);
+      if (options.trace) traceProgramStep(adjustedStep);
+    };
+  }
+
+  runUntilStop(options) {
+    return this.calculator.runProgram(options.steps, this.programStepObserver(options));
+  }
+
+  printRunStopDisplay(options) {
+    options.runStopCount = (options.runStopCount || 0) + 1;
+    console.log(`R/S ${String(options.runStopCount).padStart(4, "0")}: ${this.calculator.displayText().trim()}`);
+  }
+
+  traceKeyToken(token, options) {
+    if (!options.debug && !options.keyTrace) return;
+    const display = this.calculator.displayText().trim();
+    const modeAngle = angleModeText(this.state.angle, this.state.mode);
+    const pc = String(this.state.pc).padStart(2, "0");
+    console.log(`KEY  ${formatKeyToken(token).padEnd(10)}  ${modeAngle.padEnd(5)}  pc=${pc}  display=${display}`);
+  }
+
+  executeKeyTokenAndMaybeRun(token, options, stepOffset = 0) {
+    this.traceKeyToken(token, options);
+    const { state } = this;
+    const wasRunning = state.running;
+    const wasRunMode = state.mode === "run";
+    const isRunStop = isRunStopToken(token);
+    this.executeKeyToken(token);
+    if (!wasRunning && state.running) {
+      options.stepOffset = stepOffset;
+      let steps;
+      try {
+        steps = this.runUntilStop(options);
+      } finally {
+        options.stepOffset = 0;
       }
-      return;
+      if (state.running) throw new Error(`program did not stop after ${options.steps} steps`);
+      if (isRunStop && wasRunMode) this.printRunStopDisplay(options);
+      return steps;
     }
+    if (isRunStop && wasRunMode) this.printRunStopDisplay(options);
+    return 0;
+  }
 
-    const loadMatch = action.match(/^load\s+(.+)$/i);
-    if (loadMatch) {
-      const filename = parseScenarioFileArgument(loadMatch[1].trim());
-      if (!filename) throw new Error(`ungueltiger load-Befehl: ${action}`);
-      loadProgram(filename);
-      return;
+  statusLine(steps) {
+    const { state, calculator } = this;
+    const columns = [
+      debugCell(String(steps ?? 0).padStart(4, "0"), 5),
+      debugCell(String(state.pc).padStart(2, "0"), 3),
+      debugCell("---", 3),
+      debugCell("---", 4),
+      debugCellRight(angleModeText(state.angle, state.mode), 5),
+      "|",
+      debugCellRight(formatDebugDisplay(calculator.displayText()), DEBUG_DISPLAY_WIDTH),
+      "|",
+      debugCellRight(formatDebugNumber(state.x), DEBUG_NUMBER_WIDTH),
+      "|",
+      debugCellRight(formatDebugNumber(state.y), DEBUG_NUMBER_WIDTH),
+      "|",
+      debugCell(state.pending || "", 8),
+      formatParenStack(state.parenStack),
+    ];
+    return columns.join(" ");
+  }
+
+  scenarioExpectationError(expected, action, actionIndex, steps) {
+    const actual = this.calculator.displayText().trim();
+    const lines = [
+      `expect failed at scenario step ${actionIndex + 1}`,
+      `action: ${action}`,
+      `expected display: ${expected}`,
+      `actual display:   ${actual}`,
+      "",
+      debugHeader(),
+      this.statusLine(steps),
+      formatDebugMemories(this.state.memories),
+    ];
+    if (steps > 0 && this.state.program.some((code) => code !== 99)) {
+      lines.push("", "program:", this.calculator.makeProgramListing());
     }
+    return lines.join("\n");
+  }
 
-    const saveMatch = action.match(/^save\s+(.+)$/i);
-    if (saveMatch) {
-      const filename = parseScenarioFileArgument(saveMatch[1].trim());
-      if (!filename) throw new Error(`ungueltiger save-Befehl: ${action}`);
-      saveProgram(filename);
-      return;
-    }
+  runScenario(text, options) {
+    let steps = 0;
+    const actions = normalizeScenarioText(text).split(/[;\r\n]+/).map((part) => part.trim()).filter(Boolean);
+    const labelMap = buildLabelMap(actions, this.state.pc, this.state.mode);
+    actions.forEach((action, actionIndex) => {
+      const expectMatch = action.match(/^expect(?:-display)?\s+(.+)$/i);
+      if (expectMatch) {
+        const expected = expectMatch[1].trim();
+        const actual = this.calculator.displayText().trim();
+        if (actual !== expected) {
+          throw new Error(this.scenarioExpectationError(expected, action, actionIndex, steps));
+        }
+        return;
+      }
 
-    if (/^list$/i.test(action)) {
-      printProgramList();
-      return;
-    }
+      const loadMatch = action.match(/^load\s+(.+)$/i);
+      if (loadMatch) {
+        const filename = parseScenarioFileArgument(loadMatch[1].trim());
+        if (!filename) throw new Error(`invalid load command: ${action}`);
+        this.loadProgram(filename);
+        return;
+      }
 
-    const keyText = action.replace(/^(keys|press)\s+/i, "");
-    parseKeys(keyText).forEach((token) => {
-      steps += executeKeyTokenAndMaybeRun(token, options, steps);
+      const saveMatch = action.match(/^save\s+(.+)$/i);
+      if (saveMatch) {
+        const filename = parseScenarioFileArgument(saveMatch[1].trim());
+        if (!filename) throw new Error(`invalid save command: ${action}`);
+        this.saveProgram(filename);
+        return;
+      }
+
+      if (/^list$/i.test(action)) {
+        this.printProgramList();
+        return;
+      }
+
+      const keyText = action.replace(/^(keys|press)\s+/i, "");
+      const tokens = applyLabelMap(parseKeys(keyText), labelMap);
+      tokens.forEach((token) => {
+        steps += this.executeKeyTokenAndMaybeRun(token, options, steps);
+      });
     });
-  });
-  return steps;
+    return steps;
+  }
+
+  printSummary(steps) {
+    console.log(`\n${debugHeader()}`);
+    console.log(this.statusLine(steps));
+    console.log(formatDebugMemories(this.state.memories));
+  }
+
+  run(options) {
+    this.calculator.resetCalculatorState();
+    if (options.program) this.loadProgram(options.program);
+    if (options.mode) options.mode.forEach((token) => {
+      if (!this.applySwitch(token, { initial: true })) throw new Error(`unknown switch: ${token}`);
+    });
+    if (Number.isFinite(options.pc)) this.state.pc = options.pc;
+    if (Number.isFinite(options.dp)) {
+      this.state.pendingPrecision = true;
+      this.calculator.execute(String(options.dp));
+    }
+
+    for (let i = 0; i < options.sst; i += 1) this.calculator.runSingleProgramStep();
+
+    let steps = null;
+    try {
+      if (options.scenarioFile) {
+        const scenarioText = fs.readFileSync(options.scenarioFile, "utf8");
+        steps = this.runScenario(scenarioText, options);
+      }
+      if (options.scenario) steps = this.runScenario(options.scenario, options);
+    } catch (error) {
+      console.error(error.message);
+      process.exit(1);
+    }
+
+    this.printSummary(steps);
+    if (options.mem) this.state.memories.forEach((value, idx) => console.log(`M${idx}: ${value}`));
+  }
 }
 
-function printSummary(steps) {
-  console.log(`\n${debugHeader()}`);
-  console.log(statusLine(steps));
-  console.log(formatDebugMemories(state.memories));
-}
-
-function main() {
+if (require.main === module) {
   let options;
   try {
     options = parseArgs(process.argv.slice(2));
@@ -498,34 +626,8 @@ function main() {
     console.error(error.message);
     usage(2);
   }
-
-  calculator.resetCalculatorState();
-  if (options.program) loadProgram(options.program);
-  if (options.mode) options.mode.forEach((token) => {
-    if (!applySwitch(token, { initial: true })) throw new Error(`Unbekannter Schalter: ${token}`);
-  });
-  if (Number.isFinite(options.pc)) state.pc = options.pc;
-  if (Number.isFinite(options.dp)) {
-    state.pendingPrecision = true;
-    calculator.execute(String(options.dp));
-  }
-
-  for (let i = 0; i < options.sst; i += 1) calculator.runSingleProgramStep();
-
-  let steps = null;
-  try {
-    if (options.scenarioFile) {
-      const scenarioText = fs.readFileSync(options.scenarioFile, "utf8");
-      steps = runScenario(scenarioText, options);
-    }
-    if (options.scenario) steps = runScenario(options.scenario, options);
-  } catch (error) {
-    console.error(error.message);
-    process.exit(1);
-  }
-
-  printSummary(steps);
-  if (options.mem) state.memories.forEach((value, idx) => console.log(`M${idx}: ${value}`));
+  new SantronRunner().run(options);
 }
 
-main();
+module.exports = { SantronRunner };
+
