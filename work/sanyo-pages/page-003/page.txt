@@ -1,0 +1,25 @@
+6. EXAMPLES
+      Concrete input data and output data which               should be obtained           from the programs
+      are described     in this section.
+
+7, OPERATION
+      After entering the program           in the LOAD     mode, the mode           switch should     be
+      changed     to the RUN     mode.
+
+      Referring to the NOTES         column,     if any data are needed         to store into the data
+      memories,     data storing operation      should be completed just after the mode                    switch
+      is changed    to the RUN      mode.
+      Then   program     is executed by operating the items in order.
+
+8. NOTES
+      Initial data setting, notation        of program    operation    and    other references are described
+      in this column.
+
+9. DATA          MEMORY
+      Contents     of memory    for this operation       are described.
+
+10.     PROGRAM
+      1. Key operations      for entering program        in the LOAD         mode    are described.
+      2. Concrete     meaning   of the program      instruction   or   name     of items    to be
+        executed      are described in NOTE       of the program       column.
+
