@@ -1,3 +1,11 @@
+#
+# This program calculates inverse hyperbolic functions sinh^-1, cosh^-1,
+# and tanh^-1.
+#
+# Set DPS 4. DEG/RAD is arbitrary.
+# Use GOTO 0 0, GOTO 2 0, or GOTO 4 0.
+# Enter x and press R/S.
+#
 00 055 STO
 01 100 0
 02 018 X^2
