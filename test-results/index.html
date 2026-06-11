@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Santron Test Report</title>
+  <style>
+    :root { color-scheme: light; --pass: #0f766e; --fail: #b91c1c; --bg: #f6f7f9; --panel: #ffffff; --text: #16202a; --muted: #5b6470; --line: #d8dde3; }
+    body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    .meta { color: var(--muted); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); }
+    th, td { vertical-align: top; border-bottom: 1px solid var(--line); padding: 12px; text-align: left; }
+    th { background: #eef1f5; font-weight: 600; }
+    tr.pass td.status { color: var(--pass); font-weight: 700; }
+    tr.fail td.status { color: var(--fail); font-weight: 700; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .summary { display: inline-block; padding: 6px 10px; border-radius: 6px; background: #e8eef7; margin-bottom: 16px; }
+    .pass .status { color: var(--pass); }
+    .fail .status { color: var(--fail); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Santron Test Report</h1>
+    <div class="meta">
+      Generated: 2026-06-11 23:29:25 UTC
+    </div>
+    <div class="summary">Overall: PASS</div>
+    <table>
+      <thead>
+        <tr><th>Suite</th><th>Status</th><th>Output</th></tr>
+      </thead>
+      <tbody>
+        <tr class="pass"><td>build</td><td class="status">✓ PASS</td><td><pre>  OK  src/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.sce  →  bin/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.lst
+  OK  src/sanyo-cz-0911pg/mathematics/hyperbolic-functions.sce  →  bin/sanyo-cz-0911pg/mathematics/hyperbolic-functions.lst
+  OK  src/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.sce  →  bin/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst
+  OK  src/sanyo-cz-0911pg/mathematics/random-number-generator.sce  →  bin/sanyo-cz-0911pg/mathematics/random-number-generator.lst
+  OK  src/sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.sce  →  bin/sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.lst
+
+build: 5 gebaut, 0 fehlgeschlagen.</pre></td></tr> <tr class="pass"><td>unit</td><td class="status">✓ PASS</td><td><pre>R/S 0001: 3.000
+R/S 0002: 0.000
+R/S 0003: 1.000
+R/S 0004: 1.732
+R/S 0005: 3.464
+R/S 0006: 0.866
+PASS  tests/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.test.sce
+R/S 0001: 3.627
+R/S 0002: 3.762
+R/S 0003: 0.964
+PASS  tests/sanyo-cz-0911pg/mathematics/hyperbolic-functions.test.sce
+R/S 0001: 0.4812
+R/S 0002: 2.2924
+R/S 0003: 0.5493
+PASS  tests/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.test.sce
+R/S 0001: 0.1039
+R/S 0002: 0.0677
+R/S 0003: 0.4676
+PASS  tests/sanyo-cz-0911pg/mathematics/random-number-generator.test.sce
+
+test: 4 bestanden, 0 fehlgeschlagen.</pre></td></tr> <tr class="pass"><td>coverage</td><td class="status">✓ PASS</td><td><pre>core-key-coverage: 48 keys pressed, 47 keycodes checked.</pre></td></tr> <tr class="pass"><td>gui-smoke</td><td class="status">✓ PASS</td><td><pre>Loaded https://192.168.2.122:8765
+Keys: 40
+Initial display:            0.
+After 1 + 2 =:            3.
+After 123 EXP:       123. 00</pre></td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

@@ -72,7 +72,7 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 | B-14 | Chi-square evaluation | 38 | no | no | no |
 | B-15 | Normal distribution | 39 | no | no | no |
 | B-16 | Inverse normal integral | 40 | no | no | no |
-| B-17 | Random number generator | 41 | yes | no | no |
+| B-17 | Random number generator | 41 | yes | yes | yes |
 
 ### C. Surveying
 
