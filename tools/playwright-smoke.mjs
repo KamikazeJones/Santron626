@@ -32,7 +32,11 @@ const CHAR_BY_SEGMENTS = new Map(
 
 const url = process.argv[2] || "https://localhost:8765";
 const browser = await chromium.launch();
-const page = await browser.newPage({ ignoreHTTPSErrors: true });
+const context = await browser.newContext({
+  ignoreHTTPSErrors: true,
+  serviceWorkers: "block",
+});
+const page = await context.newPage();
 
 const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
@@ -55,6 +59,7 @@ for (const key of ["C/CE", "1", "2", "3", "EXP"]) {
 }
 const exponentEntryDisplay = await readSegmentDisplay(page);
 
+await context.close();
 await browser.close();
 
 if (errors.length) {
