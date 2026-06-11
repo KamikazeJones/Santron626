@@ -40,7 +40,7 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 | --- | --- | ---: | :-: | :-: | :-: |
 | A-1 | Hyperbolic functions | 9 | yes | yes | yes |
 | A-2 | Inverse hyperbolic functions | 10 | yes | yes | yes |
-| A-3 | Cosine rule and area of triangle | 11 | no | no | no |
+| A-3 | Cosine rule and area of triangle | 11 | yes | yes | yes |
 | A-4 | Angle between two straight lines | 12 | no | no | no |
 | A-5 | Coordinate translation and rotation | 13 | no | no | no |
 | A-6 | Simultaneous equations in 2 unknowns | 14 | no | no | no |

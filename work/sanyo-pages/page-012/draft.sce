@@ -1,0 +1,95 @@
+# HEADER
+# Program Title: TODO
+# Program No.  : TODO
+# DEG/RAD      : TODO
+# DPS          : TODO
+#
+# FORMULA
+# TODO
+#
+# EXAMPLES
+# TODO
+#
+# OPERATION
+# TODO
+#
+# NOTES
+# TODO
+#
+# DATA MEMORY
+# TODO
+
+/LOAD
+
+# Source Code
+# TODO: transcribe program table
+
+# RAW OCR TEXT
+#     CZ-0911PG                        PROGRAM                                 DEG           RAD | DPS                    ey oan                NOTE
+#                                      LIBRARY                                 .@)                                    3    1       a
+#                                                                                                                          2)F/X        x?
+#     PROGRAM                              .                                          .             PROGRAM                3,      +
+#       TITLE                      Cosine               rule and area of triangle                        no. | Av8         [4]    R/S    [tap or
+#                                                                                                                          5 | SM
+#                                                                                                                          6[_1
+#     FORMULA                                                                                                              TT FVX |     x
+#                                                                                                                          a
+#                        .                 .                  .                                    we                      a|
+#                   Given two sides and a included                         angle, the remaining               side        10 R/S         Input of @
+#                                                                                                                         i1[ cos
+#                   and the area of the triangle is computed                              by the following                mlx
+#                   fomulas : :                                                                                           13}4;   _RM
+#                                                                                                                                  0
+#                                                                                                                         15;      x
+#                            c=        a’?+b’—2ab                 cosa                                                    16|     RM
+#                                                                                                                         7]       1
+#                            Area          S=—Lab sina                                                                    18) _ x
+#                                               2                                                   a                     19]      2
+#                                                                                                                         20|      =
+#                                                                                                                 a       a1]     Vx
+#                                                                                              b                          22|     R/S   Display of ¢
+#                                                                                                                         23
+#                                                                                                                         24
+#                                                                                                                         25
+#                                                                                                                         26
+#                                                                                                                         27
+#     EXAMPLES                                                                                                            28
+#                                                                                                                         29
+#                                                                                                                         30[      x
+#                                   <Input>                              <output>                                         =o RS     input of
+#                                    a=VJ/3                               c = 1.000                                       33[_R/S | input ofe
+#                                                                                                                         34[_    SIN
+#                                    b=2                                 S = 0.866                                        35[      =
+#                                                   ;                                                                     36]       2
+#                                    a=        30                                                                         37|      =
+#                                                                                                                         38}     R/S   Display of $
+#                                                                                                                         39
+#                                                                                                                         40
+#                                                                                                             5           4
+#     OPERATION                                                            NOTES                                          7)
+#                                                                                                                         43
+#         (Calculation                of c)                                                                               a
+#         1. (eg [0] [9]                                                                                                  46
+#        ; Input of a                                                                                                     47B
+# 
+#                 . Eg                                                                                                    49
+#        4. Input of b                                                                                                    =
+#        5.                                                                                                               52
+#        6. Input of a                                                                                                    53
+#        7.                                                                                                 DATA          5
+#                   Display         of c                                                                    MEMORY        [55
+#                              .                                                                        Mo|           a   3
+#        (Calculation of S)                                                                                           5   58
+#        1. fi 30                                                                                       Mi                *
+#        2. Input of a                                                                                  Me                61
+#        3.                                                                                             Ms:               62
+#             :                                                                                         M                 63
+#        4. Input             of b                                                                            ‘           64
+#        5.         Fa                                                                                  Ms                65
+#                                                                                                                         66
+#        6. Input of a                                                                                  Ms                67
+#        7.         Fa                                                                                  M7                68
+# 
+# :                Display          of S                                                                Ms                o
+#                                                                                                       Ms                71
+# 
