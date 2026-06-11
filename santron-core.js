@@ -154,6 +154,17 @@
     return `${mantissaSign}${mantissaPadding}${mantissaDisplay}${exponentSign}${exponentDigits}`;
   }
 
+  function formatExponentEntry(entry) {
+    const mantissaValue = entry.mantissaText.replace("-", "");
+    const mantissaText = mantissaValue.includes(".") ? mantissaValue : `${mantissaValue}.`;
+    const mantissaCells = displayCellCount(mantissaText);
+    const mantissaSign = entry.mantissa < 0 ? "-" : " ";
+    const mantissaPadding = " ".repeat(Math.max(0, 8 - mantissaCells));
+    const exponentSign = entry.sign < 0 ? "-" : " ";
+    const exponentDigits = String(Math.abs(Number(entry.digits || "0"))).padStart(2, "0").slice(-2);
+    return `${mantissaSign}${mantissaPadding}${mantissaText}${exponentSign}${exponentDigits}`;
+  }
+
   function createCalculator(initialState) {
     const state = initialState || createState();
 
@@ -190,7 +201,7 @@
       }
       const n = Number(state.x);
       if (!Number.isFinite(n)) return "Error".padStart(12, " ");
-      if (state.exponentEntry) return fitDisplayText(formatExponential(n));
+      if (state.exponentEntry) return fitDisplayText(formatExponentEntry(state.exponentEntry));
       if (state.entering) return fitDisplayText(withVisibleDecimalPoint(state.x));
       return formatNumberDisplay(n);
     }
@@ -217,8 +228,9 @@
     }
 
     function startExponentEntry() {
-      const mantissa = state.entering ? Number(state.x) : 1;
-      state.exponentEntry = { mantissa, sign: 1, digits: "" };
+      const mantissaText = state.entering ? state.x : "1";
+      const mantissa = Number(mantissaText);
+      state.exponentEntry = { mantissa, mantissaText, sign: 1, digits: "" };
       state.x = String(mantissa);
       state.entering = false;
     }
@@ -360,9 +372,20 @@
 
     function execute(key, fromProgram = false) {
       if (state.power === "off") return;
-      if (!fromProgram && state.running && key !== "R/S") return;
-      if (applyPrecisionDigit(key)) return;
-      if (!fromProgram && applyManualGotoDigit(key)) return;
+
+      if (state.pendingGotoDigits !== null) {
+        if (/^[0-9]$/.test(key)) {
+          applyManualGotoDigit(key);
+          return;
+        }
+        state.pendingGotoDigits = null;
+        state.gotoPreview = null;
+      }
+
+      if (key === "GOTO" && !fromProgram && state.mode === "run") {
+        enterManualGoto();
+        return;
+      }
 
       if (state.mode === "clear" && !fromProgram) {
         if (key === "R/S") {
@@ -386,6 +409,8 @@
         state.pc = (state.pc + 1) % state.program.length;
         return;
       }
+
+      if (applyPrecisionDigit(key)) return;
 
       if (state.pendingMemory && /^[0-9]$/.test(key)) {
         applyMemoryCommand(state.pendingMemory, Number(key));
@@ -583,7 +608,20 @@
       state.programComments = parsed.comments;
       state.pc = 0;
       state.shift = false;
+      state.pendingGotoDigits = null;
+      state.gotoPreview = null;
+      state.pendingPrecision = false;
       return parsed;
+    }
+
+    function clearProgram() {
+      state.program.fill(99);
+      state.programComments = "";
+      state.pc = 0;
+      state.shift = false;
+      state.pendingGotoDigits = null;
+      state.gotoPreview = null;
+      state.pendingPrecision = false;
     }
 
     return {
@@ -594,6 +632,7 @@
       resetExpression,
       resetCalculatorState,
       loadProgramListing,
+      clearProgram,
       runOneProgramStep,
       runSingleProgramStep,
       runProgram,

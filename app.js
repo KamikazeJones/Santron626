@@ -21,17 +21,9 @@ const SEGMENTS = {
   "C": "afed",
 };
 
-const KEY_CODES = {
-  "+": 10, "-": 11, "*": 12, "/": 13, "Y^X": 14, "1/X": 17, "X^2": 18, "SQRT": 19,
-  "SIN": 20, "COS": 21, "TAN": 22, "ASIN": 30, "ACOS": 31, "ATAN": 32,
-  "LN": 40, "LOG": 41, "E^X": 42, "10^X": 43, "M+": 50, "M-": 51, "M*": 52, "M/": 53,
-  "STO": 55, "RCL": 56, "C/CE": 60, "+/-": 62, "EXP": 63, "X<>Y": 64, "PI": 65,
-  ".": 70, "PS": 71, "=": 80, "(": 81, ")": 82, "R/S": 90, "GOTO": 93, "SKP": 96,
-};
-
-for (let i = 0; i <= 9; i += 1) KEY_CODES[String(i)] = 100 + i;
-
-const PI_VALUE = 3.141592653;
+const Core = window.SantronCore;
+const calculator = Core.createCalculator();
+const { state } = calculator;
 
 const KEYS = [
   [{ key: "F", label: "F", color: "red" }, { key: "SIN", label: "sin", shift: "sin^-1", color: "gray" }, { key: "COS", label: "cos", shift: "cos^-1", color: "gray" }, { key: "TAN", label: "tan", shift: "tan^-1", color: "gray" }, { key: "PS", label: "PS", color: "gray" }],
@@ -43,32 +35,12 @@ const KEYS = [
   [{ key: "C/CE", label: "C/CE", color: "red" }, { key: "0", label: "0", color: "white" }, { key: ".", label: ".", color: "white" }, { key: "-", label: "-", shift: "Mn-", color: "blue" }, { key: "=", label: "=", color: "blue" }],
 ];
 
-const state = {
-  x: "0",
-  y: 0,
-  pending: null,
-  parenStack: [],
-  entering: false,
-  exponentEntry: null,
-  shift: false,
-  pc: 0,
-  program: Array(72).fill(99),
-  memories: Array(10).fill(0),
-  mode: "run",
-  angle: "deg",
-  displayFormat: { mode: "auto", decimals: null },
-  programComments: "",
+Object.assign(state, {
   runSpeed: 0,
   runDisplayMode: "blank",
   heldRunDisplay: null,
-  power: "on",
-  running: false,
-  programPaused: false,
-  pendingPrecision: false,
-  pendingGotoDigits: null,
-  gotoPreview: null,
   runTimer: null,
-};
+});
 
 const display = document.querySelector("#display");
 const keypad = document.querySelector("#keypad");
@@ -163,80 +135,7 @@ function displayText() {
 }
 
 function normalDisplayText() {
-  if (state.mode === "load") {
-    const code = String(state.program[state.pc]).padStart(3, "0");
-    return `${code} ${String(state.pc).padStart(2, "0")}`.padStart(12, " ");
-  }
-  const n = Number(state.x);
-  if (!Number.isFinite(n)) return "Error".padStart(12, " ");
-  if (state.exponentEntry) return fitDisplayText(formatExponential(n));
-  if (state.entering) {
-    return fitDisplayText(withVisibleDecimalPoint(state.x));
-  }
-  return formatNumberDisplay(n);
-}
-
-function formatNumberDisplay(n) {
-  if (Object.is(n, -0) || n === 0) {
-    const zero = state.displayFormat.mode === "fixed" ? Number(0).toFixed(state.displayFormat.decimals) : "0";
-    return fitDisplayText(withVisibleDecimalPoint(zero));
-  }
-  let s;
-  if (state.displayFormat.mode === "fixed") {
-    s = n.toFixed(state.displayFormat.decimals);
-    if (displayCellCount(s) > 12) s = formatExponential(n);
-  } else {
-    s = String(Number(n.toPrecision(8)));
-    if (s.includes("e")) s = formatExponential(n);
-    if (displayCellCount(s) > 12) s = formatExponential(n);
-    if (digitCount(s) > 8) s = formatExponential(n);
-  }
-  return fitDisplayText(withVisibleDecimalPoint(s));
-}
-
-function formatExponential(value) {
-  const [mantissa, exponent] = value.toExponential(7).split("e");
-  const exponentNumber = Number(exponent);
-  const mantissaSign = value < 0 ? "-" : " ";
-  const exponentSign = exponentNumber < 0 ? "-" : " ";
-  const mantissaValue = mantissa
-    .replace("-", "")
-    .replace(/(\.\d*?)0+$/, "$1")
-    .replace(/\.$/, "");
-  const mantissaDigits = mantissaValue.match(/\d/g) || [];
-  const mantissaText = mantissaDigits.length > 8
-    ? mantissaValue.replace(/\d/g, () => mantissaDigits.shift() ?? "").replace(/\D+$/, "")
-    : mantissaValue;
-  const mantissaPadding = " ".repeat(Math.max(0, 8 - digitCount(mantissaText)));
-  const mantissaDisplay = mantissaText.includes(".") ? mantissaText : `${mantissaText}.`;
-  const exponentDigits = String(Math.abs(exponentNumber)).padStart(2, "0").slice(-2);
-  return `${mantissaSign}${mantissaPadding}${mantissaDisplay}${exponentSign}${exponentDigits}`;
-}
-
-function withVisibleDecimalPoint(text) {
-  if (text.includes(".") || /[A-Za-z]/.test(text)) return text;
-  return `${text}.`;
-}
-
-function digitCount(text) {
-  return (text.match(/\d/g) || []).length;
-}
-
-function displayCellCount(text) {
-  return [...text].filter((ch) => ch !== ".").length;
-}
-
-function fitDisplayText(text) {
-  const chars = [];
-  let cells = 0;
-  for (const ch of text) {
-    if (ch !== ".") {
-      if (cells >= 12) break;
-      cells += 1;
-    }
-    chars.push(ch);
-  }
-  return `${" ".repeat(Math.max(0, 12 - cells))}${chars.join("")}`;
+  return calculator.displayText();
 }
 
 function renderDisplay(text) {
@@ -303,51 +202,8 @@ function markProgramRenderDirty() {
   programRenderDirty = true;
 }
 
-function enterManualGoto() {
-  state.pendingGotoDigits = [];
-  state.entering = false;
-  render();
-}
-
-function applyManualGotoDigit(key) {
-  if (!state.pendingGotoDigits) return false;
-  if (!/^[0-9]$/.test(key)) {
-    state.pendingGotoDigits = null;
-    state.gotoPreview = null;
-    return false;
-  }
-
-  state.pendingGotoDigits.push(Number(key));
-  if (state.pendingGotoDigits.length === 2) {
-    const target = state.pendingGotoDigits[0] * 10 + state.pendingGotoDigits[1];
-    if (target < state.program.length) state.pc = target;
-    state.pendingGotoDigits = null;
-  }
-  render();
-  return true;
-}
-
-function applyPrecisionDigit(key) {
-  if (!state.pendingPrecision) return false;
-  if (!/^[0-9]$/.test(key)) {
-    state.pendingPrecision = false;
-    return false;
-  }
-
-  const digit = Number(key);
-  if (digit <= 7) {
-    state.displayFormat = { mode: "fixed", decimals: digit };
-  } else {
-    state.displayFormat = { mode: "auto", decimals: null };
-  }
-  state.pendingPrecision = false;
-  state.entering = false;
-  return true;
-}
-
 function codeName(code) {
-  const found = Object.entries(KEY_CODES).find(([, value]) => value === code);
-  return found ? found[0] : "";
+  return Core.codeName(code);
 }
 
 function programListingLine(code, idx) {
@@ -358,48 +214,15 @@ function programListingLine(code, idx) {
 }
 
 function makeProgramListing() {
-  return state.program.map((code, idx) => programListingLine(code, idx)).join("\n");
+  return calculator.makeProgramListing();
 }
 
 function isValidProgramCode(code) {
-  return code === 99 || Object.values(KEY_CODES).includes(code);
+  return Core.isValidProgramCode(code);
 }
 
 function parseProgramListing(text) {
-  const program = Array(72).fill(99);
-  const seen = new Set();
-  const comments = [];
-  let beforeListing = true;
-
-  text.split(/\r?\n/).forEach((line, lineIdx) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith(";")) return;
-    if (trimmed.startsWith("#")) {
-      if (beforeListing) comments.push(trimmed.replace(/^#\s?/, ""));
-      return;
-    }
-
-    const match = trimmed.match(/^(\d{1,2})\s+(\d{2,3})\b/);
-    if (!match) {
-      throw new Error(`Zeile ${lineIdx + 1}: erwartet "Zelle KeyCode Zeichen"`);
-    }
-    beforeListing = false;
-
-    const address = Number(match[1]);
-    const code = Number(match[2]);
-    if (address < 0 || address >= state.program.length) {
-      throw new Error(`Zeile ${lineIdx + 1}: Adresse ${match[1]} liegt nicht zwischen 00 und 71`);
-    }
-    if (!isValidProgramCode(code)) {
-      throw new Error(`Zeile ${lineIdx + 1}: Keycode ${match[2]} ist unbekannt`);
-    }
-
-    program[address] = code;
-    seen.add(address);
-  });
-
-  if (!seen.size) throw new Error("Die Datei enthaelt kein Programmlisting");
-  return { program, comments: comments.join("\n").trim() };
+  return Core.parseProgramListing(text);
 }
 
 function programFilename() {
@@ -469,11 +292,7 @@ function loadProgramFile(file) {
 }
 
 function applyProgramListing(text, name) {
-  const parsed = parseProgramListing(text);
-  state.program = parsed.program;
-  state.programComments = parsed.comments;
-  state.pc = 0;
-  state.shift = false;
+  calculator.loadProgramListing(text);
   if (programName) programName.value = programNameFromFile(name);
   markProgramRenderDirty();
   renderProgramComments();
@@ -537,24 +356,12 @@ async function openSelectedServerProgram() {
 }
 
 function resetCalculatorState() {
-  stopProgram();
-  state.x = "0";
-  state.y = 0;
-  state.pc = 0;
-  state.program.fill(99);
-  state.programComments = "";
-  state.memories.fill(0);
-  state.shift = false;
-  state.entering = false;
-  state.exponentEntry = null;
-  state.programPaused = false;
-  state.displayFormat = { mode: "auto", decimals: null };
-  state.pendingPrecision = false;
-  state.pendingGotoDigits = null;
-  state.gotoPreview = null;
-  state.pendingMemory = null;
-  state.parenStack = [];
-  resetExpression();
+  clearProgramTimer();
+  calculator.resetCalculatorState();
+  state.runSpeed = runSpeedFromSlider(runSpeed.value);
+  state.runDisplayMode = document.querySelector("input[name='runDisplayMode']:checked")?.value || "blank";
+  state.heldRunDisplay = null;
+  state.runTimer = null;
   markProgramRenderDirty();
   renderProgramComments();
 }
@@ -603,298 +410,6 @@ function renderPower() {
   display.closest(".display-wrap").classList.toggle("power-off", off);
 }
 
-function roundInternal(value) {
-  if (!Number.isFinite(value) || value === 0) return value;
-  const sign = Math.sign(value);
-  const abs = Math.abs(value);
-  const exponent = Math.floor(Math.log10(abs));
-  const scale = 10 ** (9 - exponent);
-  const scaled = abs * scale;
-  const tolerance = Math.abs(scaled) * Number.EPSILON * 8;
-  return sign * (Math.trunc(scaled + tolerance) / scale);
-}
-
-function setX(value) {
-  const rounded = roundInternal(value);
-  state.x = String(Number.isFinite(rounded) ? rounded : "Error");
-  state.entering = false;
-  state.exponentEntry = null;
-}
-
-function updateExponentValue() {
-  const entry = state.exponentEntry;
-  const exponent = entry.sign * Number(entry.digits || "0");
-  const value = roundInternal(entry.mantissa * Math.pow(10, exponent));
-  state.x = String(Number.isFinite(value) ? value : "Error");
-  state.entering = false;
-}
-
-function startExponentEntry() {
-  const mantissa = state.entering ? Number(state.x) : 1;
-  state.exponentEntry = { mantissa, sign: 1, digits: "" };
-  state.x = String(mantissa);
-  state.entering = false;
-}
-
-function pushExponentDigit(key) {
-  if (!state.exponentEntry || !/^[0-9]$/.test(key)) return false;
-  if (state.exponentEntry.digits.length >= 2) return true;
-  state.exponentEntry.digits += key;
-  updateExponentValue();
-  return true;
-}
-
-function toggleExponentSign() {
-  if (!state.exponentEntry) return false;
-  state.exponentEntry.sign *= -1;
-  updateExponentValue();
-  return true;
-}
-
-function finishExponentEntry() {
-  state.exponentEntry = null;
-}
-
-function applyMemoryCommand(command, idx) {
-  const x = roundInternal(Number(state.x));
-  if (command === "STO") state.memories[idx] = x;
-  if (command === "RCL") setX(state.memories[idx]);
-  if (command === "M+") state.memories[idx] = roundInternal(state.memories[idx] + x);
-  if (command === "M-") state.memories[idx] = roundInternal(state.memories[idx] - x);
-  if (command === "M*") state.memories[idx] = roundInternal(state.memories[idx] * x);
-  if (command === "M/") state.memories[idx] = roundInternal(state.memories[idx] / x);
-  state.exponentEntry = null;
-  state.entering = false;
-}
-
-function pushDigit(key) {
-  if (state.exponentEntry && key === ".") return;
-  if (pushExponentDigit(key)) return;
-  if (!state.entering || state.x === "0") {
-    state.x = key === "." ? "0." : key;
-    state.entering = true;
-    return;
-  }
-  if (key === "." && state.x.includes(".")) return;
-  if (state.x.replace("-", "").replace(".", "").length < 10) state.x += key;
-}
-
-function applyPendingOperator(left, op, right) {
-  if (op === "+") return roundInternal(left + right);
-  if (op === "-") return roundInternal(left - right);
-  if (op === "*") return roundInternal(left * right);
-  if (op === "/") return roundInternal(left / right);
-  if (op === "Y^X") return roundInternal(Math.pow(left, right));
-  return roundInternal(right);
-}
-
-function commitPendingOperator() {
-  if (!state.pending) return Number(state.x);
-  const result = applyPendingOperator(state.y, state.pending, Number(state.x));
-  state.y = result;
-  setX(result);
-  state.pending = null;
-  return result;
-}
-
-function queueOperator(key) {
-  finishExponentEntry();
-  commitPendingOperator();
-  state.y = Number(state.x);
-  state.pending = key;
-  state.entering = false;
-}
-
-function resetExpression() {
-  state.pending = null;
-  state.parenStack = [];
-}
-
-function openParen() {
-  state.parenStack.push({ y: state.y, pending: state.pending });
-  state.y = 0;
-  state.pending = null;
-  state.x = "0";
-  state.entering = false;
-  state.exponentEntry = null;
-}
-
-function closeParen() {
-  if (!state.parenStack.length) return;
-  const value = commitPendingOperator();
-  const context = state.parenStack.pop();
-  state.y = context.y;
-  state.pending = context.pending;
-  setX(value);
-}
-
-function unary(key) {
-  const x = Number(state.x);
-  const radians = state.angle === "rad" ? x : x * Math.PI / 180;
-  const fromRadians = (value) => state.angle === "rad" ? value : value * 180 / Math.PI;
-  const map = {
-    "SIN": Math.sin(radians),
-    "COS": Math.cos(radians),
-    "TAN": Math.tan(radians),
-    "ASIN": fromRadians(Math.asin(x)),
-    "ACOS": fromRadians(Math.acos(x)),
-    "ATAN": fromRadians(Math.atan(x)),
-    "LN": Math.log(x),
-    "LOG": Math.log10(x),
-    "E^X": Math.exp(x),
-    "10^X": Math.pow(10, x),
-    "SQRT": Math.sqrt(x),
-    "X^2": x * x,
-    "1/X": 1 / x,
-  };
-  if (key in map) setX(map[key]);
-}
-
-function execute(key, fromProgram = false) {
-  if (state.power === "off") return;
-  if (!fromProgram && state.running && key !== "R/S") return;
-  if (applyPrecisionDigit(key)) {
-    if (!fromProgram) render();
-    return;
-  }
-  if (!fromProgram && applyManualGotoDigit(key)) return;
-  if (state.mode === "clear" && !fromProgram) {
-    if (key === "R/S") {
-      state.program.fill(99);
-      state.pc = 0;
-      markProgramRenderDirty();
-    } else if (key === "BST" || key === "SST") {
-      state.program[state.pc] = 99;
-      state.pc = key === "BST"
-        ? (state.pc + state.program.length - 1) % state.program.length
-        : (state.pc + 1) % state.program.length;
-      markProgramRenderDirty();
-    }
-    render();
-    return;
-  }
-  if (state.mode === "load" && !fromProgram && key !== "BST" && key !== "SST") {
-    if (key === "F") {
-      state.shift = !state.shift;
-      render();
-      return;
-    }
-    state.program[state.pc] = KEY_CODES[key] ?? 99;
-    state.pc = (state.pc + 1) % state.program.length;
-    markProgramRenderDirty();
-    render();
-    return;
-  }
-  if (state.pendingMemory && /^[0-9]$/.test(key)) {
-    applyMemoryCommand(state.pendingMemory, Number(key));
-    state.pendingMemory = null;
-  } else if (/^[0-9.]$/.test(key)) pushDigit(key);
-  else if (["+", "-", "*", "/", "Y^X"].includes(key)) {
-    queueOperator(key);
-  } else if (key === "=") {
-    if (state.pending) {
-      commitPendingOperator();
-    } else {
-      setX(Number(state.x));
-    }
-  } else if (key === "C/CE") {
-    state.x = "0"; state.y = 0; resetExpression(); state.exponentEntry = null; state.entering = false;
-  } else if (key === "+/-") {
-    if (toggleExponentSign()) {
-      // Exponent sign changed.
-    } else {
-      setX(-Number(state.x));
-    }
-  } else if (key === "EXP") {
-    startExponentEntry();
-  } else if (key === "PI") {
-    setX(PI_VALUE);
-  } else if (key === "X<>Y") {
-    const old = Number(state.x);
-    setX(state.y);
-    state.y = old;
-  } else if (["SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN", "LN", "LOG", "E^X", "10^X", "SQRT", "X^2", "1/X"].includes(key)) {
-    unary(key);
-  } else if (key === "F") {
-    state.shift = !state.shift;
-  } else if (key === "(") {
-    openParen();
-  } else if (key === ")") {
-    closeParen();
-  } else if (key === "GOTO" && !fromProgram && state.mode === "run") {
-    enterManualGoto();
-  } else if (key === "PS") {
-    state.pendingPrecision = true;
-    state.entering = false;
-  } else if (["STO", "RCL", "M+", "M-", "M*", "M/"].includes(key)) {
-    state.pendingMemory = key;
-  } else if (key === "BST") {
-    if (state.mode !== "run") state.pc = (state.pc + state.program.length - 1) % state.program.length;
-  } else if (key === "SST") {
-    if (!fromProgram && state.mode === "run") {
-      runSingleProgramStep();
-    } else {
-      state.pc = (state.pc + 1) % state.program.length;
-    }
-  } else if (key === "R/S") {
-    if (fromProgram) {
-      pauseProgram();
-    } else {
-      toggleProgramRun();
-    }
-  } else if (key === "SKP") {
-    if (!fromProgram && state.mode === "run") {
-      skipToNextProgramStop();
-    } else if (Number(state.x) < 0) {
-      state.pc = (state.pc + 1) % state.program.length;
-    }
-  }
-  if (!fromProgram) render();
-}
-
-function keyFromCode(code) {
-  const found = Object.entries(KEY_CODES).find(([, value]) => value === code);
-  return found ? found[0] : null;
-}
-
-function toggleProgramRun() {
-  if (state.mode !== "run") return;
-  if (state.running) {
-    stopProgram();
-    return;
-  }
-  startProgram();
-}
-
-function startProgram() {
-  if (state.running || state.power === "off") return;
-  state.heldRunDisplay = normalDisplayText();
-  resetExpression();
-  state.parenStack = [];
-  state.running = true;
-  state.programPaused = false;
-  scheduleProgramStep(0);
-  render();
-}
-
-function pauseProgram() {
-  state.running = false;
-  state.programPaused = true;
-  state.heldRunDisplay = null;
-  state.pendingMemory = null;
-  clearProgramTimer();
-  render();
-}
-
-function stopProgram() {
-  state.running = false;
-  state.programPaused = false;
-  state.heldRunDisplay = null;
-  state.pendingMemory = null;
-  clearProgramTimer();
-  render();
-}
-
 function clearProgramTimer() {
   if (state.runTimer !== null) {
     clearTimeout(state.runTimer);
@@ -908,41 +423,22 @@ function scheduleProgramStep(delay = state.runSpeed) {
 }
 
 function runOneProgramStep() {
-  if (!state.running || state.mode !== "run" || state.power === "off" || state.pc >= state.program.length) {
-    stopProgram();
-    return false;
+  const wasRunning = state.running;
+  const stillRunning = calculator.runOneProgramStep();
+  if (wasRunning && !state.running) {
+    state.heldRunDisplay = null;
+    clearProgramTimer();
+    runDisplayBlanked = false;
+    runDisplayHeld = false;
   }
-
-  const code = state.program[state.pc];
-  state.pc += 1;
-  if (code === 99) {
-    if (state.pc >= state.program.length) stopProgram();
-    return true;
-  }
-
-  executeProgramCode(code);
-  if (state.pc >= state.program.length) stopProgram();
-  return state.running;
+  markProgramRenderDirty();
+  return stillRunning;
 }
 
 function runSingleProgramStep() {
-  if (state.mode !== "run" || state.power === "off" || state.running) return;
-  state.running = true;
-  state.programPaused = false;
-  runOneProgramStep();
-  state.running = false;
-  clearProgramTimer();
+  calculator.runSingleProgramStep();
+  markProgramRenderDirty();
   render();
-}
-
-function skipToNextProgramStop() {
-  if (state.mode !== "run" || state.power === "off" || state.running) return;
-  while (state.pc < state.program.length) {
-    const code = state.program[state.pc];
-    state.pc += 1;
-    if (code === KEY_CODES["R/S"]) break;
-  }
-  if (state.pc >= state.program.length) state.pc = state.program.length;
 }
 
 function stepProgram() {
@@ -956,74 +452,10 @@ function stepProgram() {
     runOneProgramStep();
   }
 
+  render();
   if (state.running) {
-    render();
     scheduleProgramStep();
   }
-}
-
-function digitFromCode(code) {
-  return code >= 100 && code <= 109 ? code - 100 : null;
-}
-
-function readGotoAddress() {
-  if (state.pc + 1 >= state.program.length) {
-    stopProgram();
-    return null;
-  }
-  const tens = digitFromCode(state.program[state.pc]);
-  const ones = digitFromCode(state.program[state.pc + 1]);
-  state.pc += 2;
-  if (tens === null || ones === null) return null;
-  return tens * 10 + ones;
-}
-
-function readProgramMemoryIndex() {
-  if (state.pc >= state.program.length) {
-    stopProgram();
-    return null;
-  }
-  const idx = digitFromCode(state.program[state.pc]);
-  state.pc += 1;
-  if (idx === null) {
-    stopProgram();
-    return null;
-  }
-  return idx;
-}
-
-function executeProgramCode(code) {
-  const key = keyFromCode(code);
-  if (!key) return;
-
-  if (key === "GOTO") {
-    const target = readGotoAddress();
-    if (target !== null) {
-      if (target >= state.program.length) {
-        stopProgram();
-      } else {
-        state.pc = target;
-      }
-    }
-    return;
-  }
-
-  if (["STO", "RCL", "M+", "M-", "M*", "M/"].includes(key)) {
-    const idx = readProgramMemoryIndex();
-    if (idx !== null) applyMemoryCommand(key, idx);
-    return;
-  }
-
-  if (key === "SKP") {
-    if (Number(state.x) < 0) {
-      const skipWidth = state.program[state.pc] === KEY_CODES["GOTO"] ? 3 : 1;
-      state.pc += skipWidth;
-      if (state.pc >= state.program.length) stopProgram();
-    }
-    return;
-  }
-
-  execute(key, true);
 }
 
 document.addEventListener("click", (event) => {
@@ -1050,7 +482,7 @@ document.addEventListener("pointerup", (event) => {
 
 function pressKeyButton(button) {
   showKeyPress(button);
-  let key = button.dataset.key;
+  let key = normalizeGuiKey(button.dataset.key);
   if (state.shift) {
     const shifted = {
       SIN: "ASIN", COS: "ACOS", TAN: "ATAN", "E^X": "LN", LOG: "10^X", SQRT: "X^2",
@@ -1060,6 +492,60 @@ function pressKeyButton(button) {
     state.shift = false;
   }
   execute(key);
+}
+
+function normalizeGuiKey(key) {
+  if (key === "GTO") return "GOTO";
+  if (key === "X2") return "X^2";
+  if (key === "EX") return "E^X";
+  if (key === "10X") return "10^X";
+  if (key === "MX") return "M*";
+  if (key === "MDIV") return "M/";
+  return key;
+}
+
+function execute(key, fromProgram = false) {
+  const normalized = normalizeGuiKey(key);
+  if (!fromProgram && normalized === "R/S" && state.mode === "run") {
+    toggleProgramRun();
+    return;
+  }
+  if (!fromProgram && normalized === "SST" && state.mode === "run") {
+    calculator.runSingleProgramStep();
+    markProgramRenderDirty();
+    render();
+    return;
+  }
+  calculator.execute(normalized, fromProgram);
+  markProgramRenderDirty();
+  if (!fromProgram) render();
+}
+
+function startProgram() {
+  if (state.running || state.power === "off") return;
+  state.heldRunDisplay = normalDisplayText();
+  calculator.startProgram();
+  scheduleProgramStep(0);
+  render();
+}
+
+function pauseProgram() {
+  calculator.pauseProgram();
+  state.heldRunDisplay = null;
+  clearProgramTimer();
+  render();
+}
+
+function stopProgram() {
+  calculator.stopProgram();
+  state.heldRunDisplay = null;
+  clearProgramTimer();
+  render();
+}
+
+function toggleProgramRun() {
+  if (state.running) stopProgram();
+  else startProgram();
 }
 
 function showKeyPress(button) {
@@ -1114,12 +600,7 @@ document.querySelectorAll("input[name='runDisplayMode']").forEach((input) => {
   });
 });
 document.querySelector("#clearProgram").addEventListener("click", () => {
-  state.program.fill(99);
-  state.programComments = "";
-  state.pc = 0;
-  state.pendingGotoDigits = null;
-  state.gotoPreview = null;
-  state.pendingPrecision = false;
+  calculator.clearProgram();
   markProgramRenderDirty();
   renderProgramComments();
   render();
@@ -1163,7 +644,7 @@ function initializeControls() {
   state.runSpeed = runSpeedFromSlider(runSpeed.value);
   state.runDisplayMode = document.querySelector("input[name='runDisplayMode']:checked").value;
   state.heldRunDisplay = null;
-  resetExpression();
+  calculator.resetExpression();
   state.pendingPrecision = false;
   state.pendingGotoDigits = null;
   state.gotoPreview = null;
