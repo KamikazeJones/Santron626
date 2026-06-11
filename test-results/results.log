@@ -1,0 +1,50 @@
+=== build ===
+$ node build.js
+  OK  src/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.sce  →  bin/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.lst
+  OK  src/sanyo-cz-0911pg/mathematics/hyperbolic-functions.sce  →  bin/sanyo-cz-0911pg/mathematics/hyperbolic-functions.lst
+  OK  src/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.sce  →  bin/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst
+  OK  src/sanyo-cz-0911pg/mathematics/random-number-generator.sce  →  bin/sanyo-cz-0911pg/mathematics/random-number-generator.lst
+  OK  src/sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.sce  →  bin/sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.lst
+
+build: 5 gebaut, 0 fehlgeschlagen.
+
+
+=== unit ===
+$ node test.js
+R/S 0001: 3.000
+R/S 0002: 0.000
+R/S 0003: 1.000
+R/S 0004: 1.732
+R/S 0005: 3.464
+R/S 0006: 0.866
+PASS  tests/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.test.sce
+R/S 0001: 3.627
+R/S 0002: 3.762
+R/S 0003: 0.964
+PASS  tests/sanyo-cz-0911pg/mathematics/hyperbolic-functions.test.sce
+R/S 0001: 0.4812
+R/S 0002: 2.2924
+R/S 0003: 0.5493
+PASS  tests/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.test.sce
+R/S 0001: 0.1039
+R/S 0002: 0.0677
+R/S 0003: 0.4676
+PASS  tests/sanyo-cz-0911pg/mathematics/random-number-generator.test.sce
+
+test: 4 bestanden, 0 fehlgeschlagen.
+
+
+=== coverage ===
+$ node tools/core-key-coverage.mjs
+core-key-coverage: 48 keys pressed, 47 keycodes checked.
+
+
+=== gui-smoke ===
+$ node tools/playwright-smoke.mjs https://192.168.2.122:8765
+Loaded https://192.168.2.122:8765
+Keys: 40
+Initial display:            0.
+After 1 + 2 =:            3.
+After 123 EXP:       123. 00
+
+

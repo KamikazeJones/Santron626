@@ -1,10 +1,9 @@
-#
 # This program calculates uniformly distributed pseudo random numbers U[i]
 # in the range 0 <= U[i] <= 1.
 #
 # U[i] = fractional part of (PI + U[i-1])^5
 #
-# Use GOTO 0 0.
+# Use GOTO 0 1.
 # Enter the starting value U[0] with 0 <= U[0] <= 1 and press R/S.
 #
 00 090 R/S
