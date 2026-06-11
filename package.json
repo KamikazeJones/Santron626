@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "test": "node test.js",
+    "test": "node test.js && node tools/core-key-coverage.mjs",
     "gui:smoke": "node tools/playwright-smoke.mjs",
-    "all": "node build.js && node test.js"
+    "all": "node build.js && npm run test"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0"

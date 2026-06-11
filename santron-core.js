@@ -41,6 +41,7 @@
       programPaused: false,
       pendingPrecision: false,
       pendingGotoDigits: null,
+      pendingMemory: null,
       gotoPreview: null,
       power: "on",
     };
@@ -434,7 +435,6 @@
       else if (key === "F") state.shift = !state.shift;
       else if (key === "(") openParen();
       else if (key === ")") closeParen();
-      else if (key === "GOTO" && !fromProgram && state.mode === "run") enterManualGoto();
       else if (key === "PS") {
         state.pendingPrecision = true;
         state.entering = false;
