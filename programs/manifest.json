@@ -19,6 +19,26 @@
     {
       "name": "Pseudo-Random-Number-Generator",
       "file": "random-number-generator.lst"
-    }    
+    },
+    {
+      "name": "Pseudo-Random-Number-Generator (Sanyo)",
+      "file": "sanyo-cz-0911pg/mathematics/random-number-generator.lst"
+    },
+    {
+      "name": "Cosine rule and area of triangle",
+      "file": "sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.lst"
+    },
+    {
+      "name": "Hyperbolic functions",
+      "file": "sanyo-cz-0911pg/mathematics/hyperbolic-functions.lst"
+    },
+    {
+      "name": "Inverse hyperbolic functions",
+      "file": "sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst"
+    },
+    {
+      "name": "Arithmetic mean (Non distribution)",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.lst"
+    }
   ]
 }
