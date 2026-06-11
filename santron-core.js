@@ -419,6 +419,7 @@
       } else if (/^[0-9.]$/.test(key)) pushDigit(key);
       else if (["+", "-", "*", "/", "Y^X"].includes(key)) queueOperator(key);
       else if (key === "=") {
+        while (state.parenStack.length) closeParen();
         if (state.pending) commitPendingOperator();
         else setX(Number(state.x));
       } else if (key === "C/CE") {

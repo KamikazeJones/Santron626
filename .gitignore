@@ -1,2 +1,4 @@
 certs/
 node_modules/
+codex-exports/*.raw.jsonl
+codex-exports/thread-*.md
