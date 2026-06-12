@@ -37,6 +37,14 @@
       "file": "sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst"
     },
     {
+      "name": "Angle between two straight lines",
+      "file": "sanyo-cz-0911pg/mathematics/angle-between-two-straight-lines.lst"
+    },
+    {
+      "name": "Coordinate translation and rotation",
+      "file": "sanyo-cz-0911pg/mathematics/coordinate-translation-and-rotation.lst"
+    },
+    {
       "name": "Arithmetic mean (Non distribution)",
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.lst"
     }
