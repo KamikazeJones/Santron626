@@ -1,40 +1,16 @@
 {
   "programs": [
     {
-      "name": "Quadrat",
-      "file": "square.lst"
-    },
-    {
-      "name": "Fakultät",
-      "file": "fakultaet.lst"
-    },
-    {
-      "name": "Stirling-Formel",
-      "file": "stirling-formula.lst"
-    },
-    {
-      "name": "Gamma-Funktion",
-      "file": "gamma-function.lst"
-    },
-    {
-      "name": "Pseudo-Random-Number-Generator",
-      "file": "random-number-generator.lst"
-    },
-    {
-      "name": "B-17 Pseudo-Random-Number-Generator (Sanyo)",
-      "file": "sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst"
-    },
-    {
-      "name": "A-03 Cosine rule and area of triangle",
-      "file": "sanyo-cz-0911pg/mathematics/A-03_cosine-rule-and-area-of-triangle.lst"
-    },
-    {
       "name": "A-01 Hyperbolic functions",
       "file": "sanyo-cz-0911pg/mathematics/A-01_hyperbolic-functions.lst"
     },
     {
       "name": "A-02 Inverse hyperbolic functions",
       "file": "sanyo-cz-0911pg/mathematics/A-02_inverse-hyperbolic-functions.lst"
+    },
+    {
+      "name": "A-03 Cosine rule and area of triangle",
+      "file": "sanyo-cz-0911pg/mathematics/A-03_cosine-rule-and-area-of-triangle.lst"
     },
     {
       "name": "A-04 Angle between two straight lines",
@@ -59,6 +35,30 @@
     {
       "name": "B-01 Arithmetic mean (Non distribution)",
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-01_arithmetic-mean-non-distribution.lst"
+    },
+    {
+      "name": "B-17 Pseudo-Random-Number-Generator (Sanyo)",
+      "file": "sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst"
+    },
+    {
+      "name": "Fakultät",
+      "file": "fakultaet.lst"
+    },
+    {
+      "name": "Gamma-Funktion",
+      "file": "gamma-function.lst"
+    },
+    {
+      "name": "Pseudo-Random-Number-Generator",
+      "file": "random-number-generator.lst"
+    },
+    {
+      "name": "Quadrat",
+      "file": "square.lst"
+    },
+    {
+      "name": "Stirling-Formel",
+      "file": "stirling-formula.lst"
     }
   ]
 }
