@@ -19,6 +19,9 @@ columns. Treat extraction as a prepared, half-manual process:
 6. Add regression examples from the original sheet.
 7. Update `docs/sanyo-library.md`.
 
+Do not trust OCR alone for the program table. Read the rendered page and the
+cropped images side by side before writing the source.
+
 ## Required Tools
 
 Run the preparation step in WSL/Linux. The script expects:
@@ -32,6 +35,12 @@ predictable form is a WSL path such as:
 
 ```bash
 /mnt/c/Users/quass/Documents/Calculator/sanyo-ocr/page-011_ocr.pdf
+```
+
+If the scan is hard to read, rerun the preparation step at higher resolution:
+
+```bash
+bash tools/prepare-sanyo-page.sh -r 400 /mnt/c/Users/quass/Documents/Calculator/sanyo-ocr/page-011_ocr.pdf
 ```
 
 ## Page Number Rule
@@ -79,6 +88,19 @@ Important generated files:
 - `draft.sce`: starter source with the OCR text embedded as comments
 - `README.md`: generated local next steps
 
+The most useful working files are usually:
+
+- `page.txt`: layout-preserving OCR text
+- `page.png`: the full rendered page
+- `program-table.png`: the program table crop
+- `main-text.png`: title and formula area
+- `examples.png`: examples area
+- `operation-notes.png`: operation and notes area
+
+Treat `page.txt` as a starting point only. OCR often misreads calculator key
+symbols, so verify the table against `program-table.png` and the full page
+image.
+
 For hard-to-read scans, increase resolution:
 
 ```bash
@@ -100,9 +122,20 @@ Use the OCR text for broad structure, then verify against the image crops:
 - `DATA MEMORY`
 - `PROGRAM`
 
-Keep source wording close to the booklet, especially while a page has not been
-fully verified. If a title or phrase looks odd in the OCR, check `page.png`
-before correcting it silently.
+Keep the booklet structure unchanged. Transcribe the text blocks as written on
+the page, including the original order of sections and the original phrasing of
+headings, notes, examples, and operation text.
+
+When a formula is graphical, convert it into text form for the repository, but
+do not change its placement or the surrounding section structure. Keep the
+formula block in the same section and preserve the book page's line order as
+closely as practical.
+
+If a title or phrase looks odd in the OCR, check `page.png` before correcting it
+silently.
+
+When the booklet contains a diagram, keep the repository text-first and
+describe the shape or geometry in comments rather than adding image assets.
 
 ## Handle Diagrams
 
@@ -181,6 +214,14 @@ only works after adding a key that is not in the printed table, investigate the
 core model first. A-2 showed that `=` must evaluate open parentheses rather than
 requiring an artificial `)`.
 
+The translation rule applies only to the key names themselves. Do not rewrite
+the surrounding prose into a cleaner explanation. The repository source should
+follow the booklet's structure and wording, except where a graphical formula
+must be rendered as text.
+
+If a symbol is unclear, inspect `page.png` or `program-table.png` instead of
+guessing from OCR.
+
 ## Verify The Listing
 
 First inspect the generated listing:
@@ -204,6 +245,23 @@ bin/sanyo-cz-0911pg/<category>/<slug>.lst
 
 The `.lst` is the stable machine-readable representation. It should be exact
 and include all addresses through `71`.
+
+Before moving on, read back the created `.sce`, `.lst`, and `.test.sce` once
+more against the booklet page. Check that:
+
+- the section order matches the sheet
+- the prose is still the booklet prose, not a cleaned-up paraphrase
+- only Sanyo key names were mapped to Santron key names
+- graphical formulas were converted to text without changing the section layout
+- step numbers, addresses, and comments still line up with the program table
+- example inputs are actual keypresses, not shorthand that the calculator cannot enter directly
+
+For a quick one-off source check, you can also run:
+
+```bash
+node santron-cli.js --scenario-file src/sanyo-cz-0911pg/<category>/<slug>.sce --scenario "list"
+node santron-cli.js --scenario-file tests/sanyo-cz-0911pg/<category>/<slug>.test.sce
+```
 
 ## Add A Regression Test
 
@@ -254,6 +312,13 @@ If core behavior changes, also run the GUI smoke test:
 npm run gui:smoke
 ```
 
+When the browser model or certificate setup changes, use the service-worker
+smoke as well:
+
+```bash
+npm run gui:smoke:sw -- https://192.168.2.122:8765
+```
+
 ## Update The Tracker
 
 After the source, listing, and test are in place, update
@@ -285,3 +350,23 @@ Expected context cost from the earlier extraction session:
 The main risk is not typing the source; it is silently trusting bad OCR. Always
 verify the program table visually and let the original examples drive the final
 test.
+
+Be pedantic with the final pass. Re-read the generated files after you write
+them, line by line if necessary, and correct anything that is even slightly
+off before moving on.
+
+Before committing, run:
+
+```bash
+git status
+npm test
+```
+
+If `santron-core.js` changed, also run:
+
+```bash
+node --check santron-core.js
+npm run gui:smoke -- https://localhost:8765
+```
+
+Do not commit `work/` outputs unless they are explicitly needed.

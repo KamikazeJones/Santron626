@@ -1,0 +1,19 @@
+Author:          
+Creator:         ocrmypdf 15.2.0+dfsg1 / Tesseract OCR-PDF 5.3.4
+Producer:        pikepdf 8.7.1
+CreationDate:    Thu Jun 11 21:22:03 2026 CEST
+ModDate:         Thu Jun 11 21:22:03 2026 CEST
+Custom Metadata: no
+Metadata Stream: yes
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           1
+Encrypted:       no
+Page size:       587.52 x 835.92 pts
+Page rot:        0
+File size:       30652 bytes
+Optimized:       no
+PDF version:     1.7

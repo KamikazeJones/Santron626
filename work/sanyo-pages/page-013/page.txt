@@ -1,0 +1,188 @@
+CZ-0911PG                    PROGRAM                        DEG                   RAD    DPS
+                                                                                                                          PROGRAM           NOTE
+
+
+
+
+                                                                                                  g
+                                                                                                  5
+                                                                                                                           SM
+                             LIBRARY                            ‘e)
+
+
+
+
+                                                                                                                     =|
+                                                                                                                   unt
+                                                                                                               a ||]
+PROGRAM
+
+
+
+
+                                                                                                   Ss ro oe|—alos}
+                                                                                        PROGRAM                           R/S       Input of mz
+                    Angle between two straight lines
+  TITLE                                                                                   NO.
+
+FORMULA
+                       This program          calculates the angle between two
+ straight        lines, Yi= mix+bi           and Yz= m2x+ be
+
+                           6=tan? ( mi— me
+                              fan     1+ mime
+
+
+
+
+                                                                                                   is)
+                                                                                                   B  ive)
+ Where @          is the angle      measured     clock   wise         from   mi    line to mz
+
+
+
+
+                                                                                                   a  a
+ line.                                                                                                                              TAN
+
+
+
+
+                                                                                                  i=] i=) oo a
+                                                                                                                                    Display of @
+
+
+
+
+                                                                                                  is)
+                                                                                                  R
+                                                                                                  N
+                                                                                                  S
+                                                                                                  bo N
+                                                                                                  ss a
+                                                                                                  yD y
+                                                                                                  a a
+EXAMPLES
+
+
+
+
+                                                                                                  tw y ie) N
+                                                                                                  a 2) oe a
+                     <input>                               <output>
+
+
+
+                                                                                                  w w
+                                                                                                  is)
+                     Yi=sux+2                               8= 71.565°
+                                                                                                  we we te we w
+                                                                                                  a a iv a o
+                     Yo=     —x+5
+                                                                                                  t=) c)
+                                                                                                  we w
+                                                                                                  8 = &
+
+
+
+
+OPERATION                                                NOTES
+                                                                                                  vey
+                                                                                                  >
+                                                                                                  &
+
+
+
+
+  1. fi [6] [6]
+                                                                                                  ce
+                                                                                                  >
+
+
+
+
+       . Input    of m:
+                                                                                                  &
+ Nh
+
+
+
+
+                                                                                                  aa)
+                                                                                                  a
+
+
+
+
+      . Bs
+                                                                                                  os
+ WwW
+
+
+
+
+                                                                                                  -
+                                                                                                  f=) =)
+                                                                                                  w >
+
+
+
+
+      . Input of mz
+ &
+
+
+
+
+                                                                                                  a
+
+
+
+
+      .
+ wa
+
+
+
+
+                                                                                                  wn wa
+                                                                                                  it) i)
+
+
+
+
+          Display of @
+                                                                                                  &
+                                                                                                  w
+
+
+
+
+ 6. Repeat         steps     I through   5
+                                                                                                  wa
+                                                                                                  we
+                                                                                                  va
+                                                                                                  oN
+                                                                                                  w
+                                                                                                  a   ia) oo
+                                                                                                  fon w w
+                                                                                                         o
+                                                                                                  a
+                                                                                                  an
+                                                                                                  ny
+                                                                                                  ow
+                                                                                                  a
+                                                                                                  &
+                                                                                                  a
+                                                                                                  a
+                                                                                                  A
+                                                                                                  a
+                                                                                                  a
+                                                                                                  a
+                                                                                                  a
+                                                                                                  io) oo
+                                                                                                  fon a
+                                                                                                          oS
+                                                                                                  ~
+                                                                                                  4
+
