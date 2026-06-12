@@ -202,12 +202,26 @@ Transcribe the program table from `program-table.png`, not from OCR alone.
 Translate Sanyo key names into the Santron source vocabulary already used in
 existing `.sce` files. Examples seen so far:
 
-- `SM n` -> `STO n`
-- `RM n` -> `RCL n`
-- `R/S` stays `R/S`
-- skipped/padding program slots are `SST` in source and `099` in listings
-- `PS n` sets decimal places in RUN mode
-- addresses are checked through `GOTO d d`
+| Sanyo key | Santron source | Notes |
+| --- | --- | --- |
+| `SM n` | `STO n` | Store into memory register `n`. |
+| `RM n` | `RCL n` | Recall from memory register `n`. |
+| `R/S` | `R/S` | Same name in source and listing. |
+| `GOTO d d` | `GOTO d d` | Same name in source and listing. |
+| `PS n` | `PS n` | Decimal-place setup in RUN mode. |
+| `SST` | `SST` | Padding step in source; `099` in listings. |
+| `+↔-` | `+/-` | Sign-change key. |
+| `x` | `*` | Multiplication key in source syntax. |
+| `F TAN` | `ATAN` | Shifted trig key in current source vocabulary. |
+
+Only add new rows after the printed key name and the source spelling have been
+verified against the page image and a working `.sce` file.
+
+The program sequence itself is a strict 1:1 transcription of the booklet's
+program table. Do not refactor it, normalize it, shorten it, or replace it
+with a functionally equivalent program. The only allowed transformation is the
+key-name mapping from Sanyo notation to the Santron source vocabulary listed
+above.
 
 Preserve original program behavior even if it exposes emulator gaps. If a page
 only works after adding a key that is not in the printed table, investigate the
@@ -227,7 +241,7 @@ guessing from OCR.
 First inspect the generated listing:
 
 ```bash
-node santron-cli.js --scenario-file src/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.sce --scenario "list"
+node santron-cli.js --scenario-file src/sanyo-cz-0911pg/mathematics/A-02_inverse-hyperbolic-functions.sce --scenario "list"
 ```
 
 Check:
@@ -277,7 +291,7 @@ The test should load the strict listing and run the booklet examples:
 # Test: Inverse hyperbolic functions (A-2)
 # DPS: 4
 
-load bin/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst
+load bin/sanyo-cz-0911pg/mathematics/A-02_inverse-hyperbolic-functions.lst
 
 /run
 PS 4

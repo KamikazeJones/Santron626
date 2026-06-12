@@ -2,7 +2,7 @@
 # DEG/RAD: DEG
 # DPS: 3
 
-load bin/sanyo-cz-0911pg/mathematics/angle-between-two-straight-lines.lst
+load bin/sanyo-cz-0911pg/mathematics/A-04_angle-between-two-straight-lines.lst
 
 /run
 PS 3

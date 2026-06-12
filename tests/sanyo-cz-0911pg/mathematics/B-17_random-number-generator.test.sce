@@ -1,7 +1,7 @@
 # Test: Random number generator (B-17)
 # DPS: 4
 
-load bin/sanyo-cz-0911pg/mathematics/random-number-generator.lst
+load bin/sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst
 
 /run
 PS 4

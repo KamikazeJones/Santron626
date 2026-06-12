@@ -22,31 +22,43 @@
     },
     {
       "name": "Pseudo-Random-Number-Generator (Sanyo)",
-      "file": "sanyo-cz-0911pg/mathematics/random-number-generator.lst"
+      "file": "sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst"
     },
     {
       "name": "Cosine rule and area of triangle",
-      "file": "sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.lst"
+      "file": "sanyo-cz-0911pg/mathematics/A-03_cosine-rule-and-area-of-triangle.lst"
     },
     {
       "name": "Hyperbolic functions",
-      "file": "sanyo-cz-0911pg/mathematics/hyperbolic-functions.lst"
+      "file": "sanyo-cz-0911pg/mathematics/A-01_hyperbolic-functions.lst"
     },
     {
       "name": "Inverse hyperbolic functions",
-      "file": "sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst"
+      "file": "sanyo-cz-0911pg/mathematics/A-02_inverse-hyperbolic-functions.lst"
     },
     {
       "name": "Angle between two straight lines",
-      "file": "sanyo-cz-0911pg/mathematics/angle-between-two-straight-lines.lst"
+      "file": "sanyo-cz-0911pg/mathematics/A-04_angle-between-two-straight-lines.lst"
     },
     {
       "name": "Coordinate translation and rotation",
-      "file": "sanyo-cz-0911pg/mathematics/coordinate-translation-and-rotation.lst"
+      "file": "sanyo-cz-0911pg/mathematics/A-05_coordinate-translation-and-rotation.lst"
+    },
+    {
+      "name": "Simultaneous equations in 2 unknowns",
+      "file": "sanyo-cz-0911pg/mathematics/A-06_simultaneous-equations-in-2-unknowns.lst"
+    },
+    {
+      "name": "Quadratic equation",
+      "file": "sanyo-cz-0911pg/mathematics/A-07_quadratic-equation.lst"
+    },
+    {
+      "name": "Complex arithmetic (+, -, X)",
+      "file": "sanyo-cz-0911pg/mathematics/A-08_complex-arithmetic-plus-minus-times.lst"
     },
     {
       "name": "Arithmetic mean (Non distribution)",
-      "file": "sanyo-cz-0911pg/statistics-and-probabilities/arithmetic-mean-non-distribution.lst"
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-01_arithmetic-mean-non-distribution.lst"
     }
   ]
 }

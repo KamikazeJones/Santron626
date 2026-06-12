@@ -1,7 +1,7 @@
 # Test: Hyperbolic functions (A-1)
 # DPS: 3
 
-load bin/sanyo-cz-0911pg/mathematics/hyperbolic-functions.lst
+load bin/sanyo-cz-0911pg/mathematics/A-01_hyperbolic-functions.lst
 
 /run
 PS 3

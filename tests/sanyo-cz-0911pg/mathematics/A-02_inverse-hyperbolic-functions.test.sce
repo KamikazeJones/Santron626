@@ -1,7 +1,7 @@
 # Test: Inverse hyperbolic functions (A-2)
 # DPS: 4
 
-load bin/sanyo-cz-0911pg/mathematics/inverse-hyperbolic-functions.lst
+load bin/sanyo-cz-0911pg/mathematics/A-02_inverse-hyperbolic-functions.lst
 
 /run
 PS 4

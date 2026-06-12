@@ -2,7 +2,7 @@
 # DEG/RAD: DEG
 # DPS: 3
 
-load bin/sanyo-cz-0911pg/mathematics/coordinate-translation-and-rotation.lst
+load bin/sanyo-cz-0911pg/mathematics/A-05_coordinate-translation-and-rotation.lst
 
 /run
 PS 3

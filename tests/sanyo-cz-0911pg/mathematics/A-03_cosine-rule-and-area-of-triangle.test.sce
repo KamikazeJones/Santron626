@@ -2,7 +2,7 @@
 # DEG/RAD: DEG
 # DPS: 3
 
-load bin/sanyo-cz-0911pg/mathematics/cosine-rule-and-area-of-triangle.lst
+load bin/sanyo-cz-0911pg/mathematics/A-03_cosine-rule-and-area-of-triangle.lst
 
 /run
 PS 3
