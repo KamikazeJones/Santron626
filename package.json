@@ -6,6 +6,7 @@
     "build": "node build.js",
     "test": "node test.js && node tools/core-key-coverage.mjs",
     "gui:smoke": "node tools/playwright-smoke.mjs",
+    "gui:smoke:sw": "node tools/playwright-sw-smoke.mjs",
     "all": "node build.js && npm run test"
   },
   "devDependencies": {

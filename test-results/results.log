@@ -48,3 +48,15 @@ After 1 + 2 =:            3.
 After 123 EXP:       123. 00
 
 
+=== gui-smoke-sw ===
+$ node tools/playwright-sw-smoke.mjs https://192.168.2.122:8765
+Loaded https://192.168.2.122:8765
+Keys: 40
+Initial display:            0.
+After 1 + 2 =:            3.
+After 123 EXP:       123. 00
+Service workers: allow
+Chromium ignore certificate errors: no
+Service worker registrations: [{"scope":"https://192.168.2.122:8765/","active":true,"installing":false,"waiting":false}]
+
+
