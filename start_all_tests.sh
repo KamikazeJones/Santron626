@@ -18,6 +18,7 @@ tests=(
   "unit|node test.js"
   "coverage|node tools/core-key-coverage.mjs"
   "gui-smoke|node tools/playwright-smoke.mjs ${GUI_URL}"
+  "gui-smoke-sw|node tools/playwright-sw-smoke.mjs ${GUI_URL}"
 )
 
 rows=()
@@ -125,6 +126,9 @@ for item in "${tests[@]}"; do
   fi
   if [[ "${name}" == "gui-smoke" && "${GUI_URL}" == "https://localhost:8765" && "${STARTED_LOCAL_SERVER}" -eq 1 ]]; then
     cmd="node tools/playwright-smoke.mjs ${GUI_URL}"
+  fi
+  if [[ "${name}" == "gui-smoke-sw" && "${GUI_URL}" == "https://localhost:8765" && "${STARTED_LOCAL_SERVER}" -eq 1 ]]; then
+    cmd="node tools/playwright-sw-smoke.mjs ${GUI_URL}"
   fi
   run_test "${name}" "${cmd}"
 done
