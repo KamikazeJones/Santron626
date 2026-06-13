@@ -1,0 +1,50 @@
+# Fakultät
+/load
+
+*
+1 STO 1
+=
+%loop
+STO 0
+- 2
+=
+skp
+goto &next
+RCL 1
+R/S
+%next
+RCL 0 m* 1 
+- 1 =
+goto &loop
+; save Fakultaet.lst
+
+
+----------------------
+  /load
+  * 1 STO 1 =
+  %loop
+  - 2 =
+  SKP
+  GOTO &body
+  RCL 1
+  R/S
+  %body
+  + 2 =
+  M* 1
+  - 1 =
+  GOTO &loop
+  
+---------------------
+  /load
+  * 1 STO
+  %loop
+  1
+  - 2 =
+  SKP
+  GOTO &body
+  RCL 1
+  R/S
+  %body
+  + 2 -
+  M* 1
+  GOTO &loop

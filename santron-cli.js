@@ -229,8 +229,30 @@ function isRunStopToken(token) {
 
 // ── SantronRunner class ───────────────────────────────────────────────────────
 
-function traceProgramStep({ steps: stepNo, pc, code, name, display }) {
-  console.log(`${String(stepNo).padStart(4, " ")}  ${String(pc).padStart(2, "0")}  ${String(code).padStart(3, "0")}  ${(name || codeName(code) || "?").padEnd(5)}  ${display.trim()}`);
+function traceDigitFromCode(code) {
+  return code >= 100 && code <= 109 ? code - 100 : null;
+}
+
+function formatTraceInstructionName(program, pc, code, fallbackName) {
+  const name = fallbackName || codeName(code) || "?";
+  if (!Array.isArray(program)) return name;
+  if (name === "GOTO") {
+    const tens = traceDigitFromCode(program[pc + 1]);
+    const ones = traceDigitFromCode(program[pc + 2]);
+    if (tens !== null && ones !== null) return `GOTO ${tens}${ones}`;
+    return "GOTO ??";
+  }
+  if (["STO", "RCL", "M+", "M-", "M*", "M/"].includes(name)) {
+    const idx = traceDigitFromCode(program[pc + 1]);
+    if (idx !== null) return `${name} ${idx}`;
+    return `${name} ?`;
+  }
+  return name;
+}
+
+function traceProgramStep({ steps: stepNo, pc, code, name, display, program }) {
+  const traceName = formatTraceInstructionName(program, pc, code, name);
+  console.log(`${String(stepNo).padStart(4, " ")}  ${String(pc).padStart(2, "0")}  ${String(code).padStart(3, "0")}  ${traceName.padEnd(7)}  ${display.trim()}`);
 }
 
 function formatParenStack(parenStack) {
@@ -451,7 +473,7 @@ class SantronRunner {
   programStepObserver(options) {
     if (!options.trace && !options.debug) return null;
     return (step) => {
-      const adjustedStep = { ...step, steps: (options.stepOffset || 0) + step.steps };
+      const adjustedStep = { ...step, steps: (options.stepOffset || 0) + step.steps, program: this.state.program };
       if (options.debug) this.debugProgramStep(adjustedStep);
       if (options.trace) traceProgramStep(adjustedStep);
     };
@@ -630,4 +652,3 @@ if (require.main === module) {
 }
 
 module.exports = { SantronRunner };
-

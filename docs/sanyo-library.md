@@ -46,11 +46,11 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 | A-6 | Simultaneous equations in 2 unknowns | 14 | yes | yes | yes |
 | A-7 | Quadratic equation | 15 | yes | yes | yes |
 | A-8 | Complex arithmetic (+, -, x) | 16 | yes | yes | yes |
-| A-9 | Determinant and inverse of a 2x2 matrix | 17 | no | no | no |
-| A-10 | Simpson's rule for numerical integration | 18 | no | no | no |
-| A-11 | Numerical solution to differential equations | 19 | no | no | no |
-| A-12 | Base conversion (number in base b to number in base 10) | 20 | no | no | no |
-| A-13 | Base conversion (number in base 10 to number in base b) | 21 | no | no | no |
+| A-9 | Determinant and inverse of a 2x2 matrix | 17 | yes | yes | yes |
+| A-10 | Simpson's rule for numerical integration | 18 | yes | yes | yes |
+| A-11 | Numerical solution to differential equations | 19 | yes | yes | yes |
+| A-12 | Base conversion (number in base b to number in base 10) | 20 | yes | yes | yes |
+| A-13 | Base conversion (number in base 10 to number in base b) | 21 | yes | yes | yes |
 
 ### B. Statistics and Probabilities
 
