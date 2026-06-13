@@ -1,0 +1,82 @@
+#
+# This program fits y = a + b ln(x).
+#
+# Set DPS 2. DEG/RAD is arbitrary.
+# Clear M1 through M6 before use.
+# Use GOTO 0 0, press R/S, enter each xi, and press R/S.
+# Enter the matching yi and press R/S.
+# After the last yi, press R/S, then SKP, SKP, and R/S to display a.
+# Press RM 7 to display b.
+#
+00 090 R/S
+01 040 LN
+02 055 STO
+03 101 1
+04 050 M+
+05 102 2
+06 018 X^2
+07 050 M+
+08 103 3
+09 101 1
+10 050 M+
+11 104 4
+12 090 R/S
+13 050 M+
+14 105 5
+15 012 *
+16 056 RCL
+17 101 1
+18 080 =
+19 050 M+
+20 106 6
+21 093 GOTO
+22 100 0
+23 100 0
+24 090 R/S
+25 056 RCL
+26 104 4
+27 017 1/X
+28 055 STO
+29 109 9
+30 012 *
+31 056 RCL
+32 102 2
+33 012 *
+34 056 RCL
+35 105 5
+36 011 -
+37 056 RCL
+38 106 6
+39 013 /
+40 081 (
+41 056 RCL
+42 109 9
+43 012 *
+44 056 RCL
+45 102 2
+46 018 X^2
+47 011 -
+48 056 RCL
+49 103 3
+50 082 )
+51 080 =
+52 055 STO
+53 107 7
+54 012 *
+55 056 RCL
+56 102 2
+57 011 -
+58 056 RCL
+59 105 5
+60 013 /
+61 056 RCL
+62 104 4
+63 080 =
+64 062 +/-
+65 055 STO
+66 108 8
+67 099
+68 099
+69 099
+70 099
+71 099

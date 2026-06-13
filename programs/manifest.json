@@ -69,6 +69,22 @@
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-04_mean-variance-standard-deviation.lst"
     },
     {
+      "name": "B-05 Moving average (3-terms)",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-05_moving-average-3-terms.lst"
+    },
+    {
+      "name": "B-06 Logarithmic curve fit",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-06_logarithmic-curve-fit.lst"
+    },
+    {
+      "name": "B-07 Exponential curve fit",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-07_exponential-curve-fit.lst"
+    },
+    {
+      "name": "B-08 Estimation of population mean (95% confidence interval)",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-08_estimation-of-population-mean-95-percent-confidence-interval.lst"
+    },
+    {
       "name": "B-17 Pseudo-Random-Number-Generator (Sanyo)",
       "file": "sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst"
     },

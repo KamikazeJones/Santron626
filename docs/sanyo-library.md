@@ -60,10 +60,10 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 | B-2 | Arithmetic mean (Frequency distribution) | 26 | yes | yes | yes |
 | B-3 | Geometric mean | 27 | yes | yes | yes |
 | B-4 | Mean, variance, standard deviation | 28 | yes | yes | yes |
-| B-5 | Moving average (3-terms) | 29 | no | no | no |
-| B-6 | Logarithmic curve fit | 30 | no | no | no |
-| B-7 | Exponential curve fit | 31 | no | no | no |
-| B-8 | Estimation of population mean (95% confidence interval) | 32 | no | no | no |
+| B-5 | Moving average (3-terms) | 29 | yes | yes | yes |
+| B-6 | Logarithmic curve fit | 30 | yes | yes | yes |
+| B-7 | Exponential curve fit | 31 | yes | yes | yes |
+| B-8 | Estimation of population mean (95% confidence interval) | 32 | yes | yes | yes |
 | B-9 | Test of defect rate of population | 33 | no | no | no |
 | B-10 | Interval estimation | 34 | no | no | no |
 | B-11 | Covariance and correlation coefficient | 35 | no | no | no |
