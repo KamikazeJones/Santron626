@@ -4,11 +4,11 @@
 #
 # Set PS 3.
 # Set DG/RD to DG.
-# Use GOTO 0 0 for the angle result.
-# Enter m1 and m2, then press R/S at each stop.
 # Example:
-#   For y1 = 0.5 x + 2 and y2 = -x + 5:
-#   GOTO 0 0, 0.5 R/S, 1 +/- R/S -> 71.565
+#   GOTO 0 0
+#   0.5 R/S  - m1
+#   1 +/- R/S  - m2
+#   -> 71.565
 #
 00 055 STO
 01 100 0

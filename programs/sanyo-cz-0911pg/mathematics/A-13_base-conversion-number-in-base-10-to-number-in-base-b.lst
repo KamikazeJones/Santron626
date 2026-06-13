@@ -2,15 +2,19 @@
 # This program converts a number in base 10 to base b.
 #
 # Set PS 0.
-# Use GOTO 0 0, press R/S, enter the base-10 value, press R/S,
-# enter the target base, and press R/S.
-# Then press R/S repeatedly to display successive digits.
-# After the last nonzero digit, press SKP and then R/S to display 10.
 # Example:
-#   GOTO 0 0, R/S, 455.625 R/S, 16 R/S -> 7
-#   R/S -> 12
-#   R/S -> 1
-#   SKP, R/S -> 10
+#   GOTO 0 0
+#   R/S
+#   455.625 R/S  - Dezimalzahl
+#   16 R/S  - Basis b
+#   -> 7
+#   R/S
+#   -> 12
+#   R/S
+#   -> 1
+#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   R/S
+#   -> 10
 #
 00 090 R/S
 01 055 STO

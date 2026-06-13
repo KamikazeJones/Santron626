@@ -3,12 +3,16 @@
 # and tanh^-1.
 #
 # Set PS 4.
-# Use GOTO 0 0, GOTO 2 0, or GOTO 4 0.
-# Enter x and press R/S.
 # Example:
-#   GOTO 0 0, 0.5 R/S -> 0.4812
-#   GOTO 2 0, 5 R/S -> 2.2924
-#   GOTO 4 0, 0.5 R/S -> 0.5493
+#   GOTO 0 0
+#   0.5 R/S  - x fuer sinh^-1 x
+#   -> 0.4812
+#   GOTO 2 0
+#   5 R/S  - x fuer cosh^-1 x
+#   -> 2.2924
+#   GOTO 4 0
+#   0.5 R/S  - x fuer tanh^-1 x
+#   -> 0.5493
 #
 00 055 STO
 01 100 0

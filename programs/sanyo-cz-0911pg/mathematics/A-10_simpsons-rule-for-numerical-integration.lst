@@ -3,13 +3,21 @@
 #
 # Set PS 4.
 # Set DG/RD to RD.
-# Use GOTO 0 0, press R/S, enter h, then enter successive y values with R/S.
-# Press RCL 1 at the end to display the accumulated integral.
 # Example:
-#   GOTO 0 0, R/S, 0.3926991 R/S,
-#   0 R/S, 0 R/S, 0.1464 R/S, 0.5 R/S, 0.8536 R/S,
-#   1 R/S, 0.8536 R/S, 0.5 R/S, 0.1464 R/S
-#   RCL 1 -> 1.5708
+#   GOTO 0 0
+#   R/S
+#   0.3926991 R/S  - h
+#   0 R/S  - f(x0)
+#   0 R/S  - f(x8)
+#   0.1464 R/S  - f(x1)
+#   0.5 R/S  - f(x2)
+#   0.8536 R/S  - f(x3)
+#   1 R/S  - f(x4)
+#   0.8536 R/S  - f(x5)
+#   0.5 R/S  - f(x6)
+#   0.1464 R/S  - f(x7)
+#   RCL 1
+#   -> 1.5708
 #
 00 090 R/S
 01 013 /

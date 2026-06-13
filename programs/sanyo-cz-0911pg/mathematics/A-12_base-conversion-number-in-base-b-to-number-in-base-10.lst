@@ -2,14 +2,22 @@
 # This program converts a number in base b to base 10 and to a fractional value.
 #
 # Set PS 5.
-# Store the base in STO 0.
-# Use GOTO 0 0 for the integer part and GOTO 2 0 for the fractional mode.
-# Enter each digit and press R/S. Finish the integer example with =,
-# and the fractional example with a final R/S.
 # Example:
-#   2 STO 0
-#   GOTO 0 0, 1 R/S, 0 R/S, 1 R/S, 0 R/S, 1 = -> 21.00000
-#   GOTO 2 0, 1 R/S, 0 R/S, 1 R/S, 0 R/S, 1 R/S -> 0.65625
+#   2 STO 0  - Basis b
+#   GOTO 0 0
+#   1 R/S  - Ziffer 1
+#   0 R/S  - Ziffer 2
+#   1 R/S  - Ziffer 3
+#   0 R/S  - Ziffer 4
+#   1 =  - Ziffer 5
+#   -> 21.00000
+#   GOTO 2 0
+#   1 R/S  - Ziffer 1
+#   0 R/S  - Ziffer 2
+#   1 R/S  - Ziffer 3
+#   0 R/S  - Ziffer 4
+#   1 R/S  - Ziffer 5
+#   -> 0.65625
 #
 00 012 *
 01 056 RCL
