@@ -209,7 +209,7 @@ existing `.sce` files. Examples seen so far:
 | `R/S` | `R/S` | Same name in source and listing. |
 | `GOTO d d` | `GOTO d d` | Same name in source and listing. |
 | `PS n` | `PS n` | Decimal-place setup in RUN mode. |
-| `SST` | `SST` | Padding step in source; `099` in listings. |
+| `SST` | `SST` | Printed blank step in source; `099` in listings. |
 | `+↔-` | `+/-` | Sign-change key. |
 | `x` | `*` | Multiplication key in source syntax. |
 | `F TAN` | `ATAN` | Shifted trig key in current source vocabulary. |
@@ -235,6 +235,12 @@ must be rendered as text.
 
 If a symbol is unclear, inspect `page.png` or `program-table.png` instead of
 guessing from OCR.
+
+When the printed table contains blank addresses, transcribe them as `SST` in
+the `.sce` source so that the generated `.lst` preserves the printed address
+layout as `099`. Do not silently omit blank steps and do not try to pad them
+later by hand without first checking whether the booklet actually printed a
+blank row there.
 
 ## Verify The Listing
 
@@ -305,6 +311,26 @@ Use the sheet's `DPS` and `DEG/RAD` requirements. Test all clear example
 outputs from the page. If an example is ambiguous, document the ambiguity in
 the `.sce` comments and add the test only after visual confirmation.
 
+Be precise about the program's first `R/S` behavior. There are two common
+patterns in this booklet:
+
+- The program is already waiting for input at the current entry point, so the
+  user types the value first and then presses `R/S`.
+- The program must first be advanced to an internal stop by pressing `R/S`,
+  and only then does the user enter the first value.
+
+You must determine which pattern the printed `OPERATION` section describes and
+mirror it consistently in three places:
+
+- the `.sce` comments under `# OPERATION`
+- the regression test scenario
+- any manual verification sequence you run in the CLI
+
+Do not normalize both patterns into the same test style. If the booklet says
+`GOTO 0 0`, then `R/S`, then `Input of h`, the test must include that initial
+`R/S`. If the booklet says `GOTO 0 0`, then `Input of x`, then `R/S`, the test
+must enter the value before pressing `R/S`.
+
 ## Run Checks
 
 For one source while developing:
@@ -343,6 +369,11 @@ After the source, listing, and test are in place, update
 - set `test` to `yes` when a regression scenario exists
 - keep category letters and titles aligned with the booklet index
 - keep notes for uncertain OCR titles until the page is fully verified
+
+If the program should be selectable in the app, also update
+`programs/manifest.json` and copy the final `.lst` into the corresponding
+`programs/...` path used by the manifest. Do not stop after updating only
+`bin/...`; the app loads from `programs/`, not from `bin/`.
 
 ## Practical Notes
 

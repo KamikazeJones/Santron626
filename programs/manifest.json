@@ -33,6 +33,26 @@
       "file": "sanyo-cz-0911pg/mathematics/A-08_complex-arithmetic-plus-minus-times.lst"
     },
     {
+      "name": "A-09 Determinant and inverse of a 2X2 matrix",
+      "file": "sanyo-cz-0911pg/mathematics/A-09_determinant-and-inverse-of-a-2x2-matrix.lst"
+    },
+    {
+      "name": "A-10 Simpson's rule for numerical integration",
+      "file": "sanyo-cz-0911pg/mathematics/A-10_simpsons-rule-for-numerical-integration.lst"
+    },
+    {
+      "name": "A-11 Numerical solution to differential equations",
+      "file": "sanyo-cz-0911pg/mathematics/A-11_numerical-solution-to-differential-equations.lst"
+    },
+    {
+      "name": "A-12 Base conversion (Number in base b to number in base 10)",
+      "file": "sanyo-cz-0911pg/mathematics/A-12_base-conversion-number-in-base-b-to-number-in-base-10.lst"
+    },
+    {
+      "name": "A-13 Base conversion (Number in base 10 to number in base b)",
+      "file": "sanyo-cz-0911pg/mathematics/A-13_base-conversion-number-in-base-10-to-number-in-base-b.lst"
+    },
+    {
       "name": "B-01 Arithmetic mean (Non distribution)",
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-01_arithmetic-mean-non-distribution.lst"
     },
