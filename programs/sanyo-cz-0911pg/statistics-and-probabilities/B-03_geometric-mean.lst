@@ -1,0 +1,81 @@
+#
+# This program calculates the geometric mean of grouped inputs.
+#
+# Set DPS 2. DEG/RAD is arbitrary.
+# Use GOTO 0 0.
+# Press R/S, enter each xi, and press R/S after every value.
+# After the last value, press SKP and then R/S to compute x_g_bar.
+# Press RM 1 to display the number of input data.
+#
+00 101 1
+01 055 STO
+02 100 0
+03 090 R/S
+04 052 M*
+05 100 0
+06 101 1
+07 050 M+
+08 101 1
+09 093 GOTO
+10 100 0
+11 103 3
+12 090 R/S
+13 056 RCL
+14 100 0
+15 014 Y^X
+16 056 RCL
+17 101 1
+18 017 1/X
+19 080 =
+20 099
+21 099
+22 099
+23 099
+24 099
+25 099
+26 099
+27 099
+28 099
+29 099
+30 099
+31 099
+32 099
+33 099
+34 099
+35 099
+36 099
+37 099
+38 099
+39 099
+40 099
+41 099
+42 099
+43 099
+44 099
+45 099
+46 099
+47 099
+48 099
+49 099
+50 099
+51 099
+52 099
+53 099
+54 099
+55 099
+56 099
+57 099
+58 099
+59 099
+60 099
+61 099
+62 099
+63 099
+64 099
+65 099
+66 099
+67 099
+68 099
+69 099
+70 099
+71 099

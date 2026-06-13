@@ -375,6 +375,20 @@ If the program should be selectable in the app, also update
 `programs/...` path used by the manifest. Do not stop after updating only
 `bin/...`; the app loads from `programs/`, not from `bin/`.
 
+The `programs/...lst` file must also keep a short leading `#` comment block for
+the GUI. The app shows these leading comments in the program information panel.
+If you copy a raw listing from `bin/...` into `programs/...`, add or restore the
+comment block before considering the extraction finished.
+
+At minimum, the comment block should state:
+
+- what the program computes
+- required `DPS` and `DEG/RAD`
+- the actual button sequence users must follow for the first input and result
+  display
+- any important sheet-specific caveats, such as required cleared memories or
+  known discrepancies between the printed example and the transcribed program
+
 ## Practical Notes
 
 Good pages usually cost only a few minutes after preparation. The efficient

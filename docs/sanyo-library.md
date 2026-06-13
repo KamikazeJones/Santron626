@@ -56,10 +56,10 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 
 | No. | Program | Page | src | bin | test |
 | --- | --- | ---: | :-: | :-: | :-: |
-| B-1 | Arithmetic mean (Non distribution) | 25 | yes | no | no |
-| B-2 | Arithmetic mean (Frequency distribution) | 26 | no | no | no |
-| B-3 | Geometric mean | 27 | no | no | no |
-| B-4 | Mean, variance, standard deviation | 28 | no | no | no |
+| B-1 | Arithmetic mean (Non distribution) | 25 | yes | yes | yes |
+| B-2 | Arithmetic mean (Frequency distribution) | 26 | yes | yes | yes |
+| B-3 | Geometric mean | 27 | yes | yes | yes |
+| B-4 | Mean, variance, standard deviation | 28 | yes | yes | yes |
 | B-5 | Moving average (3-terms) | 29 | no | no | no |
 | B-6 | Logarithmic curve fit | 30 | no | no | no |
 | B-7 | Exponential curve fit | 31 | no | no | no |

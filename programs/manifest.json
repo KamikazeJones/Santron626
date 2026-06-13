@@ -57,6 +57,18 @@
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-01_arithmetic-mean-non-distribution.lst"
     },
     {
+      "name": "B-02 Arithmetic mean (Frequency distribution)",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-02_arithmetic-mean-frequency-distribution.lst"
+    },
+    {
+      "name": "B-03 Geometric mean",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-03_geometric-mean.lst"
+    },
+    {
+      "name": "B-04 Mean, Variance, Standard Deviation",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-04_mean-variance-standard-deviation.lst"
+    },
+    {
       "name": "B-17 Pseudo-Random-Number-Generator (Sanyo)",
       "file": "sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst"
     },
