@@ -388,6 +388,14 @@ At minimum, the comment block should state:
   display
 - any important sheet-specific caveats, such as required cleared memories or
   known discrepancies between the printed example and the transcribed program
+- at least one concrete worked example with:
+  - the example input values
+  - the exact key sequence in repository key names
+  - the expected display value or sequence of display values
+
+Keep the GUI example aligned with the verified regression test. If the test uses
+a corrected reading of the booklet example, say that explicitly in the GUI
+comment block.
 
 ## Practical Notes
 

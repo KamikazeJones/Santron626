@@ -10,6 +10,12 @@
 # as 2.5 instead of 3.
 # If x1 is entered as 3 with the corrected '=', the program yields x_bar = 4.00,
 # matching the direct weighted-mean calculation from the printed formula.
+# Example:
+#   GOTO 0 0, R/S, 0.5 R/S, 2.5
+#   3 R/S, 6 R/S, 8 R/S, 5 R/S, 2 R/S, 1 R/S
+#   R/S, SKP, R/S -> 3.50
+#   Alternative documented case:
+#   with x1 = 3 instead of 2.5, the corrected program yields 4.00.
 #
 00 090 R/S
 01 055 STO

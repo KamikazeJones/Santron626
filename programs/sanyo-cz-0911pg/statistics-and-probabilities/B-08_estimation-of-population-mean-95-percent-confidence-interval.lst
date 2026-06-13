@@ -5,6 +5,9 @@
 # Use GOTO 0 0, press R/S, enter x_bar, and press R/S.
 # Enter S and press R/S, then enter n and press R/S to display the lower limit.
 # Press R/S once more to display the upper limit.
+# Example:
+#   GOTO 0 0, R/S, 158.5 R/S, 6.5 R/S, 100 R/S -> 157.20
+#   R/S -> 159.80
 #
 00 090 R/S
 01 055 STO

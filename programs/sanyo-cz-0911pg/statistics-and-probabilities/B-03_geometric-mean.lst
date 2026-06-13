@@ -5,7 +5,11 @@
 # Use GOTO 0 0.
 # Press R/S, enter each xi, and press R/S after every value.
 # After the last value, press SKP and then R/S to compute x_g_bar.
-# Press RM 1 to display the number of input data.
+# Press RCL 1 to display the number of input data.
+# Example:
+#   GOTO 0 0, R/S, 3.4 R/S, 5.1 R/S, 10.2 R/S, 10.8 R/S
+#   SKP, R/S -> 6.61
+#   RCL 1 -> 4
 #
 00 101 1
 01 055 STO

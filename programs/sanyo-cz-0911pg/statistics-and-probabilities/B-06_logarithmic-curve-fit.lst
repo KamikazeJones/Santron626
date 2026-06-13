@@ -6,7 +6,13 @@
 # Use GOTO 0 0, press R/S, enter each xi, and press R/S.
 # Enter the matching yi and press R/S.
 # After the last yi, press R/S, then SKP, SKP, and R/S to display a.
-# Press RM 7 to display b.
+# Press RCL 7 to display b.
+# Example:
+#   Clear M1..M6, then
+#   GOTO 0 0, R/S, 3 R/S, 1.5 R/S, 4 R/S, 9.3 R/S,
+#   6 R/S, 23.4 R/S, 10 R/S, 45.8 R/S, 12 R/S, 60.1 R/S,
+#   SKP, SKP, R/S -> -47.02
+#   RCL 7 -> 41.39
 #
 00 090 R/S
 01 040 LN

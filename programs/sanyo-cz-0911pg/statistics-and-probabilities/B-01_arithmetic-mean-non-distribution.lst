@@ -5,6 +5,10 @@
 # Use GOTO 0 0.
 # Enter each xi and press R/S. The display shows the number of data.
 # After the last value, press SKP and then R/S to compute x_bar.
+# Example:
+#   GOTO 0 0, 9.140 R/S, 9.145 R/S, 9.165 R/S, 9.185 R/S, 9.190 R/S
+#   -> display counts 1, 2, 3, 4, 5
+#   SKP, R/S -> 9.165
 #
 00 060 C/CE
 01 055 STO
