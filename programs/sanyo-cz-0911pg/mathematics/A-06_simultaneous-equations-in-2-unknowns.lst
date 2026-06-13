@@ -2,8 +2,12 @@
 # This program solves a system of two equations in two unknowns.
 #
 # Set Arbitrary mode and DPS 2.
-# Enter a1, b1, c1, a2, b2, and c2 in the memory registers first.
+# Enter a1, b1, c1, a2, b2, and c2 in memory first.
 # Use GOTO 0 0 and then press R/S twice to display x1 and x2.
+# Example:
+#   STO 0 = 1, STO 1 = -1, STO 2 = -1, STO 3 = 1, STO 4 = 1, STO 5 = 3
+#   GOTO 0 0, R/S -> 1.00
+#   R/S -> 2.00
 #
 00 056 RCL
 01 101 1

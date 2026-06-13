@@ -5,6 +5,10 @@
 # Set DPS 4. DEG/RAD is arbitrary.
 # Use GOTO 0 0, GOTO 2 0, or GOTO 4 0.
 # Enter x and press R/S.
+# Example:
+#   GOTO 0 0, 0.5 R/S -> 0.4812
+#   GOTO 2 0, 5 R/S -> 2.2924
+#   GOTO 4 0, 0.5 R/S -> 0.5493
 #
 00 055 STO
 01 100 0

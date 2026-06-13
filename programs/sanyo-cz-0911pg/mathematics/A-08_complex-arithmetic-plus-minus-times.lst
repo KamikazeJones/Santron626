@@ -3,10 +3,18 @@
 # for the complex numbers z1 = a1 + b1 i and z2 = a2 + b2 i.
 #
 # Set Arbitrary mode and DPS 0.
-# Store a1, b1, a2, and b2 in M0, M1, M2, and M3.
+# Store a1, b1, a2, and b2 in STO 0, STO 1, STO 2, and STO 3.
 # Use GOTO 0 0, then press R/S repeatedly to display:
 # (a1 + a2), (b1 + b2), (a1 - a2), (b1 - b2),
 # (a1 a2 - b1 b2), and (a1 b2 + b1 a2).
+# Example:
+#   STO 0 = 1, STO 1 = 2, STO 2 = 3, STO 3 = 4
+#   GOTO 0 0, R/S -> 4
+#   R/S -> 6
+#   R/S -> -2
+#   R/S -> -2
+#   R/S -> -5
+#   R/S -> 10
 #
 00 056 RCL
 01 100 0

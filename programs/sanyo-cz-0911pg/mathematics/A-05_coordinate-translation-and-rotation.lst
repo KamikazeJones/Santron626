@@ -3,8 +3,12 @@
 # theta to compute x' and y' for a point P.
 #
 # Set DEG mode and DPS 3.
-# Enter x0, y0, and theta in the memory registers first.
+# Enter x0, y0, and theta in memory first.
 # Use GOTO 0 0 for x' and GOTO 5 1 for y'.
+# Example:
+#   STO 0 = 2, STO 1 = 1, STO 2 = 45
+#   GOTO 0 0, 4 R/S, 3 R/S -> 2.828
+#   R/S -> 0.000
 #
 00 055 STO
 01 105 5

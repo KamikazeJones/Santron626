@@ -4,6 +4,9 @@
 # Set Arbitrary mode and DPS 2.
 # Use GOTO 0 0.
 # Enter a, b, and c, then press R/S at each stop.
+# Example:
+#   GOTO 0 0, R/S, 3 R/S, 2 R/S, +/- 1 R/S -> 0.33
+#   R/S -> -1.00
 #
 00 090 R/S
 01 055 STO

@@ -1,3 +1,13 @@
+#
+# This program numerically solves a first-order differential equation.
+#
+# Set Arbitrary mode and DPS 7.
+# Use GOTO 0 0, press R/S, enter h, x0, and y0, each followed by R/S.
+# Each further R/S advances one step and displays the next y value.
+# Example:
+#   GOTO 0 0, R/S, 0.01 R/S, 0 R/S, 1 R/S -> 1.0100500
+#   R/S -> 1.0202010
+#
 00 090 R/S
 01 055 STO
 02 100 0

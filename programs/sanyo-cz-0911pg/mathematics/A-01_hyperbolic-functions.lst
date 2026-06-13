@@ -5,6 +5,13 @@
 # Use GOTO 0 0 for sinh, GOTO 1 0 for cosh, and GOTO 2 0 for tanh.
 # Enter x and press R/S.
 # After a result is shown, press 1/X to get csech, sech, or coth.
+# Example:
+#   GOTO 0 0, 2 R/S -> 3.627
+#   1/X -> 0.276
+#   GOTO 1 0, 2 R/S -> 3.762
+#   1/X -> 0.266
+#   GOTO 2 0, 2 R/S -> 0.964
+#   1/X -> 1.037
 #
 00 055 STO
 01 100 0
