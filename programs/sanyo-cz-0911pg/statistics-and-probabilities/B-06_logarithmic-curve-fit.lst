@@ -1,18 +1,33 @@
 #
 # This program fits y = a + b ln(x).
 #
-# Set DPS 2. DEG/RAD is arbitrary.
+# Set PS 2.
 # Clear M1 through M6 before use.
-# Use GOTO 0 0, press R/S, enter each xi, and press R/S.
-# Enter the matching yi and press R/S.
-# After the last yi, press R/S, then SKP, SKP, and R/S to display a.
-# Press RCL 7 to display b.
 # Example:
-#   Clear M1..M6, then
-#   GOTO 0 0, R/S, 3 R/S, 1.5 R/S, 4 R/S, 9.3 R/S,
-#   6 R/S, 23.4 R/S, 10 R/S, 45.8 R/S, 12 R/S, 60.1 R/S,
-#   SKP, SKP, R/S -> -47.02
-#   RCL 7 -> 41.39
+#   0 STO 1  - ln(x) loeschen
+#   0 STO 2  - sum ln(x) loeschen
+#   0 STO 3  - sum ln(x)^2 loeschen
+#   0 STO 4  - n loeschen
+#   0 STO 5  - sum y loeschen
+#   0 STO 6  - sum y ln(x) loeschen
+#   GOTO 0 0
+#   R/S
+#   3 R/S  - x1
+#   1.5 R/S  - y1
+#   4 R/S  - x2
+#   9.3 R/S  - y2
+#   6 R/S  - x3
+#   23.4 R/S  - y3
+#   10 R/S  - x4
+#   45.8 R/S  - y4
+#   12 R/S  - x5
+#   60.1 R/S  - y5
+#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   SKP
+#   R/S
+#   -> -47.02
+#   RCL 7
+#   -> 41.39
 #
 00 090 R/S
 01 040 LN

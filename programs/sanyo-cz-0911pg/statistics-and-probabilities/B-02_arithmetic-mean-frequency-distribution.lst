@@ -1,21 +1,29 @@
 #
 # This program calculates the arithmetic mean of frequency-distributed data.
 #
-# Set DPS 2. DEG/RAD is arbitrary.
-# Use GOTO 0 0, press R/S, enter h, press R/S, then enter x1.
-# The display then shows each xi. Enter each fi and press R/S to advance.
-# After the last frequency, press R/S once more, then SKP, then R/S to display x_bar.
+# Set PS 2.
+# Use GOTO 0 0.
 # Note: the printed table shows '-' at step 14; this file uses '=' as a documented
 # booklet misprint correction. The printed example is consistent only if x1 is read
 # as 2.5 instead of 3.
 # If x1 is entered as 3 with the corrected '=', the program yields x_bar = 4.00,
 # matching the direct weighted-mean calculation from the printed formula.
 # Example:
-#   GOTO 0 0, R/S, 0.5 R/S, 2.5
-#   3 R/S, 6 R/S, 8 R/S, 5 R/S, 2 R/S, 1 R/S
-#   R/S, SKP, R/S -> 3.50
+#   GOTO 0 0
+#   R/S
+#   0.5 R/S  - h
+#   2.5 R/S  - x1
+#   3 R/S  - f1
+#   6 R/S  - f2
+#   8 R/S  - f3
+#   5 R/S  - f4
+#   2 R/S  - f5
+#   1 R/S  - f6
+#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   R/S
+#   -> 3.50
 #   Alternative documented case:
-#   with x1 = 3 instead of 2.5, the corrected program yields 4.00.
+#   mit x1 = 3 statt 2.5 liefert das korrigierte Programm 4.00.
 #
 00 090 R/S
 01 055 STO

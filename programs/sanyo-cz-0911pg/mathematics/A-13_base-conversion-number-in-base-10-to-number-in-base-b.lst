@@ -1,7 +1,7 @@
 #
 # This program converts a number in base 10 to base b.
 #
-# Set Arbitrary mode and DPS 0.
+# Set PS 0.
 # Use GOTO 0 0, press R/S, enter the base-10 value, press R/S,
 # enter the target base, and press R/S.
 # Then press R/S repeatedly to display successive digits.

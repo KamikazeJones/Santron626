@@ -2,11 +2,12 @@
 # This program translates the origin to O'(x0, y0) and rotates the axes by
 # theta to compute x' and y' for a point P.
 #
-# Set DEG mode and DPS 3.
+# Set PS 3.
+# Set DG/RD to DG.
 # Enter x0, y0, and theta in memory first.
 # Use GOTO 0 0 for x' and GOTO 5 1 for y'.
 # Example:
-#   STO 0 = 2, STO 1 = 1, STO 2 = 45
+#   2 STO 0, 1 STO 1, 45 STO 2
 #   GOTO 0 0, 4 R/S, 3 R/S -> 2.828
 #   R/S -> 0.000
 #

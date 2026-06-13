@@ -1,7 +1,8 @@
 #
 # This program evaluates a definite integral with Simpson's rule.
 #
-# Set RAD mode and DPS 4.
+# Set PS 4.
+# Set DG/RD to RD.
 # Use GOTO 0 0, press R/S, enter h, then enter successive y values with R/S.
 # Press RCL 1 at the end to display the accumulated integral.
 # Example:

@@ -1,17 +1,27 @@
 #
 # This program fits y = a * e^(b x).
 #
-# Set DPS 5. DEG/RAD is arbitrary.
+# Set PS 5.
 # Clear M0 through M5 before use.
-# Use GOTO 0 0, press R/S, enter each yi, and press R/S.
-# Enter the matching xi and press R/S.
-# After the last xi, press SKP, SKP, and R/S to display a.
-# Press RCL 6 to display b.
 # Example:
-#   Clear M0..M5, then
-#   GOTO 0 0, R/S, 1 R/S, 1 R/S, 2 R/S, 2 R/S,
-#   SKP, SKP, R/S -> 0.50000
-#   RCL 6 -> 0.69315
+#   0 STO 0  - sum ln(y) loeschen
+#   0 STO 1  - sum x loeschen
+#   0 STO 2  - sum x^2 loeschen
+#   0 STO 3  - working loeschen
+#   0 STO 4  - sum x ln(y) loeschen
+#   0 STO 5  - n loeschen
+#   GOTO 0 0
+#   R/S
+#   1 R/S  - y1
+#   1 R/S  - x1
+#   2 R/S  - y2
+#   2 R/S  - x2
+#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   SKP
+#   R/S
+#   -> 0.50000
+#   RCL 6
+#   -> 0.69315
 #
 00 090 R/S
 01 040 LN

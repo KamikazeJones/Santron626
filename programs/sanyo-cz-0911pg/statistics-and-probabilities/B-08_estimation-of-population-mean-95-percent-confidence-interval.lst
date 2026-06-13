@@ -1,13 +1,17 @@
 #
 # This program estimates a 95% confidence interval for the population mean.
 #
-# Set DPS 2. DEG/RAD is arbitrary.
-# Use GOTO 0 0, press R/S, enter x_bar, and press R/S.
-# Enter S and press R/S, then enter n and press R/S to display the lower limit.
-# Press R/S once more to display the upper limit.
+# Set PS 2.
+# Use GOTO 0 0.
 # Example:
-#   GOTO 0 0, R/S, 158.5 R/S, 6.5 R/S, 100 R/S -> 157.20
-#   R/S -> 159.80
+#   GOTO 0 0
+#   R/S
+#   158.5 R/S  - x_bar
+#   6.5 R/S  - S
+#   100 R/S  - n
+#   -> 157.20
+#   R/S
+#   -> 159.80
 #
 00 090 R/S
 01 055 STO

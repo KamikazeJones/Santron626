@@ -2,12 +2,13 @@
 # This program calculates the remaining side c and the area S of a triangle
 # from two sides and the included angle alpha.
 #
-# Set DEG mode and DPS 3.
+# Set PS 3.
+# Set DG/RD to DG.
 # Use GOTO 0 0 for c and GOTO 3 0 for S.
 # Enter a, b, and alpha, then press R/S at each stop.
 # Example:
-#   GOTO 0 0, SQRT 3 R/S, 2 R/S, 30 R/S -> 1.000
-#   GOTO 3 0, SQRT 3 R/S, 2 R/S, 30 R/S -> 0.866
+#   GOTO 0 0, 3 SQRT R/S, 2 R/S, 30 R/S -> 1.000
+#   GOTO 3 0, 3 SQRT R/S, 2 R/S, 30 R/S -> 0.866
 #
 00 055 STO
 01 100 0

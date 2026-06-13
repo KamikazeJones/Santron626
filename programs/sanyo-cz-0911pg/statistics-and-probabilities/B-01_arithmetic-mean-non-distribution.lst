@@ -1,14 +1,24 @@
 #
 # This program calculates the arithmetic mean of ungrouped data.
 #
-# Set DPS 3. DEG/RAD is arbitrary.
+# Set PS 3.
 # Use GOTO 0 0.
-# Enter each xi and press R/S. The display shows the number of data.
-# After the last value, press SKP and then R/S to compute x_bar.
 # Example:
-#   GOTO 0 0, 9.140 R/S, 9.145 R/S, 9.165 R/S, 9.185 R/S, 9.190 R/S
-#   -> display counts 1, 2, 3, 4, 5
-#   SKP, R/S -> 9.165
+#   GOTO 0 0
+#   R/S
+#   9.140 R/S  - x1
+#   -> 1
+#   9.145 R/S  - x2
+#   -> 2
+#   9.165 R/S  - x3
+#   -> 3
+#   9.185 R/S  - x4
+#   -> 4
+#   9.190 R/S  - x5
+#   -> 5
+#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   R/S
+#   -> 9.165
 #
 00 060 C/CE
 01 055 STO

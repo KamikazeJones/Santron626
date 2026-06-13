@@ -3,8 +3,13 @@
 #
 # U[i] = fractional part of (PI + U[i-1])^5
 #
+# Set PS 4.
 # Use GOTO 0 1.
 # Enter the starting value U[0] with 0 <= U[0] <= 1 and press R/S.
+# Example:
+#   GOTO 0 1, 0.1200 R/S -> 0.1039
+#   R/S -> 0.0677
+#   R/S -> 0.4676
 #
 00 090 R/S
 01 010 +

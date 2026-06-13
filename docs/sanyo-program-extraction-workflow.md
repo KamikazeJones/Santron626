@@ -383,7 +383,8 @@ comment block before considering the extraction finished.
 At minimum, the comment block should state:
 
 - what the program computes
-- required `DPS` and `DEG/RAD`
+- required `PS`
+- required `DG/RD` only if the program is not mode-independent
 - the actual button sequence users must follow for the first input and result
   display
 - any important sheet-specific caveats, such as required cleared memories or
@@ -396,6 +397,38 @@ At minimum, the comment block should state:
 Keep the GUI example aligned with the verified regression test. If the test uses
 a corrected reading of the booklet example, say that explicitly in the GUI
 comment block.
+
+For GUI comments specifically, use these naming rules consistently:
+
+- Use the calculator/app names, not the booklet names.
+- Write `PS`, not `DPS`.
+- Write `DG/RD`, not `DEG/RAD`.
+- Omit any angle-mode line completely when the source header says `Arbitrary`.
+- If a mode is required, name it in calculator terms, for example
+  `Set DG/RD to DG.` or `Set DG/RD to RD.`
+- Use calculator key names in examples and operation hints, for example
+  `RCL`, `STO`, `+/-`, `SQRT`, `1/X`.
+- Do not mix booklet notation such as `RM`, `SM`, or prose like
+  `display of xi` into the user-facing key sequence when the app exposes a
+  different key label.
+- Derive the example sequence from the verified `.test.sce` file, not from a
+  paraphrase of the sheet text.
+
+Format GUI examples and operation hints in a strict, readable step layout:
+
+- Put `GOTO a b` on its own line.
+- If the program needs an initial start press with no value entry yet, put
+  `R/S` on its own next line.
+- List value entries one per line in the form:
+  `<value> R/S  - <short note about what this value is>`
+- Put trailing control steps such as `SKP` and final `R/S` on their own lines.
+- For `SKP`, prefer an explanatory note such as:
+  `SKP  - beende Eingabe und berechne Ergebnis(se)`
+- If repeated result displays follow, show them one per line, for example:
+  `R/S  -> 1.0202010`
+  `RCL 4 -> 9.165000`
+- Do not compress a multi-step example into one prose sentence when separate
+  lines make the input flow clearer.
 
 ## Practical Notes
 

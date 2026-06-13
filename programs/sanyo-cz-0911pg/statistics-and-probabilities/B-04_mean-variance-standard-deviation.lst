@@ -1,19 +1,28 @@
 #
 # This program calculates mean x_bar, variance r, and standard deviation sigma.
 #
-# Set DPS 6. DEG/RAD is arbitrary.
+# Set PS 6.
 # Clear M1, M2, and M3 before use.
-# Use GOTO 0 0, press R/S, then enter each xi followed by R/S.
-# After the last value, press SKP and then R/S to display sigma.
-# Press RCL 4 for x_bar and RCL 5 for r.
 # Note: with the printed example inputs, the transcribed program yields
 # r = 0.000410 and sigma = 0.020248.
 # Example:
-#   Clear M1..M3, then
-#   GOTO 0 0, R/S, 9.140 R/S, 9.145 R/S, 9.165 R/S, 9.185 R/S, 9.190 R/S
-#   SKP, R/S -> 0.020248
-#   RCL 4 -> 9.165000
-#   RCL 5 -> 0.000410
+#   0 STO 1  - sum x loeschen
+#   0 STO 2  - sum x^2 loeschen
+#   0 STO 3  - n loeschen
+#   GOTO 0 0
+#   R/S
+#   9.140 R/S  - x1
+#   9.145 R/S  - x2
+#   9.165 R/S  - x3
+#   9.185 R/S  - x4
+#   9.190 R/S  - x5
+#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   R/S
+#   -> 0.020248
+#   RCL 4
+#   -> 9.165000
+#   RCL 5
+#   -> 0.000410
 #
 00 090 R/S
 01 050 M+

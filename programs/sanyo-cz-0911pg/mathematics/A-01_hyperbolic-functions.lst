@@ -1,7 +1,7 @@
 #
 # This program calculates hyperbolic functions sinh, cosh, and tanh.
 #
-# Set DPS 3. DEG/RAD is arbitrary.
+# Set PS 3.
 # Use GOTO 0 0 for sinh, GOTO 1 0 for cosh, and GOTO 2 0 for tanh.
 # Enter x and press R/S.
 # After a result is shown, press 1/X to get csech, sech, or coth.
