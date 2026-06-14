@@ -70,7 +70,7 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 | B-12 | Binominal coefficient (nCr) | 36 | yes | yes | yes |
 | B-13 | Permutation (nPr) | 37 | yes | yes | yes |
 | B-14 | Chi-square evaluation | 38 | yes | yes | yes |
-| B-15 | Normal distribution | 39 | no | no | no |
+| B-15 | Normal distribution | 39 | yes | yes | yes |
 | B-16 | Inverse normal integral | 40 | yes | yes | yes |
 | B-17 | Random number generator | 41 | yes | yes | yes |
 
