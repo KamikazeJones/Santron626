@@ -4,6 +4,11 @@ This document describes the current workflow for extracting Sanyo CZ-0911PG
 library programs from OCR PDFs into Santron source, listing, tests, and
 documentation.
 
+It is also the permanent repository for stable extraction rules discovered while
+working. If a repo-specific rule, convention, or recurring pitfall is learned
+during extraction, add it to this file promptly instead of keeping it only in
+chat context.
+
 ## Purpose
 
 The OCR text is useful for titles, formulas, examples, and notes, but it is not
@@ -331,6 +336,17 @@ Do not normalize both patterns into the same test style. If the booklet says
 `R/S`. If the booklet says `GOTO 0 0`, then `Input of x`, then `R/S`, the test
 must enter the value before pressing `R/S`.
 
+When you use one-line manual CLI checks with `node santron-cli.js --scenario '...'`,
+use `;` only to separate command blocks such as `load`, `/run ...`, `expect`,
+`save`, or `list`. Do not insert extra `;` between ordinary key sequences inside
+the same block. For example:
+
+```bash
+node santron-cli.js --scenario 'load "foo.lst"; /run PS 2 GOTO 0 0 2 R/S; expect 3.14'
+```
+
+In `.test.sce` files written line by line, no `;` separators are needed.
+
 ## Run Checks
 
 For one source while developing:
@@ -400,6 +416,7 @@ comment block.
 
 For GUI comments specifically, use these naming rules consistently:
 
+- Write the entire GUI comment block in English.
 - Use the calculator/app names, not the booklet names.
 - Write `PS`, not `DPS`.
 - Write `DG/RD`, not `DEG/RAD`.
@@ -423,7 +440,7 @@ Format GUI examples and operation hints in a strict, readable step layout:
   `<value> R/S  - <short note about what this value is>`
 - Put trailing control steps such as `SKP` and final `R/S` on their own lines.
 - For `SKP`, prefer an explanatory note such as:
-  `SKP  - beende Eingabe und berechne Ergebnis(se)`
+  `SKP  - finish input and calculate result(s)`
 - If repeated result displays follow, show them one per line, for example:
   `R/S  -> 1.0202010`
   `RCL 4 -> 9.165000`

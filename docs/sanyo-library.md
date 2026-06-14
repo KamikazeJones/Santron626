@@ -64,14 +64,14 @@ the index. For example, printed page `25` is stored as `page-026_ocr.pdf`.
 | B-6 | Logarithmic curve fit | 30 | yes | yes | yes |
 | B-7 | Exponential curve fit | 31 | yes | yes | yes |
 | B-8 | Estimation of population mean (95% confidence interval) | 32 | yes | yes | yes |
-| B-9 | Test of defect rate of population | 33 | no | no | no |
-| B-10 | Interval estimation | 34 | no | no | no |
-| B-11 | Covariance and correlation coefficient | 35 | no | no | no |
-| B-12 | Binominal coefficient (nCr) | 36 | no | no | no |
-| B-13 | Permutation (nPr) | 37 | no | no | no |
-| B-14 | Chi-square evaluation | 38 | no | no | no |
+| B-9 | Test of defect rate of population | 33 | yes | yes | yes |
+| B-10 | Interval estimation | 34 | yes | yes | yes |
+| B-11 | Covariance and correlation coefficient | 35 | yes | yes | yes |
+| B-12 | Binominal coefficient (nCr) | 36 | yes | yes | yes |
+| B-13 | Permutation (nPr) | 37 | yes | yes | yes |
+| B-14 | Chi-square evaluation | 38 | yes | yes | yes |
 | B-15 | Normal distribution | 39 | no | no | no |
-| B-16 | Inverse normal integral | 40 | no | no | no |
+| B-16 | Inverse normal integral | 40 | yes | yes | yes |
 | B-17 | Random number generator | 41 | yes | yes | yes |
 
 ### C. Surveying

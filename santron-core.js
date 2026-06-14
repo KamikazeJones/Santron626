@@ -456,10 +456,6 @@
 
     function startProgram() {
       if (state.running || state.power === "off") return;
-      if (!state.programPaused) {
-        resetExpression();
-        state.parenStack = [];
-      }
       state.running = true;
       state.programPaused = false;
     }

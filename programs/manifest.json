@@ -85,6 +85,34 @@
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-08_estimation-of-population-mean-95-percent-confidence-interval.lst"
     },
     {
+      "name": "B-09 Test of defect rate of population",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-09_test-of-defect-rate-of-population.lst"
+    },
+    {
+      "name": "B-10 Interval estimation",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-10_interval-estimation.lst"
+    },
+    {
+      "name": "B-11 Covariance and correlation coefficient",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-11_covariance-and-correlation-coefficient.lst"
+    },
+    {
+      "name": "B-12 Binominal coefficient (nCr)",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-12_binominal-coefficient-nCr.lst"
+    },
+    {
+      "name": "B-13 Permutation (nPr)",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-13_permutation-nPr.lst"
+    },
+    {
+      "name": "B-14 Chi-square evaluation",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-14_chi-square-evaluation.lst"
+    },
+    {
+      "name": "B-16 Inverse normal integral",
+      "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-16_inverse-normal-integral.lst"
+    },
+    {
       "name": "B-17 Pseudo-Random-Number-Generator (Sanyo)",
       "file": "sanyo-cz-0911pg/statistics-and-probabilities/B-17_random-number-generator.lst"
     },

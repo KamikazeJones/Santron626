@@ -41,6 +41,17 @@ runCase("all key codes can be decoded for program execution", (calculator) => {
   }
 });
 
+runCase("R/S preserves a pending manual calculation", (calculator) => {
+  press(calculator, "4", "*", "6");
+  calculator.execute("R/S");
+  assertEqual(calculator.state.y, 4, "R/S changed y");
+  assertEqual(calculator.state.x, "6", "R/S changed x");
+  assertEqual(calculator.state.pending, "*", "R/S cleared pending");
+  calculator.stopProgram();
+  calculator.execute("=");
+  assertEqual(calculator.state.x, "24", "pending calculation did not resume after R/S");
+});
+
 if (failures.length) {
   failures.forEach((failure) => {
     console.error(`FAIL ${failure.name}`);
@@ -84,6 +95,12 @@ function primeForKey(calculator, key) {
 
 function press(calculator, ...keys) {
   keys.forEach((key) => calculator.execute(key));
+}
+
+function assertEqual(actual, expected, message) {
+  if (actual !== expected) {
+    throw new Error(`${message}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
 }
 
 function assertHealthy(calculator, key) {
