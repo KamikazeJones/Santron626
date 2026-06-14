@@ -16,7 +16,7 @@
 #   9.165 R/S  - x3
 #   9.185 R/S  - x4
 #   9.190 R/S  - x5
-#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   SKP  - finish input and calculate result(s)
 #   R/S
 #   -> 0.020248
 #   RCL 4

@@ -19,11 +19,11 @@
 #   5 R/S  - f4
 #   2 R/S  - f5
 #   1 R/S  - f6
-#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   SKP  - finish input and calculate result(s)
 #   R/S
 #   -> 3.50
 #   Alternative documented case:
-#   mit x1 = 3 statt 2.5 liefert das korrigierte Programm 4.00.
+#   With x1 = 3 instead of 2.5, the corrected program yields 4.00.
 #
 00 090 R/S
 01 055 STO

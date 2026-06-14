@@ -16,7 +16,7 @@
 #   1 R/S  - x1
 #   2 R/S  - y2
 #   2 R/S  - x2
-#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   SKP  - finish input and calculate result(s)
 #   SKP
 #   R/S
 #   -> 0.50000

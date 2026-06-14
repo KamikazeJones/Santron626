@@ -5,14 +5,14 @@
 # Example:
 #   GOTO 0 0
 #   R/S
-#   455.625 R/S  - Dezimalzahl
-#   16 R/S  - Basis b
+#   455.625 R/S  - decimal number
+#   16 R/S  - base b
 #   -> 7
 #   R/S
 #   -> 12
 #   R/S
 #   -> 1
-#   SKP  - beende Eingabe und berechne Ergebnis(se)
+#   SKP  - finish input and calculate result(s)
 #   R/S
 #   -> 10
 #

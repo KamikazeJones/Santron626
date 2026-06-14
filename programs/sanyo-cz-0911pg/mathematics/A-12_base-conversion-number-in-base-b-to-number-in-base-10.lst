@@ -3,20 +3,20 @@
 #
 # Set PS 5.
 # Example:
-#   2 STO 0  - Basis b
+#   2 STO 0  - base b
 #   GOTO 0 0
-#   1 R/S  - Ziffer 1
-#   0 R/S  - Ziffer 2
-#   1 R/S  - Ziffer 3
-#   0 R/S  - Ziffer 4
-#   1 =  - Ziffer 5
+#   1 R/S  - digit 1
+#   0 R/S  - digit 2
+#   1 R/S  - digit 3
+#   0 R/S  - digit 4
+#   1 =  - digit 5
 #   -> 21.00000
 #   GOTO 2 0
-#   1 R/S  - Ziffer 1
-#   0 R/S  - Ziffer 2
-#   1 R/S  - Ziffer 3
-#   0 R/S  - Ziffer 4
-#   1 R/S  - Ziffer 5
+#   1 R/S  - digit 1
+#   0 R/S  - digit 2
+#   1 R/S  - digit 3
+#   0 R/S  - digit 4
+#   1 R/S  - digit 5
 #   -> 0.65625
 #
 00 012 *
