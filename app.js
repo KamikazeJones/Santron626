@@ -349,7 +349,6 @@ async function openSelectedServerProgram() {
     const response = await fetch(`programs/${program.file}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`${program.name} konnte nicht geladen werden.`);
     applyProgramListing(await response.text(), program.file);
-    serverProgramSelect.value = "";
   } catch (error) {
     alert(error.message);
   }

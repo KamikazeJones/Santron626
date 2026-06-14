@@ -47,9 +47,13 @@ if (!tests.length) {
 
 let passed = 0;
 let failed = 0;
+const total = tests.length;
 
-for (const testFile of tests) {
+for (const [index, testFile] of tests.entries()) {
   const rel = path.relative(ROOT_DIR, testFile);
+  const current = index + 1;
+  const percent = Math.floor((current * 100) / total);
+  console.log(`[${current}/${total} | ${String(percent).padStart(3, " ")}%] ${rel}`);
   const result = spawnSync(process.execPath, [RUNNER, "--repository", guiUrl, testFile], {
     cwd: ROOT_DIR,
     encoding: "utf8",

@@ -53,7 +53,7 @@ run_test() {
     echo "\$ ${cmd}"
   } >> "${LOG_FILE}"
 
-  if bash -lc "cd \"${ROOT_DIR}\" && ${cmd}" >"${tmp_log}" 2>&1; then
+  if bash -lc "cd \"${ROOT_DIR}\" && ${cmd}" 2>&1 | tee "${tmp_log}"; then
     status="PASS"
   else
     status="FAIL"
