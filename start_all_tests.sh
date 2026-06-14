@@ -19,12 +19,14 @@ tests=(
   "coverage|node tools/core-key-coverage.mjs"
   "gui-smoke|node tools/playwright-smoke.mjs ${GUI_URL}"
   "gui-smoke-sw|node tools/playwright-sw-smoke.mjs ${GUI_URL}"
+  "gui-repository|node tools/playwright-gui-test-suite.mjs ${GUI_URL}"
 )
 
 rows=()
 overall_pass=1
 PASS_ICON="✓"
 FAIL_ICON="🛑"
+TOTAL_TESTS="${#tests[@]}"
 
 status_label() {
   local status="$1"
@@ -36,10 +38,16 @@ status_label() {
 }
 
 run_test() {
-  local name="$1"
-  local cmd="$2"
+  local index="$1"
+  local name="$2"
+  local cmd="$3"
   local tmp_log
+  local status
+  local percent
   tmp_log="$(mktemp)"
+  percent=$(( index * 100 / TOTAL_TESTS ))
+
+  printf '[%d/%d | %3d%%] %s\n' "${index}" "${TOTAL_TESTS}" "${percent}" "${name}"
   {
     echo "=== ${name} ==="
     echo "\$ ${cmd}"
@@ -69,6 +77,8 @@ PY
   rows+=(
     "<tr class=\"${status,,}\"><td>${name}</td><td class=\"status\">$(status_label "${status}")</td><td><pre>${escaped_output}</pre></td></tr>"
   )
+
+  printf '[%d/%d | %3d%%] %s %s\n' "${index}" "${TOTAL_TESTS}" "${percent}" "${status}" "${name}"
 
   rm -f "${tmp_log}"
 }
@@ -118,10 +128,14 @@ else
   GUI_SERVER_READY=1
 fi
 
+test_index=0
 for item in "${tests[@]}"; do
+  test_index=$((test_index + 1))
   IFS='|' read -r name cmd <<<"${item}"
-  if [[ "${name}" == "gui-smoke" && "${GUI_SERVER_READY}" -eq 0 ]]; then
-    rows+=("<tr class=\"fail\"><td>gui-smoke</td><td class=\"status\">$(status_label FAIL)</td><td><pre>GUI server unavailable</pre></td></tr>")
+  if [[ "${name}" == gui-* && "${GUI_SERVER_READY}" -eq 0 ]]; then
+    percent=$(( test_index * 100 / TOTAL_TESTS ))
+    printf '[%d/%d | %3d%%] FAIL %s\n' "${test_index}" "${TOTAL_TESTS}" "${percent}" "${name}"
+    rows+=("<tr class=\"fail\"><td>${name}</td><td class=\"status\">$(status_label FAIL)</td><td><pre>GUI server unavailable</pre></td></tr>")
     continue
   fi
   if [[ "${name}" == "gui-smoke" && "${GUI_URL}" == "https://localhost:8765" && "${STARTED_LOCAL_SERVER}" -eq 1 ]]; then
@@ -130,7 +144,7 @@ for item in "${tests[@]}"; do
   if [[ "${name}" == "gui-smoke-sw" && "${GUI_URL}" == "https://localhost:8765" && "${STARTED_LOCAL_SERVER}" -eq 1 ]]; then
     cmd="node tools/playwright-sw-smoke.mjs ${GUI_URL}"
   fi
-  run_test "${name}" "${cmd}"
+  run_test "${test_index}" "${name}" "${cmd}"
 done
 
 cat > "${REPORT_FILE}" <<HTML

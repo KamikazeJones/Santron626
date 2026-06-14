@@ -681,3 +681,12 @@ renderNow();
 showMobileCalculator();
 registerServiceWorker();
 window.addEventListener("pageshow", showMobileCalculator);
+
+window.__santronApp = {
+  calculator,
+  state,
+  execute,
+  applyProgramListing,
+  resetCalculatorState,
+  selectProgramTab,
+};

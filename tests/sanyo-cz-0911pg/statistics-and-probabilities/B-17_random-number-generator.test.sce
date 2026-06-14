@@ -1,13 +1,14 @@
 # Test: Random number generator (B-17)
 # DPS: 4
 
-load bin/sanyo-cz-0911pg/mathematics/B-17_random-number-generator.lst
+load bin/sanyo-cz-0911pg/statistics-and-probabilities/B-17_random-number-generator.lst
 
 /run
 PS 4
 
-# The program needs GOTO 0 1 before the first seed input.
-GOTO 0 1
+# The program starts at 0 0 and needs an initial R/S before the seed input.
+GOTO 0 0
+R/S
 
 # u(0) = 0.1200
 0 . 1 2 0 0 R/S

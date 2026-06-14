@@ -5,7 +5,8 @@
 #
 # Set PS 4.
 # Example:
-#   GOTO 0 1
+#   GOTO 0 0
+#   R/S
 #   0.1200 R/S  - Startwert U[0]
 #   -> 0.1039
 #   R/S

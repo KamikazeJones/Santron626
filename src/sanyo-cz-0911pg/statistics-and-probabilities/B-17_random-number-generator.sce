@@ -23,14 +23,11 @@
 # u(3) = 0.4676
 #
 # OPERATION
-# 1. GOTO 0 1
-# 2. Input of Data u(0)
-# 3. R/S
-# 4. Display of u(1)
-# 5. R/S
-# 6. Display of u(2)
-# 7. R/S
-# 8. Display of u(3)
+# 1. GOTO 0 0
+# 2. R/S
+# 3. Input of Data u(0)
+# 4. R/S, Display of u(i)
+# 5. Repeat step 4
 
 /LOAD
 
