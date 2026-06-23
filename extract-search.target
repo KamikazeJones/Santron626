@@ -1,0 +1,82 @@
+name digit-extract
+max-cells 40
+
+# Schnittstelle:
+# - M8 enthaelt die Zahl.
+# - Die zu extrahierende Dezimalstelle wird als Display-Zahl eingegeben.
+# - Ergebnis ist die Ziffer an Stelle 10^X in M7.
+# - M6 darf als Scratch verwendet und zerstoert werden.
+#
+# Beispiel: M8=1024030, X=4 -> M7=2.
+
+seed / RCL 8 X<>Y 10^X + 9 EXP 9 STO 4 + STO 7 RCL 4 - RCL 4 = M- 7
+
+case
+init M8=1024030
+keys 0 R/S
+expect M7=0 M8=1024030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=1024030
+keys 1 R/S
+expect M7=3 M8=1024030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=1024030
+keys 3 R/S
+expect M7=4 M8=1024030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=1024030
+keys 4 R/S
+expect M7=2 M8=1024030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=1024030
+keys 6 R/S
+expect M7=1 M8=1024030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=3040210
+keys 1 R/S
+expect M7=1 M8=3040210 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=3040210
+keys 2 R/S
+expect M7=2 M8=3040210 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=3040210
+keys 4 R/S
+expect M7=4 M8=3040210 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=3040210
+keys 6 R/S
+expect M7=3 M8=3040210 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=241030
+keys 1 R/S
+expect M7=3 M8=241030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=241030
+keys 3 R/S
+expect M7=1 M8=241030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=241030
+keys 4 R/S
+expect M7=4 M8=241030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=241030
+keys 5 R/S
+expect M7=2 M8=241030 pause=1 pending=none pending-memory=none paren=0 exponent=0
+
+case
+init M8=241030
+keys 6 R/S
+expect M7=0 M8=241030 pause=1 pending=none pending-memory=none paren=0 exponent=0

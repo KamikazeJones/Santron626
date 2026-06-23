@@ -139,6 +139,18 @@
     {
       "name": "Stirling-Formel",
       "file": "stirling-formula.lst"
+    },
+    {
+      "name": "Mastermind 16",
+      "file": "mastermind-16.lst"
+    },
+    {
+      "name": "Mastermind 17",
+      "file": "mastermind-17.lst"
+    },
+    {
+      "name": "Mastermind 18",
+      "file": "mastermind-18.lst"
     }
   ]
 }

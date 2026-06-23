@@ -1,0 +1,143 @@
+digraph Mastermind11 {
+  graph [
+    label="mastermind-11.sce - Programmablauf",
+    labelloc=t,
+    fontsize=18,
+    fontname="Arial",
+    rankdir=TB,
+    splines=polyline,
+    nodesep=0.55,
+    ranksep=0.55
+  ];
+
+  node [
+    shape=box,
+    style="rounded",
+    fontname="Arial",
+    fontsize=11,
+    margin="0.10,0.08",
+    width=2.35,
+    height=0.75,
+    fixedsize=false
+  ];
+
+  edge [
+    fontname="Arial",
+    fontsize=10
+  ];
+
+  start [
+    shape=oval,
+    width=2.35,
+    group=main,
+    label="Start\nVorbedingungen:\nM0=1\nM1=0 black\nM2=1 Position\nM8=codierter CODE\nM9=4 hit-Vorrat"
+  ];
+
+  input [
+    group=main,
+    label="Schritte 00..02\nR/S\nGuess-Ziffer eingeben\nM4 = Guess-Ziffer"
+  ];
+
+  extract [
+    group=main,
+    label="Schritte 03..33\nCODE-Position holen\n\nCodierung: Stelle 10^d = Position von Ziffer d\nq = floor(M8 / 10^M4)\nM7 = q - 10 * floor(q / 10)\n\nM4 = Guess-Ziffer\nM7 = CODE-Position dieser Ziffer"
+  ];
+
+  hit_test [
+    shape=diamond,
+    group=main,
+    label="Schritte 34..38\nMiss-Test\nM7 == 0?"
+  ];
+
+  hit_add [
+    width=2.35,
+    group=right,
+    label="Schritte 39..42\nwenn M7 == 0:\nM9 = M9 - 1\nsonst: M9 = M9 - 0"
+  ];
+
+  black_test [
+    shape=diamond,
+    group=main,
+    label="Schritte 43..51\nVergleich + SKP\nM7 == M2?"
+  ];
+
+  black_add [
+    width=2.35,
+    group=right,
+    label="Schritte 52..55\nnur wenn gleich\nM1 = M1 + 1\nblack"
+  ];
+
+  next_pos [
+    group=main,
+    label="Schritte 56..58\nM2 = M2 + 1"
+  ];
+
+  done_test [
+    shape=diamond,
+    group=main,
+    label="Schritte 59..64\nM2 == 5?"
+  ];
+
+  stop [
+    shape=oval,
+    width=2.35,
+    group=right,
+    label="Schritt 65\nStop bei R/S\nErgebnis:\nblack = M1\nwhite = M9 - M1"
+  ];
+
+  loop [
+    width=2.35,
+    group=main,
+    label="Schritte 66..68\nGOTO 0 0"
+  ];
+
+  memory [
+    shape=note,
+    width=2.35,
+    group=left,
+    label="Speicherbelegung\nM0 = Konstante 1\nM1 = black\nM2 = aktuelle Position 1..4, danach 5\nM3 = frei\nM4 = aktuelle Guess-Ziffer\nM5 = frei\nM6 = frei\nM7 = extrahierte CODE-Position\nM8 = codierter CODE\nM9 = hit, startet bei 4"
+  ];
+
+  steps [
+    shape=note,
+    width=2.35,
+    group=right,
+    label="Programmlaenge\n69 Schritte belegt\nAdressen 00..68\n3 Schritte frei\n\nKeine Endanzeige im Programm\nwhite = M9 - M1"
+  ];
+
+  blank3 [shape=point, width=0.01, height=0.01, label="", style=invis, group=right];
+  blank4 [shape=point, width=0.01, height=0.01, label="", style=invis, group=right];
+
+  { rank=same; memory; start; steps; }
+  { rank=same; input; }
+  { rank=same; extract; }
+  { rank=same; hit_add; hit_test; }
+  { rank=same; black_add; black_test; }
+  { rank=same; blank3; next_pos; }
+  { rank=same; blank4; done_test; }
+  { rank=same; stop; loop; }
+
+  hit_add -> black_add -> blank3 -> blank4 -> stop [
+    style=invis,
+    weight=10
+  ];
+  start -> input [weight=100];
+  input -> extract [weight=100];
+  extract -> hit_test [weight=100];
+
+  hit_test -> hit_add [label="ja"];
+  hit_test -> black_test [label="nein", weight=100];
+  hit_add -> black_test;
+
+  black_test -> black_add [label="ja"];
+  black_test -> next_pos [label="nein", weight=100];
+  black_add -> next_pos;
+
+  next_pos -> done_test [weight=100];
+  done_test -> stop [label="ja"];
+  done_test -> loop [label="nein", weight=100];
+  loop -> input;
+
+  memory -> start [style=dotted, arrowhead=none];
+  start -> steps [style=dotted, arrowhead=none];
+}

@@ -1,0 +1,65 @@
+name mastermind-step
+max-cells 72
+append RCL 2 = R/S
+
+seed STO 4 1 0 STO 6 RCL 8 / RCL 4 10^X + EXP 0 9 + STO 7 M* 6 RCL 6 - RCL 6 = M- 7 RCL 7 - +/- SKP RCL 0 M- 9 RCL 2 * +/- - 4 X<>Y SKP RCL 0 M- 9 M+ 1 1 M+ 2
+
+case
+init M0=1 M1=0 M2=1 M8=1024030 M9=4
+keys 1 R/S
+expect M0=1 M1=0 M2=2 M8=1024030 M9=4 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=0 M2=2 M8=1024030 M9=4
+keys 2 R/S
+expect M0=1 M1=0 M2=3 M8=1024030 M9=3 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=0 M2=3 M8=1024030 M9=3
+keys 3 R/S
+expect M0=1 M1=0 M2=4 M8=1024030 M9=3 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=0 M2=4 M8=1024030 M9=3
+keys 4 R/S
+expect M0=1 M1=0 M2=5 M8=1024030 M9=3 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+case
+init M0=1 M1=0 M2=1 M8=3040210 M9=4
+keys 1 R/S
+expect M0=1 M1=1 M2=2 M8=3040210 M9=3 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=1 M2=2 M8=3040210 M9=3
+keys 2 R/S
+expect M0=1 M1=2 M2=3 M8=3040210 M9=2 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=2 M2=3 M8=3040210 M9=2
+keys 6 R/S
+expect M0=1 M1=3 M2=4 M8=3040210 M9=1 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=3 M2=4 M8=3040210 M9=1
+keys 4 R/S
+expect M0=1 M1=4 M2=5 M8=3040210 M9=0 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+case
+init M0=1 M1=0 M2=1 M8=241030 M9=4
+keys 1 R/S
+expect M0=1 M1=0 M2=2 M8=241030 M9=4 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=0 M2=2 M8=241030 M9=4
+keys 2 R/S
+expect M0=1 M1=0 M2=3 M8=241030 M9=3 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=0 M2=3 M8=241030 M9=3
+keys 6 R/S
+expect M0=1 M1=0 M2=4 M8=241030 M9=2 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=continue
+
+case
+init M0=1 M1=0 M2=4 M8=241030 M9=2
+keys 4 R/S
+expect M0=1 M1=1 M2=5 M8=241030 M9=1 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done

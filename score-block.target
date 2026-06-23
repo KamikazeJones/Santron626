@@ -1,0 +1,64 @@
+name mastermind-score-block
+max-cells 30
+
+# Suche fuer den Mastermind-Bewertungsblock.
+#
+# Mutiert wird nur der Score-Kandidat:
+#
+#   M1 += 1, falls M7 == M2
+#   M9 -= 1, falls M7 == 0
+#   M9 -= 1, falls M7 == M2
+#   M2 += 1
+#
+# Der feste Prefix fuehrt die echte Guess-Eingabe und die 22-Zellen-Extraktion
+# aus. Dadurch sieht der Kandidat denselben X/Y/pending-Zustand wie im echten
+# Mastermind-Programm.
+#
+# Der feste Append schliesst den Ausdruck, springt fuer die naechste Ziffer
+# zurueck zum Eingabe-Halt und stoppt nach der vierten Ziffer beim Ergebnis.
+#
+# Kandidaten-Kosten zaehlen nur den Score-Block, nicht Prefix oder Append.
+
+prefix R/S STO 4 / RCL 8 X<>Y 10^X + 9 EXP 9 STO 4 + STO 7 RCL 4 - RCL 4 = M- 7
+append RCL 2 = SKP GOTO 0 0 R/S
+
+seed RCL 7 - +/- SKP RCL 0 M- 9 RCL 2 * +/- - 4 X<>Y SKP RCL 0 M- 9 M+ 1 1 M+ 2
+
+# CODE 1234 -> M8 = 43210
+# 1234: vier schwarze Treffer.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+keys R/S 1 R/S 2 R/S 3 R/S 4 R/S
+expect M0=1 M1=4 M2=5 M8=43210 M9=0 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+# 2143: vier weisse Treffer.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+keys R/S 2 R/S 1 R/S 4 R/S 3 R/S
+expect M0=1 M1=0 M2=5 M8=43210 M9=4 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+# 1243: zwei schwarz, zwei weiss.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+keys R/S 1 R/S 2 R/S 4 R/S 3 R/S
+expect M0=1 M1=2 M2=5 M8=43210 M9=2 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+# 5656: keine Ziffer kommt im Code vor.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+keys R/S 5 R/S 6 R/S 5 R/S 6 R/S
+expect M0=1 M1=0 M2=5 M8=43210 M9=0 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+# CODE 6413 -> M8 = 1024030
+# 1234: null schwarz, drei weiss.
+case
+init M0=1 M1=0 M2=1 M8=1024030 M9=4
+keys R/S 1 R/S 2 R/S 3 R/S 4 R/S
+expect M0=1 M1=0 M2=5 M8=1024030 M9=3 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done
+
+# CODE 1264 -> M8 = 3040210
+# 3514: ein schwarz, ein weiss.
+case
+init M0=1 M1=0 M2=1 M8=3040210 M9=4
+keys R/S 3 R/S 5 R/S 1 R/S 4 R/S
+expect M0=1 M1=1 M2=5 M8=3040210 M9=1 pause=1 pending=none pending-memory=none paren=0 exponent=0 loop=done

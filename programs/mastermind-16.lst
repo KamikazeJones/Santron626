@@ -1,0 +1,86 @@
+# Mastermind 16
+# GUI-Listing fuer den Santron626-Programmbaustein.
+# Der geheime Code wird vor dem Start codiert in M8 versteckt.
+# Beispiel: 6413 -> 1024030
+# Vor dem ersten Start: C/CE STO 1 4 STO 9
+# Nach der vierten Guess-Ziffer haelt das Programm an.
+# Schwarz bedeutet: richtige Ziffer an richtiger Stelle.
+# Weiss bedeutet: richtige Ziffer an falscher Stelle.
+# RCL 9 zeigt die weissen Treffer an.
+# RCL 1 zeigt die schwarzen Treffer an. Wird hier 4 angezeigt, so wurde der Code geknackt und das Spiel ist gewonnen!
+#
+# Fuer den naechsten Guess setzt der Benutzer die Speicher zurueck mit:
+# C/CE STO 1 4 STO 9
+
+00 101 1
+01 055 STO
+02 100 0
+03 055 STO
+04 102 2
+05 101 1
+06 100 0
+07 055 STO
+08 106 6
+09 090 R/S
+10 055 STO
+11 104 4
+12 056 RCL
+13 108 8
+14 013 /
+15 056 RCL
+16 104 4
+17 043 10^X
+18 010 +
+19 063 EXP
+20 100 0
+21 109 9
+22 010 +
+23 055 STO
+24 107 7
+25 052 M*
+26 106 6
+27 056 RCL
+28 106 6
+29 011 -
+30 056 RCL
+31 106 6
+32 080 =
+33 051 M-
+34 107 7
+35 056 RCL
+36 107 7
+37 011 -
+38 062 +/-
+39 096 SKP
+40 056 RCL
+41 100 0
+42 051 M-
+43 109 9
+44 056 RCL
+45 102 2
+46 012 *
+47 062 +/-
+48 011 -
+49 104 4
+50 064 X<>Y
+51 096 SKP
+52 056 RCL
+53 100 0
+54 051 M-
+55 109 9
+56 050 M+
+57 101 1
+58 101 1
+59 050 M+
+60 102 2
+61 056 RCL
+62 102 2
+63 080 =
+64 096 SKP
+65 093 GOTO
+66 100 0
+67 105 5
+68 090 R/S
+69 093 GOTO
+70 100 0
+71 100 0

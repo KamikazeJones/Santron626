@@ -1,0 +1,16 @@
+# Santron 626 peephole rules
+#
+# Format:
+#   lhs => rhs
+#
+# Regeln werden menschenlesbar geschrieben. Das C-Programm uebersetzt sie beim
+# Laden in regulaere Ausdruecke ueber normalisierte dreistellige Keycodes.
+#
+# Variablen:
+# - $m: Speicher-/Ziffernzelle 0..9. Wiederholtes $m wird zur Backreference.
+
+RCL $m RCL $m => RCL $m
+RCL $m STO $m => RCL $m
+STO $m RCL $m => STO $m
+= = => =
+C/CE C/CE => C/CE

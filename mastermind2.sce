@@ -24,29 +24,33 @@ STO 3
 
 # N: Schleifenzähler
 3 STO 5 
-+/- STO 8
 
 %loop
     RCL 0 # lade CODE
-%decode
-    / RCL 5 10^X
-    + EXP 9 - EXP 9 - STO 7 # first CODE
-    RCL 8
-    SKP # M0 ist negativ also SKIP
-    GOTO &guess
-    +/- STO 8
-    RCL 7 STO 6
+    / EXP RCL 5
+    + EXP 9 - EXP 9 - STO 6 # first CODE
+
     ( RCL 1 # lade CODE
-    goto &decode
-%guess
+    / EXP RCL 5
+    + EXP 9 - EXP 9 ) STO 7 # first GUESS
+    
     = X^2 +/- # < 0 wenn ungleich
+    
     SKP 
     GOTO &black
-
-    RCL 6 10^X M+ 2 # ca
-    RCL 7 10^X M+ 3 # ga
-    GOTO &repeat
+    
+    EXP RCL 6 M+ 2 # ca
+    EXP RCL 7 M+ 3 # ga
+    GOTO %repeat
 %black
     1 M+ 4
 
-; list;
+%repeat
+    RCL 6 * EXP RCL 5 = M- 0
+    RCL 7 * EXP RCL 5 = M- 1
+    1 M- 5
+    SKP
+    GOTO &loop
+    
+# jetzt die weiße Bewertung
+;list;
