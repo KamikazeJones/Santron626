@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"dev.quassel.ga.core"},{"l":"dev.quassel.ga.puzzle"}];updateSearchResults();

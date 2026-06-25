@@ -4,15 +4,25 @@ import dev.quassel.ga.core.EvaluationResult;
 import dev.quassel.ga.core.SearchDomain;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ArrayDeque;
+import java.util.Map;
 import java.util.random.RandomGenerator;
 
+/** Sliding-puzzle domain plugged into the generic GA core. */
 public final class PuzzleDomain implements SearchDomain<PuzzleCandidate> {
   private final PuzzleBoard startBoard;
   private final int minLength;
   private final int maxLength;
 
+  /**
+   * Creates one puzzle domain around a fixed start board and candidate length range.
+   *
+   * @param startBoard fixed start board
+   * @param minLength minimum candidate length
+   * @param maxLength maximum candidate length
+   */
   public PuzzleDomain(PuzzleBoard startBoard, int minLength, int maxLength) {
     if (minLength < 0 || maxLength < minLength) {
       throw new IllegalArgumentException("invalid length range");
@@ -128,7 +138,30 @@ public final class PuzzleDomain implements SearchDomain<PuzzleCandidate> {
         + " ineffective=" + ineffectiveMoves
         + System.lineSeparator()
         + end;
-    return new EvaluationResult(score, solved, summary);
+    Map<String, Double> metrics = new LinkedHashMap<>();
+    metrics.put("manhattan", (double) manhattan);
+    metrics.put("misplaced", (double) misplaced);
+    metrics.put("rawLength", (double) rawLength);
+    metrics.put("normalizedLength", (double) normalizedLength);
+    metrics.put("effectiveMoves", (double) effectiveMoves);
+    metrics.put("ineffectiveMoves", (double) ineffectiveMoves);
+    metrics.put("lengthPenalty", lengthPenalty);
+    metrics.put("ineffectivePenalty", ineffectivePenalty);
+    metrics.put("normalizationPenalty", normalizationPenalty);
+    List<String> diagnostics = new ArrayList<>();
+    if (rawLength != normalizedLength) {
+      diagnostics.add("sequence contains cancellable move pairs");
+    }
+    if (ineffectiveMoves > 0) {
+      diagnostics.add("sequence contains ineffective moves");
+    }
+    if (manhattan == 0 && misplaced > 0) {
+      diagnostics.add("unexpected metric state: zero manhattan with misplaced tiles");
+    }
+    if (solved) {
+      diagnostics.add("candidate solves the puzzle");
+    }
+    return new EvaluationResult(score, solved, summary, metrics, diagnostics);
   }
 
   @Override
@@ -142,6 +175,18 @@ public final class PuzzleDomain implements SearchDomain<PuzzleCandidate> {
         + result.summary();
   }
 
+  @Override
+  public String fingerprint(PuzzleCandidate candidate) {
+    return normalizedCandidate(candidate.moves()).compact();
+  }
+
+  /**
+   * Generates a solvable random start board by scrambling the solved board.
+   *
+   * @param size puzzle size
+   * @param rng random source
+   * @return solvable scrambled board
+   */
   public static PuzzleBoard scrambledBoard(int size, RandomGenerator rng) {
     PuzzleBoard board = PuzzleBoard.solved(size);
     int shuffleCount = 2 * size * size;

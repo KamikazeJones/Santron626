@@ -4,11 +4,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/** Immutable sliding-puzzle board. */
 public final class PuzzleBoard {
   private final int size;
   private final int[] tiles;
   private final int blankIndex;
 
+  /**
+   * Creates a board from explicit tiles.
+   *
+   * @param size edge length of the board
+   * @param tiles tile values in row-major order, using {@code 0} for the blank
+   */
   public PuzzleBoard(int size, int[] tiles) {
     if (size < 2) {
       throw new IllegalArgumentException("size must be >= 2");
@@ -21,6 +28,12 @@ public final class PuzzleBoard {
     this.blankIndex = findBlank(this.tiles);
   }
 
+  /**
+   * Creates the solved board for a given size.
+   *
+   * @param size edge length of the board
+   * @return solved board
+   */
   public static PuzzleBoard solved(int size) {
     int[] tiles = new int[size * size];
     for (int i = 0; i < tiles.length - 1; i++) {
@@ -30,6 +43,13 @@ public final class PuzzleBoard {
     return new PuzzleBoard(size, tiles);
   }
 
+  /**
+   * Parses a square board from textual tile values.
+   *
+   * @param text textual board representation
+   * @param size expected edge length
+   * @return parsed board
+   */
   public static PuzzleBoard parse(String text, int size) {
     String normalized = text.trim().replace('/', ' ').replace(',', ' ');
     String[] parts = normalized.split("\\s+");
@@ -66,10 +86,21 @@ public final class PuzzleBoard {
     return new PuzzleBoard(size, tiles);
   }
 
+  /**
+   * Returns the board size.
+   *
+   * @return board edge length
+   */
   public int size() {
     return size;
   }
 
+  /**
+   * Applies one move and returns the resulting board.
+   *
+   * @param move move to apply
+   * @return resulting board
+   */
   public PuzzleBoard apply(Move move) {
     int row = blankIndex / size;
     int col = blankIndex % size;
@@ -85,6 +116,12 @@ public final class PuzzleBoard {
     return new PuzzleBoard(size, copy);
   }
 
+  /**
+   * Applies a sequence of moves.
+   *
+   * @param moves moves to apply
+   * @return resulting board
+   */
   public PuzzleBoard apply(Iterable<Move> moves) {
     PuzzleBoard board = this;
     for (Move move : moves) {
@@ -93,6 +130,12 @@ public final class PuzzleBoard {
     return board;
   }
 
+  /**
+   * Executes a move sequence while counting effective and ineffective moves.
+   *
+   * @param moves moves to execute
+   * @return execution result with resulting board and counters
+   */
   public ExecutionResult execute(Iterable<Move> moves) {
     PuzzleBoard board = this;
     int effectiveMoves = 0;
@@ -109,6 +152,11 @@ public final class PuzzleBoard {
     return new ExecutionResult(board, effectiveMoves, ineffectiveMoves);
   }
 
+  /**
+   * Whether the board is solved.
+   *
+   * @return true if solved
+   */
   public boolean isSolved() {
     for (int i = 0; i < tiles.length - 1; i++) {
       if (tiles[i] != i + 1) {
@@ -118,6 +166,11 @@ public final class PuzzleBoard {
     return tiles[tiles.length - 1] == 0;
   }
 
+  /**
+   * Sum of Manhattan distances of all tiles from their goal positions.
+   *
+   * @return Manhattan distance
+   */
   public int manhattanDistance() {
     int distance = 0;
     for (int index = 0; index < tiles.length; index++) {
@@ -135,6 +188,11 @@ public final class PuzzleBoard {
     return distance;
   }
 
+  /**
+   * Number of misplaced non-blank tiles.
+   *
+   * @return misplaced tile count
+   */
   public int misplacedTiles() {
     int misplaced = 0;
     for (int i = 0; i < tiles.length - 1; i++) {
@@ -145,6 +203,11 @@ public final class PuzzleBoard {
     return misplaced;
   }
 
+  /**
+   * Whether the board is solvable according to sliding-puzzle parity rules.
+   *
+   * @return true if solvable
+   */
   public boolean isSolvable() {
     int inversions = inversionCount();
     if ((size & 1) == 1) {
@@ -172,6 +235,7 @@ public final class PuzzleBoard {
     return sb.toString();
   }
 
+  /** Small self-test for parser, moves and parity logic. */
   public static void selfTest() {
     PuzzleBoard solved = PuzzleBoard.solved(5);
     if (!solved.isSolved()) {
@@ -243,6 +307,13 @@ public final class PuzzleBoard {
     return inversions;
   }
 
+  /**
+   * Result of executing a move sequence on a board.
+   *
+   * @param board resulting board
+   * @param effectiveMoves moves that changed the board
+   * @param ineffectiveMoves moves that had no effect
+   */
   public record ExecutionResult(PuzzleBoard board, int effectiveMoves, int ineffectiveMoves) {
   }
 }

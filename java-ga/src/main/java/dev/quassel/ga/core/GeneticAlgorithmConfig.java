@@ -1,5 +1,14 @@
 package dev.quassel.ga.core;
 
+/**
+ * Static configuration for a GA run.
+ *
+ * @param populationSize number of candidates per generation
+ * @param maxGenerations hard generation limit
+ * @param eliteCount number of elite candidates copied unchanged
+ * @param crossoverRate probability of crossover before mutation
+ * @param seed random seed for reproducible runs
+ */
 public record GeneticAlgorithmConfig(
     int populationSize,
     int maxGenerations,
@@ -7,6 +16,7 @@ public record GeneticAlgorithmConfig(
     double crossoverRate,
     long seed
 ) {
+  /** Validates the configuration invariants. */
   public GeneticAlgorithmConfig {
     if (populationSize < 2) {
       throw new IllegalArgumentException("populationSize must be >= 2");
