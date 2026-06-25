@@ -1,0 +1,302 @@
+name score-3215-1234.target
+max-cells 99
+
+# Neue graduelle Bewertung:
+# - numerische Abweichungen werden relativ zur Groesse des Zielwerts bewertet
+# - es gibt keinen zusaetzlichen Alles-oder-nichts-Aufschlag
+# - ungueltige Zahlen und Endlosschleifen bleiben deutlich teuer
+score numeric normalized
+score exact-weight 0.05
+score invalid 100
+score timeout 1000
+
+# Suche fuer den Mastermind-Bewertungsblock.
+#
+# Mutiert wird nur der Score-Kandidat:
+#
+#   M1 += 1, falls M7 == M2
+#   M9 -= 1, falls M7 == 0
+#   M9 -= 1, falls M7 == M2
+#   M2 += 1
+#
+# Der feste Prefix fuehrt die echte Guess-Eingabe und die 22-Zellen-Extraktion
+# aus. Dadurch sieht der Kandidat denselben X/Y/pending-Zustand wie im echten
+# Mastermind-Programm.
+#
+# Der feste Append schliesst den Ausdruck, springt fuer die naechste Ziffer
+# zurueck zum Eingabe-Halt und stoppt nach der vierten Ziffer beim Ergebnis.
+#
+# Kandidaten-Kosten zaehlen nur den Score-Block, nicht Prefix oder Append.
+
+prefix R/S STO 4 / RCL 8 X<>Y 10^X + 9 EXP 9 STO 4 + STO 7 RCL 4 - RCL 4 = M- 7
+append RCL 2 = SKP GOTO 0 0 R/S
+
+seed RCL 7 - +/- SKP RCL 0 M- 9 RCL 2 * +/- - 4 X<>Y SKP RCL 0 M- 9 M+ 1 1 M+ 2
+
+# CODE 1234 -> M8 = 43210
+# 3215: ein schwarzer Treffer, zwei weiße Treffer
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+step
+keys R/S 3 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 2 R/S
+check M1=1 weight=5
+check M2=3 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 1 R/S
+check M1=1 weight=5
+check M2=4 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 5 R/S
+check M0=1 mode=exact
+check M1=1 weight=5
+check M2=5 weight=2
+check M8=43210 mode=exact
+check M9=2 weight=5
+check pause=1 mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+check loop=done mode=exact
+
+# 2143: vier weisse Treffer.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+step
+keys R/S 2 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 1 R/S
+check M1=0 weight=5
+check M2=3 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 4 R/S
+check M1=0 weight=5
+check M2=4 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 3 R/S
+check M0=1 mode=exact
+check M1=0 weight=5
+check M2=5 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=done mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+
+# 1243: zwei schwarz, zwei weiss.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+step
+keys R/S 1 R/S
+check M1=1 weight=5
+check M2=2 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 2 R/S
+check M1=2 weight=5
+check M2=3 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 4 R/S
+check M1=2 weight=5
+check M2=4 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 3 R/S
+check M0=1 mode=exact
+check M1=2 weight=5
+check M2=5 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check loop=done mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+
+# 5656: keine Ziffer kommt im Code vor.
+case
+init M0=1 M1=0 M2=1 M8=43210 M9=4
+step
+keys R/S 5 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 6 R/S
+check M1=0 weight=5
+check M2=3 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 5 R/S
+check M1=0 weight=5
+check M2=4 weight=2
+check M9=1 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 6 R/S
+check M0=1 mode=exact
+check M1=0 weight=5
+check M2=5 weight=2
+check M9=0 weight=5
+check pause=1 mode=exact
+check loop=done mode=exact
+check pause=1 mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+
+# CODE 6413 -> M8 = 1024030
+# 1234: null schwarz, drei weiss.
+case
+init M0=1 M1=0 M2=1 M8=1024030 M9=4
+step
+keys R/S 1 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 2 R/S
+check M1=0 weight=5
+check M2=3 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 3 R/S
+check M1=0 weight=5
+check M2=4 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 4 R/S
+check M0=1 mode=exact
+check M1=0 weight=5
+check M2=5 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=done mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+
+# CODE 1264 -> M8 = 3040210
+# 3514: ein schwarz, ein weiss.
+case
+init M0=1 M1=0 M2=1 M8=3040210 M9=4
+step
+keys R/S 3 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 5 R/S
+check M1=0 weight=5
+check M2=3 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 1 R/S
+check M1=0 weight=5
+check M2=4 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 4 R/S
+check M0=1 mode=exact
+check M1=1 weight=5
+check M2=5 weight=2
+check M8=3040210 mode=exact
+check M9=1 weight=5
+check pause=1 mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+check loop=done mode=exact
+
+# CODE  6543 -> M8 = 4321000
+# GUESS 3562: 1 schwarz, 2 weiss.
+
+case
+init M0=1 M1=0 M2=1 M8=3456000 M9=4
+step
+keys 3 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check M9=4 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 5 R/S
+check M1=1 weight=5
+check M2=3 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 6 R/S
+check M1=1 weight=5
+check M2=4 weight=2
+check M9=3 weight=5
+check pause=1 mode=exact
+check loop=continue mode=exact
+step
+keys 2 R/S
+check M0=1 mode=exact
+check M1=0 weight=5
+check M2=5 weight=2
+check M9=2 weight=5
+check pause=1 mode=exact
+check pending=none weight=0.5
+check pending-memory=none weight=0.5
+check paren=0 mode=exact weight=0.5
+check exponent=0 mode=exact weight=0.5
+check loop=done mode=exact
+check M8=34560000 mode=exact

@@ -30,6 +30,9 @@ typedef struct {
 typedef struct {
   int exact;
   int total;
+  int matched_checks;
+  int total_checks;
+  int goto_violations;
   double error;
   double penalty;
   double cost;
@@ -82,6 +85,11 @@ typedef struct {
 
 static uint64_t rng_state = 0x123456789abcdef0ULL;
 static bool verbose_failures = false;
+static bool soft_score = false;
+static bool local_goto = false;
+
+static bool score_is_better(const Score *a, const Score *b);
+static void print_program(const Program *p, const Score *score);
 
 typedef struct {
   bool enabled;
@@ -92,6 +100,12 @@ typedef struct {
   bool has_promoted;
   Program promoted_program;
 } PromotionState;
+
+typedef struct {
+  Program prefix;
+  Program best_program;
+  Score best_score;
+} BeamNode;
 
 static void close_promotion_log(PromotionState *promotion) {
   if (!promotion->log_file) return;
@@ -465,51 +479,48 @@ static void run_keys(SantronState *s, const TargetCase *tc) {
   }
 }
 
-static bool check_numeric(double actual, double expected, double *error) {
-  if (nearly_equal(actual, expected)) return true;
+static bool check_numeric(double actual, double expected, double *error,
+                          int *matched_checks, int *total_checks) {
+  (*total_checks)++;
+  if (nearly_equal(actual, expected)) {
+    (*matched_checks)++;
+    return true;
+  }
   if (isfinite(actual) && isfinite(expected)) *error += fabs(actual - expected);
   else *error += 1e6;
   return false;
 }
 
-static bool check_case(const SantronState *s, const StateSpec *expect, double *error, double *penalty) {
+static bool check_bool(bool actual_ok, double penalty_value, double *penalty,
+                       int *matched_checks, int *total_checks) {
+  (*total_checks)++;
+  if (actual_ok) {
+    (*matched_checks)++;
+    return true;
+  }
+  *penalty += penalty_value;
+  return false;
+}
+
+static bool check_case(const SantronState *s, const StateSpec *expect,
+                       double *error, double *penalty,
+                       int *matched_checks, int *total_checks) {
   bool ok = true;
-  if (expect->has_x) ok = check_numeric(s->x, expect->x, error) && ok;
-  if (expect->has_y) ok = check_numeric(s->y, expect->y, error) && ok;
-  if (expect->has_pc) ok = check_numeric((double)s->pc, (double)expect->pc, error) && ok;
+  if (expect->has_x) ok = check_numeric(s->x, expect->x, error, matched_checks, total_checks) && ok;
+  if (expect->has_y) ok = check_numeric(s->y, expect->y, error, matched_checks, total_checks) && ok;
+  if (expect->has_pc) ok = check_numeric((double)s->pc, (double)expect->pc, error, matched_checks, total_checks) && ok;
   for (int i = 0; i < MEMORY_SIZE; i++) {
-    if (expect->has_memory[i]) ok = check_numeric(s->memory[i], expect->memory[i], error) && ok;
+    if (expect->has_memory[i]) ok = check_numeric(s->memory[i], expect->memory[i], error, matched_checks, total_checks) && ok;
   }
-  if (expect->has_pause && ((s->paused ? 1 : 0) != expect->pause)) {
-    *penalty += 1000.0;
-    ok = false;
-  }
-  if (expect->has_running && ((s->running ? 1 : 0) != expect->running)) {
-    *penalty += 1000.0;
-    ok = false;
-  }
-  if (expect->has_pending_none && s->pending != OP_NONE) {
-    *penalty += 1000.0;
-    ok = false;
-  }
-  if (expect->has_pending_memory_none && s->pending_memory >= 0) {
-    *penalty += 100.0;
-    ok = false;
-  }
-  if (expect->has_paren && s->paren_depth != expect->paren) {
-    *penalty += 1000.0;
-    ok = false;
-  }
-  if (expect->has_exponent && ((s->exponent_entry ? 1 : 0) != expect->exponent)) {
-    *penalty += 100.0;
-    ok = false;
-  }
+  if (expect->has_pause) ok = check_bool((s->paused ? 1 : 0) == expect->pause, 1000.0, penalty, matched_checks, total_checks) && ok;
+  if (expect->has_running) ok = check_bool((s->running ? 1 : 0) == expect->running, 1000.0, penalty, matched_checks, total_checks) && ok;
+  if (expect->has_pending_none) ok = check_bool(s->pending == OP_NONE, 1000.0, penalty, matched_checks, total_checks) && ok;
+  if (expect->has_pending_memory_none) ok = check_bool(s->pending_memory < 0, 100.0, penalty, matched_checks, total_checks) && ok;
+  if (expect->has_paren) ok = check_bool(s->paren_depth == expect->paren, 1000.0, penalty, matched_checks, total_checks) && ok;
+  if (expect->has_exponent) ok = check_bool((s->exponent_entry ? 1 : 0) == expect->exponent, 100.0, penalty, matched_checks, total_checks) && ok;
   if (expect->has_loop) {
     bool loop_ok = expect->loop > 0 ? s->x >= 0.0 : s->x < 0.0;
-    if (!loop_ok) {
-      *penalty += 1000.0;
-      ok = false;
-    }
+    ok = check_bool(loop_ok, 1000.0, penalty, matched_checks, total_checks) && ok;
   }
   return ok;
 }
@@ -532,7 +543,10 @@ static Score score_program(const Program *p, const Target *target) {
       run_keys(&s, &target->cases[i]);
       double error = 0.0;
       double penalty = 0.0;
-      bool ok = check_case(&s, &target->cases[i].expect, &error, &penalty);
+      int matched_checks = 0;
+      int total_checks = 0;
+      bool ok = check_case(&s, &target->cases[i].expect, &error, &penalty,
+                           &matched_checks, &total_checks);
       if (ok) {
         score.exact++;
       } else if (verbose_failures) {
@@ -546,16 +560,56 @@ static Score score_program(const Program *p, const Target *target) {
         }
         fprintf(stderr, "\n");
       }
+      score.matched_checks += matched_checks;
+      score.total_checks += total_checks;
       score.error += error;
       score.penalty += penalty;
     }
   }
 
-  score.cost =
-    (double)(score.total - score.exact) * 100000.0 +
-    score.error * 100.0 +
-    score.penalty +
-    (double)score.cells;
+  if (local_goto) {
+    int routine_start = target->prefix_len;
+    int routine_end = target->prefix_len + len;
+    for (int i = 0; i < p->op_count; i++) {
+      const Operation *op = &p->ops[i];
+      if (op->len == 3 && op->codes[0] == KEY_GOTO) {
+        int tens = digit_from_code(op->codes[1]);
+        int ones = digit_from_code(op->codes[2]);
+        int addr = tens >= 0 && ones >= 0 ? tens * 10 + ones : -1;
+        if (addr < routine_start || addr >= routine_end) score.goto_violations++;
+      }
+    }
+  }
+
+  if (score.goto_violations != 0) {
+    score.cost = INFINITY;
+    return score;
+  }
+
+  bool complete = score.exact == score.total &&
+                  score.penalty == 0.0 &&
+                  score.goto_violations == 0 &&
+                  (!soft_score || score.matched_checks == score.total_checks);
+  double cell_cost = complete ? (double)score.cells : 0.0;
+
+  if (soft_score) {
+    int missed_checks = score.total_checks - score.matched_checks;
+    double capped_error = fmin(score.error, 100000.0);
+    double capped_penalty = fmin(score.penalty, 100000.0);
+    score.cost =
+      (double)missed_checks * 10000.0 +
+      capped_error * 0.01 +
+      capped_penalty * 0.1 +
+      (double)score.goto_violations * 50000.0 +
+      cell_cost;
+  } else {
+    score.cost =
+      (double)(score.total - score.exact) * 100000.0 +
+      score.error * 100.0 +
+      score.penalty +
+      (double)score.goto_violations * 100000.0 +
+      cell_cost;
+  }
   return score;
 }
 
@@ -565,7 +619,7 @@ static int full_operation_set(Operation *ops, int capacity) {
     KEY_SIN, KEY_COS, KEY_TAN, KEY_ASIN, KEY_ACOS, KEY_ATAN,
     KEY_LN, KEY_LOG, KEY_EX, KEY_TENX,
     KEY_CLEAR, KEY_SIGN, KEY_EXP, KEY_SWAP, KEY_PI, KEY_DOT, KEY_PS,
-    KEY_EQ, KEY_LPAREN, KEY_RPAREN, KEY_RS, KEY_SKP
+    KEY_EQ, KEY_LPAREN, KEY_RPAREN, KEY_SKP
   };
   const int memory_commands[] = {
     KEY_MPLUS, KEY_MMINUS, KEY_MULMEM, KEY_DIVMEM, KEY_STO, KEY_RCL
@@ -652,6 +706,52 @@ static void mutate_program(Program *dst, const Program *src, const Operation *op
   }
 }
 
+static void anneal_candidate_no_grow(const Target *target, const Operation *ops, int op_count,
+                                     const Program *start, uint64_t seed,
+                                     int iterations, const char *label,
+                                     Program *overall_best,
+                                     Score *overall_best_score) {
+  rng_state = seed;
+  if (!rng_state) rng_state = 1;
+
+  Program current = *start;
+  const int max_cells = program_cell_count(&current);
+  Score current_score = score_program(&current, target);
+  Program local_best = current;
+  Score local_best_score = current_score;
+  double temperature = 2000.0;
+
+  for (int i = 1; i <= iterations; i++) {
+    Program mutated;
+    mutate_program(&mutated, &current, ops, op_count, max_cells);
+    Score mutated_score = score_program(&mutated, target);
+
+    double delta = mutated_score.cost - current_score.cost;
+    bool accept = delta <= 0.0 || rng_double() < exp(-delta / temperature);
+    if (accept) {
+      current = mutated;
+      current_score = mutated_score;
+    }
+
+    if (score_is_better(&mutated_score, &local_best_score)) {
+      local_best = mutated;
+      local_best_score = mutated_score;
+    }
+
+    temperature *= 0.9995;
+    if (temperature < 0.01) temperature = 0.01;
+  }
+
+  if (score_is_better(&local_best_score, overall_best_score)) {
+    *overall_best = local_best;
+    *overall_best_score = local_best_score;
+    printf("\nnew beam-anneal overall best from %s seed=%llu max-cells=%d iterations=%d\n",
+           label, (unsigned long long)seed, max_cells, iterations);
+    print_program(overall_best, overall_best_score);
+    fflush(stdout);
+  }
+}
+
 static void random_program(Program *p, const Operation *ops, int op_count,
                            int min_cells, int max_cells) {
   memset(p, 0, sizeof(*p));
@@ -667,12 +767,87 @@ static void random_program(Program *p, const Operation *ops, int op_count,
   }
 }
 
+static bool append_random_fit(Program *p, const Operation *ops, int op_count,
+                              int max_cells) {
+  if (p->op_count >= MAX_PROGRAM_OPS) return false;
+  int cells = program_cell_count(p);
+  for (int attempt = 0; attempt < 100; attempt++) {
+    Operation op = ops[rng_int(op_count)];
+    if (cells + op.len <= max_cells) {
+      p->ops[p->op_count++] = op;
+      return true;
+    }
+  }
+  return false;
+}
+
+static void complete_random_program(Program *dst, const Program *prefix,
+                                    const Operation *ops, int op_count,
+                                    int min_cells, int max_cells) {
+  *dst = *prefix;
+  int current_cells = program_cell_count(dst);
+  if (min_cells < current_cells) min_cells = current_cells;
+  if (max_cells < min_cells) max_cells = min_cells;
+  int target_cells = min_cells + rng_int(max_cells - min_cells + 1);
+  while (program_cell_count(dst) < target_cells) {
+    if (!append_random_fit(dst, ops, op_count, max_cells)) break;
+  }
+}
+
+static bool score_is_better(const Score *a, const Score *b) {
+  if (a->cost != b->cost) return a->cost < b->cost;
+  if (a->exact != b->exact) return a->exact > b->exact;
+  if (a->matched_checks != b->matched_checks) return a->matched_checks > b->matched_checks;
+  if (a->goto_violations != b->goto_violations) return a->goto_violations < b->goto_violations;
+  return a->cells < b->cells;
+}
+
+static int compare_beam_nodes(const void *left, const void *right) {
+  const BeamNode *a = (const BeamNode *)left;
+  const BeamNode *b = (const BeamNode *)right;
+  if (score_is_better(&a->best_score, &b->best_score)) return -1;
+  if (score_is_better(&b->best_score, &a->best_score)) return 1;
+  return 0;
+}
+
+static BeamNode evaluate_prefix_rollouts(const Program *prefix,
+                                         const Target *target,
+                                         const Operation *ops, int op_count,
+                                         int rollouts,
+                                         int rollout_min_cells,
+                                         int rollout_max_cells) {
+  BeamNode node;
+  memset(&node, 0, sizeof(node));
+  node.prefix = *prefix;
+  node.best_score.cost = INFINITY;
+
+  if (rollouts == 0) {
+    Score score = score_program(prefix, target);
+    node.best_score = score;
+    node.best_program = *prefix;
+    return node;
+  }
+
+  for (int i = 0; i < rollouts; i++) {
+    Program candidate;
+    complete_random_program(&candidate, prefix, ops, op_count,
+                            rollout_min_cells, rollout_max_cells);
+    Score score = score_program(&candidate, target);
+    if (score_is_better(&score, &node.best_score)) {
+      node.best_score = score;
+      node.best_program = candidate;
+    }
+  }
+  return node;
+}
+
 static void print_program(const Program *p, const Score *score) {
   uint16_t codes[MAX_CELLS];
   int len = flatten_program(p, codes, MAX_CELLS);
-  printf("cells=%d ops=%d exact=%d/%d error=%.12g penalty=%.12g cost=%.12g\n",
-         len, p->op_count, score->exact, score->total, score->error,
-         score->penalty, score->cost);
+  printf("cells=%d ops=%d exact=%d/%d checks=%d/%d goto=%d error=%.12g penalty=%.12g cost=%.12g\n",
+         len, p->op_count, score->exact, score->total,
+         score->matched_checks, score->total_checks, score->goto_violations,
+         score->error, score->penalty, score->cost);
   for (int i = 0; i < len; i++) printf("%s%s", i ? " " : "", code_name(codes[i]));
   printf("\n");
   for (int i = 0; i < len; i++) printf("%02d %03d %s\n", i, codes[i], code_name(codes[i]));
@@ -895,6 +1070,7 @@ static bool try_promote_mastermind(const Program *candidate, const Score *score,
                                    PromotionState *promotion, const char *where) {
   if (!promotion || !promotion->enabled) return false;
   if (score->exact != score->total || score->penalty != 0.0) return false;
+  if (score->goto_violations != 0) return false;
   if (score->cells >= promotion->best_cells) return false;
 
   promotion->tested++;
@@ -972,7 +1148,7 @@ static bool has_flag(int argc, char **argv, const char *name) {
 
 static void usage(const char *argv0) {
   fprintf(stderr,
-          "usage: %s --target file [--iterations n] [--restarts n] [--seed n|--seed-ms] [--candidate \"keys...\"] [--random-start] [--random-min-cells n] [--random-max-cells n] [--promote-mastermind] [--promotion-log file] [--check]\n",
+          "usage: %s --target file [--iterations n] [--restarts n] [--seed n|--seed-ms] [--candidate \"keys...\"] [--random-start] [--random-min-cells n] [--random-max-cells n] [--beam-rollout] [--beam-width n] [--beam-branch n] [--beam-rollouts n] [--beam-rounds n] [--beam-anneal n] [--beam-anneal-iterations n] [--soft-score] [--local-goto] [--promote-mastermind] [--promotion-log file] [--check]\n",
           argv0);
 }
 
@@ -1062,6 +1238,92 @@ static void run_restart(const Target *target, const Operation *ops, int op_count
   fflush(stdout);
 }
 
+static void run_beam_rollout(const Target *target, const Operation *ops, int op_count,
+                             uint64_t seed, int beam_width, int beam_branch,
+                             int beam_rollouts, int beam_rounds,
+                             int rollout_min_cells, int rollout_max_cells,
+                             int beam_anneal, int beam_anneal_iterations,
+                             Program *overall_best, Score *overall_best_score) {
+  rng_state = seed;
+  if (!rng_state) rng_state = 1;
+
+  BeamNode *beam = calloc((size_t)beam_width, sizeof(*beam));
+  BeamNode *children = calloc((size_t)beam_width * (size_t)beam_branch, sizeof(*children));
+  if (!beam || !children) {
+    fprintf(stderr, "out of memory in beam rollout\n");
+    free(beam);
+    free(children);
+    return;
+  }
+
+  int beam_count = 1;
+  memset(&beam[0], 0, sizeof(beam[0]));
+  beam[0] = evaluate_prefix_rollouts(&beam[0].prefix, target, ops, op_count,
+                                     beam_rollouts, rollout_min_cells,
+                                     rollout_max_cells);
+
+  printf("\nbeam-rollout seed=%llu width=%d branch=%d rollouts=%d rounds=%d cells=%d..%d\n",
+         (unsigned long long)seed, beam_width, beam_branch, beam_rollouts,
+         beam_rounds, rollout_min_cells, rollout_max_cells);
+  printf("initial beam best:\n");
+  print_program(&beam[0].best_program, &beam[0].best_score);
+
+  if (score_is_better(&beam[0].best_score, overall_best_score)) {
+    *overall_best = beam[0].best_program;
+    *overall_best_score = beam[0].best_score;
+  }
+
+  for (int round = 1; round <= beam_rounds; round++) {
+    int child_count = 0;
+    for (int i = 0; i < beam_count; i++) {
+      for (int j = 0; j < beam_branch; j++) {
+        Program child = beam[i].prefix;
+        if (!append_random_fit(&child, ops, op_count, rollout_max_cells)) continue;
+        children[child_count++] = evaluate_prefix_rollouts(&child, target, ops, op_count,
+                                                           beam_rollouts,
+                                                           rollout_min_cells,
+                                                           rollout_max_cells);
+      }
+    }
+    if (child_count == 0) break;
+
+    qsort(children, (size_t)child_count, sizeof(children[0]), compare_beam_nodes);
+    beam_count = child_count < beam_width ? child_count : beam_width;
+    for (int i = 0; i < beam_count; i++) beam[i] = children[i];
+
+    if (score_is_better(&beam[0].best_score, overall_best_score)) {
+      *overall_best = beam[0].best_program;
+      *overall_best_score = beam[0].best_score;
+      printf("\nnew beam overall best at round %d prefix-cells=%d\n",
+             round, program_cell_count(&beam[0].prefix));
+      print_program(overall_best, overall_best_score);
+      fflush(stdout);
+    }
+
+    printf("\nbeam round %d best prefix-cells=%d:\n",
+           round, program_cell_count(&beam[0].prefix));
+    print_program(&beam[0].best_program, &beam[0].best_score);
+    fflush(stdout);
+  }
+
+  if (beam_anneal > 0 && beam_anneal_iterations > 0) {
+    int anneal_count = beam_anneal < beam_count ? beam_anneal : beam_count;
+    printf("\nbeam-anneal top=%d iterations=%d no-grow=yes\n",
+           anneal_count, beam_anneal_iterations);
+    for (int i = 0; i < anneal_count; i++) {
+      char label[64];
+      snprintf(label, sizeof(label), "beam rank %d", i + 1);
+      anneal_candidate_no_grow(target, ops, op_count, &beam[i].best_program,
+                               seed + 1000003ULL + (uint64_t)i,
+                               beam_anneal_iterations, label,
+                               overall_best, overall_best_score);
+    }
+  }
+
+  free(beam);
+  free(children);
+}
+
 int main(int argc, char **argv) {
   const char *target_path = parse_string_arg(argc, argv, "--target", NULL);
   if (!target_path) {
@@ -1072,6 +1334,8 @@ int main(int argc, char **argv) {
   Target target;
   parse_target(target_path, &target);
   verbose_failures = has_flag(argc, argv, "--verbose");
+  soft_score = has_flag(argc, argv, "--soft-score");
+  local_goto = has_flag(argc, argv, "--local-goto");
 
   const int iterations = parse_int_arg(argc, argv, "--iterations", 300000);
   const char *seed_text = parse_string_arg(argc, argv, "--seed", NULL);
@@ -1079,6 +1343,13 @@ int main(int argc, char **argv) {
   const uint64_t seed = seed_from_millis ? current_unix_millis() : parse_u64_value(seed_text);
   const int restarts = parse_int_arg(argc, argv, "--restarts", 1);
   const bool random_start = has_flag(argc, argv, "--random-start");
+  const bool beam_rollout = has_flag(argc, argv, "--beam-rollout");
+  const int beam_width = parse_int_arg(argc, argv, "--beam-width", 32);
+  const int beam_branch = parse_int_arg(argc, argv, "--beam-branch", 8);
+  const int beam_rollouts = parse_int_arg(argc, argv, "--beam-rollouts", 8);
+  const int beam_rounds = parse_int_arg(argc, argv, "--beam-rounds", target.max_cells);
+  const int beam_anneal = parse_int_arg(argc, argv, "--beam-anneal", 0);
+  const int beam_anneal_iterations = parse_int_arg(argc, argv, "--beam-anneal-iterations", 2000);
   int random_min_cells = parse_int_arg(argc, argv, "--random-min-cells", 1);
   int random_max_cells = parse_int_arg(argc, argv, "--random-max-cells", target.max_cells);
   PromotionState promotion = {0};
@@ -1100,6 +1371,16 @@ int main(int argc, char **argv) {
       random_min_cells > random_max_cells ||
       random_max_cells > target.max_cells) {
     fprintf(stderr, "--random-min-cells/--random-max-cells must satisfy 0 <= min <= max <= target max-cells\n");
+    close_promotion_log(&promotion);
+    return 2;
+  }
+  if (beam_width <= 0 || beam_branch <= 0 || beam_rollouts < 0 || beam_rounds <= 0) {
+    fprintf(stderr, "--beam-width/--beam-branch/--beam-rounds must be >= 1 and --beam-rollouts must be >= 0\n");
+    close_promotion_log(&promotion);
+    return 2;
+  }
+  if (beam_anneal < 0 || beam_anneal_iterations < 0) {
+    fprintf(stderr, "--beam-anneal and --beam-anneal-iterations must be >= 0\n");
     close_promotion_log(&promotion);
     return 2;
   }
@@ -1125,12 +1406,15 @@ int main(int argc, char **argv) {
   promotion.promoted_program = seed_program;
   promotion.has_promoted = false;
 
-  printf("target=%s seed=%llu seed-source=%s restarts=%d operations=%d iterations=%d max-cells=%d prefix=%d append=%d cases=%d random-start=%s random-cells=%d..%d promote-mastermind=%s promotion-log=%s\n",
+  printf("target=%s seed=%llu seed-source=%s restarts=%d operations=%d iterations=%d max-cells=%d prefix=%d append=%d cases=%d random-start=%s random-cells=%d..%d beam-rollout=%s beam-anneal=%d beam-anneal-iterations=%d soft-score=%s local-goto=%s promote-mastermind=%s promotion-log=%s\n",
          target.name, (unsigned long long)seed,
          seed_from_millis ? "unix-ms" : "manual", restarts, op_count,
          iterations, target.max_cells, target.prefix_len, target.append_len,
          target.case_count, random_start ? "yes" : "no",
-         random_min_cells, random_max_cells,
+         random_min_cells, random_max_cells, beam_rollout ? "yes" : "no",
+         beam_anneal, beam_anneal_iterations,
+         soft_score ? "yes" : "no",
+         local_goto ? "yes" : "no",
          promotion.enabled ? "yes" : "no",
          promotion_log_path ? promotion_log_path : "-");
   printf("initial candidate:\n");
@@ -1141,9 +1425,27 @@ int main(int argc, char **argv) {
   }
 
   if (has_flag(argc, argv, "--check") || iterations == 0) {
-    int result = seed_score.exact == seed_score.total && seed_score.penalty == 0.0 ? 0 : 1;
+    int result = seed_score.exact == seed_score.total &&
+                 seed_score.penalty == 0.0 &&
+                 seed_score.goto_violations == 0 ? 0 : 1;
     close_promotion_log(&promotion);
     return result;
+  }
+
+  if (beam_rollout) {
+    Program beam_best = {0};
+    Score beam_best_score = {0};
+    beam_best_score.cost = INFINITY;
+    run_beam_rollout(&target, ops, op_count, seed, beam_width, beam_branch,
+                     beam_rollouts, beam_rounds, random_min_cells,
+                     random_max_cells, beam_anneal, beam_anneal_iterations,
+                     &beam_best, &beam_best_score);
+    printf("\nbeam best:\n");
+    print_program(&beam_best, &beam_best_score);
+    close_promotion_log(&promotion);
+    return beam_best_score.exact == beam_best_score.total &&
+           beam_best_score.penalty == 0.0 &&
+           beam_best_score.goto_violations == 0 ? 0 : 1;
   }
 
   for (int restart = 0; restart < restarts; restart++) {
@@ -1169,5 +1471,6 @@ int main(int argc, char **argv) {
   }
   close_promotion_log(&promotion);
   return overall_best_score.exact == overall_best_score.total &&
-         overall_best_score.penalty == 0.0 ? 0 : 1;
+         overall_best_score.penalty == 0.0 &&
+         overall_best_score.goto_violations == 0 ? 0 : 1;
 }

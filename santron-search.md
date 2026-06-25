@@ -164,52 +164,107 @@ CODE 1264, Guess 1264 -> schwarz 4, weiss 0
 Diese Tests pruefen nicht nur das Endergebnis, sondern auch, ob der Block nach
 jeder eingegebenen Ziffer wieder in einem brauchbaren Zustand haelt.
 
-## Vorschlag fuer eine einfache Target-Syntax
+## Target-Spezifikation
 
-Die erste Version muss nicht allgemein perfekt sein. Sie soll nur genuegend
-ausdruecken koennen, um konkrete Suchen nicht mehr in C fest zu verdrahten.
+Die Target-Datei beschreibt Programmrahmen, Eingaben, beobachtbares Verhalten
+und dessen Bewertung. Sie beschreibt keinen Loesungsweg.
 
-Moegliche Form:
+Globale Direktiven:
 
 ```text
-name mastermind-step
-max-cells 72
-append RCL 2 = R/S
-seed STO 4 1 0 STO 6 ...
+name frei lesbarer Name
+max-cells 30
+prefix feste Santron-Tasten vor dem Kandidaten
+append feste Santron-Tasten nach dem Kandidaten
+seed bekannte Startfolge
+```
 
+`seed` wird vom flachen Sucher verwendet. Der Baum-Sucher ignoriert die Zeile.
+`keys`, `prefix` und `append` enthalten immer echte Santron-Tasten, keine
+abstrakten Eingaben.
+
+Bewertungsregeln:
+
+```text
+score numeric raw
+score numeric normalized
+score exact-weight 0
+score invalid 100
+score timeout 1000
+```
+
+`numeric normalized` verwendet fuer numerische Checks:
+
+```text
+abs(actual - expected) / (1 + abs(expected))
+```
+
+`raw` verwendet die absolute Abweichung. `exact-weight` wird bei einer
+numerischen Abweichung zusaetzlich zur Distanz addiert. Mit `0` bleibt der
+Gradient ohne Alles-oder-nichts-Sprung erhalten. `invalid` bewertet NaN und
+unendliche Werte. `timeout` bewertet einen Programmlauf, der nach 1000
+VM-Schritten nicht beendet ist.
+
+Ein Testfall beginnt mit `case` und genau einem Anfangszustand:
+
+```text
 case
 init M0=1 M1=0 M2=1 M8=1024030 M9=4
+```
+
+Nicht in `init` genannte Speicher sowie `X` und `Y` werden mit drei
+unterschiedlichen Varianten belegt. Damit darf ein Kandidat nicht
+versehentlich von unbeschriebenen Anfangswerten abhaengen.
+
+Ein Fall enthaelt einen oder mehrere aufeinanderfolgende Schritte:
+
+```text
+step
+keys R/S 1 R/S
+check M1=0 weight=5
+check M2=2 weight=2
+check pause=1 mode=exact
+
+step
+keys 2 R/S
+check M1=0 weight=5
+check M2=3 weight=2
+```
+
+Der VM-Zustand bleibt zwischen den Schritten erhalten. Dadurch kann ein Target
+den Zustand nach jeder Eingabe bewerten, statt nur das Endergebnis zu sehen.
+
+Syntax einer einzelnen Pruefung:
+
+```text
+check FIELD=WERT [mode=distance|exact] [weight=N] [tolerance=N]
+```
+
+Numerische Felder sind `X`, `Y`, `PC` und `M0` bis `M9`. Zustandsfelder sind
+`pause`, `running`, `paren` und `exponent`. Zusaetzlich existieren:
+
+```text
+check pending=none
+check pending-memory=none
+check loop=continue
+check loop=done
+```
+
+`mode=distance` ist fuer numerische Felder Standard. `mode=exact` ist fuer
+Zustandsfelder Standard. `weight` multipliziert den Verlust; `tolerance`
+definiert den Bereich mit Verlust null.
+
+Die alte Kurzform bleibt gueltig:
+
+```text
 keys 1 R/S
-expect M1=0 M2=2 M8=1024030 M9=4 pause=1 pending=none loop=continue
-
-case
-init M0=1 M1=0 M2=3 M8=1024030 M9=3
-keys 3 R/S
-expect M1=0 M2=4 M8=1024030 M9=3 pause=1 pending=none loop=continue
+expect M1=0 M2=2 pause=1 pending=none
 ```
 
-`keys` beschreibt absichtlich keine abstrakte Eingabe, sondern echte
-Santron-Tasten. `1 R/S` bedeutet also: Taste `1` druecken, dann `R/S`
-druecken. Dadurch muss der Sucher keine Sonderlogik fuer "Guess-Ziffern"
-kennen, sondern fuehrt einfach Tastenfolgen auf der VM aus.
-
-Sequenztests sind als naechster Ausbauschritt geplant. Sie sollen ebenfalls mit
-echten Tastenfolgen arbeiten:
-
-```text
-sequence
-init M0=1 M1=0 M2=1 M8=1024030 M9=4
-keys 1 R/S 2 R/S 3 R/S 4 R/S
-expect M1=0 M2=5 M8=1024030 M9=3 pause=1
-
-sequence
-init M0=1 M1=0 M2=1 M8=1024030 M9=4
-keys 6 R/S 4 R/S 1 R/S 3 R/S
-expect M1=4 M2=5 M8=1024030 M9=0 pause=1
-```
-
-Die Syntax darf spaeter noch geaendert werden. Wichtig ist zuerst die Trennung
-zwischen Suchmotor und Suchziel.
+Ohne `score`, `step` oder `check` verwendet der Baum-Sucher die bisherige
+Legacy-Bewertung. Sobald eine dieser neuen Direktiven vorkommt, wird jeder
+einzelne Check jedes Schritts und jeder Initialzustandsvariante zu einem
+eigenen Lexicase-Ziel.
 
 ## Umsetzungsstand
 
@@ -243,6 +298,10 @@ Der Prototyp kann:
   behalten
 - mit `--random-start` jeden Restart mit einem komplett neu gewuerfelten
   Kandidaten beginnen, statt immer vom Seed auszugehen
+- mit `--soft-score` Teilerfolge innerhalb eines Testfalls bewerten, damit
+  zufaellige Programme einen nutzbaren Gradienten bekommen
+- mit `--local-goto` `GOTO`-Ziele ausserhalb des aktuell gesuchten Kandidaten
+  hart verwerfen
 - ohne `--seed` automatisch die Unixzeit in Millisekunden als Startseed
   verwenden
 - mit `--promote-mastermind` kuerzere gueltige Extract-Kandidaten direkt in
@@ -296,7 +355,7 @@ das Programm ein gemeinsames `overall best` aus.
 Kreativere Suche mit zufaelligen Startprogrammen:
 
 ```text
-/tmp/santron-search --target score-block.target --random-start --random-min-cells 5 --random-max-cells 30 --iterations 100000 --restarts 1000
+/tmp/santron-search --target score-block.target --random-start --random-min-cells 5 --random-max-cells 30 --soft-score --local-goto --iterations 100000 --restarts 1000
 ```
 
 Damit startet jeder Restart mit einem neu gewuerfelten Kandidaten innerhalb des
@@ -304,6 +363,84 @@ angegebenen Zellbereichs. Der Sucher gibt trotzdem den normalen Seed als
 `initial candidate` aus, verwendet ihn aber in den Restarts nicht als
 Startpunkt. Dieser Modus ist deutlich ineffizienter, kann aber weiter vom
 bisherigen Ansatz weg springen.
+
+`--soft-score` aendert nicht die Definition von "korrekt". Ein Kandidat ist
+weiterhin erst dann gueltig, wenn alle Faelle exakt bestehen. Fuer die Suche
+werden aber einzelne Erwartungen wie `M1`, `M2`, `M9`, `pause`, `pending` und
+`loop` getrennt gezaehlt. Dadurch sieht der Sucher auch Fortschritt, wenn ein
+zufaelliges Programm nur einzelne Speicher richtig setzt.
+
+Die Programmlaenge zaehlt erst, wenn ein Kandidat korrekt ist. Fehlerhafte
+Programme bekommen also keinen Bonus nur dadurch, dass sie kuerzer sind. Solange
+noch Erwartungen verletzt werden, bestimmen Teilerfolge, Fehler, Penalties und
+GOTO-Verstoesse die Kosten.
+
+`--local-goto` ist fuer Routinen sinnvoll, die als Kandidat zwischen einem
+festen `prefix` und einem festen `append` gesucht werden. Ein `GOTO` im
+Kandidaten darf dann nur innerhalb des Kandidatenblocks landen:
+
+```text
+prefix_len <= ziel < prefix_len + kandidat_laenge
+```
+
+Spruenge in den Prefix, in den Append oder ganz aus dem Programm heraus werden
+als `goto`-Verstoss gezaehlt. Der Kandidat bekommt dann Kosten `inf` und kann
+nicht als beste Loesung akzeptiert werden. Das gilt auch im Beam-Modus.
+
+`R/S` wird nicht zufaellig in Kandidaten eingefuegt. Haltepunkte gehoeren in
+`prefix` oder `append`, nicht in den mutierten Routineblock. Manuell angegebene
+Kandidaten duerfen `R/S` weiterhin enthalten, falls das fuer ein anderes Target
+bewusst gewuenscht ist.
+
+Experimenteller Beam-Rollout-Modus:
+
+```text
+/tmp/santron-search --target score-block.target --beam-rollout --beam-width 64 --beam-branch 16 --beam-rollouts 16 --beam-rounds 30 --random-min-cells 5 --random-max-cells 30 --soft-score --local-goto --seed-ms
+```
+
+Dieser Modus baut Programme von links nach rechts auf. Fuer jedes Praefix
+werden mehrere zufaellige Fortsetzungen bis zur erlaubten Laenge ausprobiert.
+Die besten Praefixe werden in den naechsten Runden weiterverfolgt.
+
+Parameter:
+
+```text
+--beam-width n      Anzahl der Praefixe, die pro Runde behalten werden
+--beam-branch n     zufaellige Erweiterungen pro behaltenem Praefix
+--beam-rollouts n   zufaellige Vervollstaendigungen pro neuem Praefix
+--beam-rounds n     maximale Anzahl Aufbau-Runden
+--beam-anneal n     nach Beam-Ende die besten n Kandidaten kurz annealen
+--beam-anneal-iterations n
+                    Annealing-Schritte pro Beam-Kandidat, Standard 2000
+```
+
+Der bekannte Seed wird weiter als Referenz ausgegeben, aber der Beam-Modus
+meldet am Ende einen eigenen `beam best`. Wenn dieser noch nicht korrekt ist,
+endet das Programm mit Exit-Code 1.
+
+Ohne Monte-Carlo-Fortsetzungen:
+
+```text
+/tmp/santron-search --target score-block.target --beam-rollout --beam-width 128 --beam-branch 32 --beam-rollouts 0 --beam-rounds 30 --random-max-cells 30 --soft-score --local-goto --seed-ms
+```
+
+Mit `--beam-rollouts 0` wird jedes Praefix direkt bewertet. Dann misst Runde 1
+wirklich Programme mit einer Operation, Runde 2 Programme mit zwei Operationen
+usw. `--random-max-cells` bleibt als Laengenlimit fuer Praefixe relevant;
+`--random-min-cells` spielt in diesem direkten Modus keine Rolle.
+
+Optional kann nach der Beam-Suche ein kurzes Annealing auf den besten
+Beam-Kandidaten laufen:
+
+```text
+/tmp/santron-search --target score-block.target --beam-rollout --beam-width 1000 --beam-branch 32 --beam-rollouts 0 --beam-rounds 30 --beam-anneal 1000 --beam-anneal-iterations 2000 --random-max-cells 30 --soft-score --local-goto --seed-ms
+```
+
+Dabei wird jeder Kandidat mit seiner aktuellen Zelllaenge als Obergrenze
+annealed. Der Kandidat darf also verbessert oder gekuerzt werden, aber nicht
+laenger werden. `--beam-anneal 1000` kann nur so viele Kandidaten nachbearbeiten,
+wie der letzte Beam tatsaechlich enthaelt; praktisch sollte `--beam-width` also
+mindestens so gross sein.
 
 Fuer einen langen Lauf bietet sich zum Beispiel an:
 
@@ -493,3 +630,223 @@ tools/santron-search.c
 
 `tools/stochastic-mastermind-step.c` bleibt vorerst als alter, spezialisierter
 Sucher erhalten. Neue Arbeit soll in `tools/santron-search.c` weitergehen.
+
+## Syntaxbaum-Suche
+
+Der experimentelle Sucher `tools/santron-tree-search.c` arbeitet nicht direkt
+auf flachen Tastensequenzen, sondern erzeugt Programme als kleine
+Syntaxbaeume. Diese Baeume werden anschliessend in Santron-Tasten kompiliert
+und mit derselben VM-Bewertung gegen eine Target-Datei getestet.
+
+Ein Smoke-Test:
+
+```text
+cc -std=c11 -O2 -Wall -Wextra tools/santron-tree-search.c -lm -o /tmp/santron-tree-search
+/tmp/santron-tree-search --target score-block-tree.target --population 40 --generations 5 --depth 3 --elite 4 --max-cells 30 --seed 23
+```
+
+`score-block-tree.target` ist die Trace-Variante mit `step` und `check`.
+`score-block.target` bleibt unveraendert, weil der flache
+`tools/santron-search.c` die erweiterte Syntax noch nicht liest.
+
+Die bekannte korrekte Routine kann ohne AST direkt gegen das Trace-Target
+geprueft werden:
+
+```text
+/tmp/santron-tree-search --target score-block-tree.target --max-cells 30 --candidate "RCL 7 - +/- SKP RCL 0 M- 9 RCL 2 * +/- - 4 X<>Y SKP RCL 0 M- 9 M+ 1 1 M+ 2"
+candidate cells=26 exact=72/72 checks=468/468 error=0 penalty=0 cost=26 objectives=468
+```
+
+`max-cells` in der Target-Datei ist der Standardwert. Eine explizite Angabe
+von `--max-cells` ueberschreibt ihn auch nach oben. Das ist insbesondere fuer
+fehlerhafte Zwischenloesungen sinnvoll: Ihre Laenge beeinflusst die Bewertung
+nicht, sie duerfen aber mehr Raum verwenden, um sich einer korrekten Funktion
+anzunaehern.
+
+Die harte Obergrenze ergibt sich aus dem 100-Zellen-Programmspeicher:
+
+```text
+100 - Prefix-Laenge - Append-Laenge
+```
+
+Hat das Target kein Append, reserviert der Sucher stattdessen eine Zelle fuer
+das automatisch angehaengte `R/S`. Prefix, Kandidat und Append werden dadurch
+niemals still abgeschnitten.
+
+Die Ausgabe zeigt jeweils beides: zuerst die kompilierte Santron-Tastenfolge,
+danach den Lisp-artigen Baum, aus dem sie entstanden ist. Der erste Prototyp
+kennt Konstanten, `M0` bis `M9`, unaere Funktionen, binaere Ausdruecke,
+Speicheroperationen, `if` und `seq`.
+
+Das Blatt `X` bezeichnet den Displaywert, der beim Eintritt in den gesuchten
+Kandidaten bereits vorhanden ist. Es kompiliert zu keiner Taste. Da dieser
+Wert ohne zusaetzliches `STO` nicht erneut hergestellt werden kann, darf `X`
+hoechstens einmal vorkommen und muss das zuerst ausgewertete Blatt sein:
+
+```text
+(- X M7)       -> - RCL 7 =
+(SIN X)        -> SIN
+(+ M7 X)       -> ungueltig
+(+ X X)        -> ungueltig
+```
+
+Das erste Listing nutzt die Santron-Eingabereihenfolge: Der linke Operand `X`
+steht schon im Display, danach folgen Operator und rechter Operand.
+
+Der eingebaute Regressionstest prueft diese vier `X`-Faelle sowie beide
+Laufzeitpfade eines kompilierten `if`:
+
+```text
+/tmp/santron-tree-search --self-test
+tree self-test: PASS
+```
+
+Die erste eingebaute Bedingung ist der einstellige Operator `!=0`:
+
+```text
+(if (!=0 z) then)
+(if (!=0 z) then else)
+```
+
+`!=0` ist bewusst kein allgemeiner zweistelliger Vergleich: Die Null ist fest
+in der Bedeutung des Operators enthalten. `(!=0 z)` wird ohne Sprung zu
+`z X^2 +/-` kompiliert. Fuer `z != 0` ist `z^2` positiv und wird durch `+/-`
+negativ. Fuer `z = 0` bleibt das Ergebnis null. Damit kann `SKP` die Bedingung
+direkt auswerten.
+
+Der Ausdruck `(min x y)` wird mit der bekannten kompakten Routine uebersetzt:
+
+```text
+x - y = SKP C/CE + y =
+```
+
+Bei `x < y` ueberspringt `SKP` das Loeschen und `(x-y)+y` ergibt `x`.
+Andernfalls wird das Zwischenergebnis geloescht und `0+y` ergibt `y`.
+Da der zweite Operand zweimal ausgewertet wird, muss er nebenwirkungsfrei sein
+und darf insbesondere nicht den einmaligen Eingangswert `X` enthalten.
+
+Die Zweige sind derzeit Speicheranweisungen oder weitere `if`-Knoten. Nach
+der Bedingung erzeugt der Compiler lokale Spruenge:
+
+```text
+condition SKP GOTO else-or-end then [GOTO end else]
+```
+
+Die zweistelligen `GOTO`-Adressen werden aus der Laenge des Target-Prefix und
+der Position im kompilierten Kandidaten berechnet. Dadurch kann derselbe AST
+in Targets mit unterschiedlich langen Prefixen verwendet werden.
+
+Die Programmlaenge beeinflusst die Auswahl nur bei vollstaendig korrekten
+Kandidaten. Solange Tests oder Einzelpruefungen fehlschlagen, sind zwei
+ansonsten gleich bewertete Programme unabhaengig von ihrer Laenge gleich gut.
+
+Standardmaessig verwendet die Baum-Suche Lexicase-Selektion:
+
+```text
+--selection lexicase
+```
+
+Im Legacy-Modus erhaelt jeder Target-Fall und jede Variante einen eigenen
+Verlustwert. Bei Targets mit `step`/`check` wird jede einzelne Pruefung jedes
+Schritts und jeder Variante zu einem eigenen Verlustwert. Bei jeder Elternwahl
+werden diese Ziele zufaellig sortiert und schrittweise die jeweils besten
+Kandidaten behalten. Dadurch bleiben Spezialisten fuer einzelne Teilprobleme
+erhalten, auch wenn ihre Gesamtkosten noch nicht gut sind.
+Mit `--selection aggregate` kann die fruehere Auswahl aus den insgesamt
+besten Kandidaten verwendet werden.
+
+`--immigrants n` ersetzt pro Generation die letzten `n` Nachkommen durch neue
+Zufallsbaeume. Standard sind fuenf Prozent der Population. Das verhindert,
+dass nach einem fruehen Plateau nur noch eng verwandte Baeume gekreuzt werden.
+
+Die Variation verwendet standardmaessig:
+
+```text
+--point-mutation 50
+--subtree-mutation 30
+```
+
+Die restlichen 20 Prozent sind Crossovers. Eine Punktmutation aendert nur eine
+Konstante, Speicherzelle, Funktion, Rechenoperation oder Speicheroperation
+eines vorhandenen AST. Dadurch koennen bereits weitgehend korrekte Programme
+lokal verbessert werden. Die Teilbaum-Mutation bleibt fuer groessere
+Strukturaenderungen erhalten.
+
+### Rotierende Top-Programme
+
+Der Baum-Sucher kann die besten ASTs jeder Generation als lesbare
+S-Ausdruecke speichern und beim naechsten Start wieder als Population laden:
+
+```text
+--top-prefix top-programs
+--top-files 3
+--top-count 100
+```
+
+Damit entstehen rotierend:
+
+```text
+top-programs-0.ast
+top-programs-1.ast
+top-programs-2.ast
+```
+
+Jede nicht auskommentierte Zeile enthaelt genau einen vollstaendigen AST:
+
+```lisp
+(seq (M- M9 1) (if (!=0 M7) (M+ M1 1)) (M+ M2 1))
+```
+
+Nach dem Sortieren einer Generation wird die Datei
+`generation % top-files` neu geschrieben. Vor dem Schliessen wird
+`fflush()` ausgefuehrt. Wird der Prozess waehrend des Schreibens beendet, kann
+hoechstens diese eine Datei unvollstaendig sein; die anderen Dateien enthalten
+weiterhin fruehere Generationen.
+
+Beim Start liest der Sucher alle Dateien mit dem angegebenen Prefix:
+
+- Kommentar- und Leerzeilen werden ignoriert.
+- Jede AST-Zeile wird separat geparst und strukturell validiert.
+- Abgeschnittene oder ungueltige Zeilen werden verworfen.
+- Jeder geladene AST wird mit dem aktuellen Target neu kompiliert und bewertet.
+- Doppelte kompilierte Tastenfolgen werden entfernt.
+- Freie Populationsplaetze werden anschliessend zufaellig gefuellt.
+
+Die Dateien speichern bewusst keine alten Scores. Aenderungen an Target,
+Gewichten oder Bewertungsregeln werden deshalb beim Wiederanlauf korrekt
+beruecksichtigt.
+
+Beispiel:
+
+```text
+/tmp/santron-tree-search \
+  --target score-block-tree.target \
+  --population 2000 \
+  --generations 5000 \
+  --depth 7 \
+  --elite 100 \
+  --immigrants 100 \
+  --max-cells 60 \
+  --top-prefix top-programs \
+  --top-files 3 \
+  --top-count 100 \
+  --seed-ms
+```
+
+Der AST ist typisiert: Ausdruecke liefern einen Displaywert, Statements
+veraendern Zustand oder Kontrollfluss. Ein `if` darf daher nur in `seq` oder
+in einem anderen `if`-Zweig stehen, niemals als Operand von `+`, `*`, `min`
+oder einer Funktion. Mutation und Crossover erhalten diese Rollen.
+
+Binaere Ausdruecke werden kontextabhaengig uebersetzt. Ein binaerer Ausdruck
+auf der rechten Seite eines anderen Operators erhaelt Klammern. Dadurch bleibt
+die Bedeutung des AST erhalten und es entstehen keine nutzlosen Folgen wie
+`= =`.
+
+`seq` ist eine Anweisungsfolge, keine Aneinanderreihung beliebiger Ausdruecke.
+Alle Kinder bis auf das letzte muessen deshalb Statements wie `STO`, `M+`,
+`M-` oder `if` sein. Nur das letzte Kind darf ein normaler Ausdruck sein.
+Damit werden unter anderem Folgen ausgeschlossen, die getrennte Konstanten zu
+einer neuen Zahl verschmelzen oder einen Wert unmittelbar durch `RCL n`
+ueberschreiben. Diese Form wird beim Erzeugen sowie nach Mutation und
+Crossover geprueft.
