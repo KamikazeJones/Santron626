@@ -6,147 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Java GA playground</title>
   <style>
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      background-color: #1a1a1a;
-      border: none;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -162,77 +21,20 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      {   }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-    code span.at { color: #7d9029; } /* Attribute */
-    code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { color: #008000; } /* BuiltIn */
-    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #4070a0; } /* Char */
-    code span.cn { color: #880000; } /* Constant */
-    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-    code span.dt { color: #902000; } /* DataType */
-    code span.dv { color: #40a070; } /* DecVal */
-    code span.er { color: #ff0000; font-weight: bold; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #40a070; } /* Float */
-    code span.fu { color: #06287e; } /* Function */
-    code span.im { color: #008000; font-weight: bold; } /* Import */
-    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-    code span.op { color: #666666; } /* Operator */
-    code span.ot { color: #007020; } /* Other */
-    code span.pp { color: #bc7a00; } /* Preprocessor */
-    code span.sc { color: #4070a0; } /* SpecialChar */
-    code span.ss { color: #bb6688; } /* SpecialString */
-    code span.st { color: #4070a0; } /* String */
-    code span.va { color: #19177c; } /* Variable */
-    code span.vs { color: #4070a0; } /* VerbatimString */
-    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="docs/start.css" />
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">Java GA playground</h1>
-</header>
-<h1 id="navigation">Navigation</h1>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#java-ga-playground" id="toc-java-ga-playground">Java GA
+playground</a>
+<ul>
+<li><a href="#architektur-prinzipien"
+id="toc-architektur-prinzipien">Architektur-Prinzipien</a></li>
+</ul></li>
+</ul>
+</nav>
 <ul>
 <li><a href="javadoc/index.html">API-JavaDoc</a></li>
 <li><a href="README.md">README.md</a></li>
@@ -240,13 +42,48 @@
 <h1 id="java-ga-playground">Java GA playground</h1>
 <p>Minimaler erster Schnitt für eine generische Bibliothek zur
 genetischen Suche.</p>
+<h2 id="architektur-prinzipien">Architektur-Prinzipien</h2>
+<p>Dieses Projekt ist <strong>keine Puzzle-Anwendung</strong> mit etwas
+GA darunter. Dieses Projekt ist eine <strong>generische
+GA-Infrastruktur</strong>, in die konkrete Probleme nur als
+austauschbare Adapter eingehängt werden.</p>
+<p>Nicht verhandelbare Architekturregeln:</p>
+<ul>
+<li>Die GA-Suche kennt keine Problem-Domain.</li>
+<li>Die Laufzeit-Infrastruktur kennt keine Problem-Domain.</li>
+<li>HTTP, CLI, Monitoring, Registry, Worker und Persistenz gehören zur
+Infrastruktur, nicht zur Puzzle-Domäne.</li>
+<li>Konkrete Probleme wie das Schiebe-Puzzle dürfen nur über klar
+definierte Interfaces oder Adapter an die generische Infrastruktur
+angeschlossen werden.</li>
+<li>Ein Klassenname oder Paketname, der Infrastruktur mit einer
+konkreten Domäne mischt, ist ein Architekturfehler und kein akzeptabler
+Zwischenzustand.</li>
+</ul>
+<p>Aktueller Architekturstatus:</p>
+<ul>
+<li>Die frühere Kopplung von Puzzle-Domäne und HTTP-Laufzeit wurde
+aufgebrochen.</li>
+<li>Die generische Laufzeit liegt jetzt unter
+<code>dev.quassel.ga.runtime</code>.</li>
+<li>Das Puzzle hängt nur noch über <code>PuzzleRuntimeAdapter</code> an
+der Infrastruktur.</li>
+<li>Die Einstiegsschicht ist jetzt eine generische CLI unter
+<code>dev.quassel.ga.app</code>.</li>
+<li>Konkrete Probleme werden über <code>--problem &lt;id&gt;</code>
+ausgewählt, nicht über eigene CLI-Klassen.</li>
+</ul>
 <p>Enthalten:</p>
 <ul>
 <li>generischer GA-Kern ohne Domänenwissen</li>
+<li>generische Runtime-Schicht für Worker und Registry</li>
 <li>24-Puzzle als erstes Beispielproblem</li>
+<li>Travelling Salesman als zweites Beispielproblem</li>
 <li>CLI-Smoke mit textueller Ausgabe pro Generation</li>
 <li>einfacher Self-Test ohne externe Bibliotheken</li>
-<li>lokaler HTTP-Server für adressierbare Suchläufe</li>
+<li>generischer Worker-HTTP-Server für adressierbare Suchläufe</li>
+<li>generischer Registry-HTTP-Server für aggregierte Sicht auf mehrere
+Worker</li>
 <li>CLI-Kommandos als HTTP-Client für laufende Runs</li>
 </ul>
 <p>Aktueller Stand:</p>
@@ -254,7 +91,8 @@ genetischen Suche.</p>
 <li>Der erste vertikale Schnitt funktioniert:
 <ul>
 <li>generischer GA-Kern</li>
-<li>Puzzle-Domäne</li>
+<li>generische Runtime-Infrastruktur</li>
+<li>Puzzle-Adapter</li>
 <li>CLI-Build und CLI-Smoke</li>
 </ul></li>
 <li>Das 4x4-Puzzle funktioniert als erste Demo bereits brauchbar.</li>
@@ -266,6 +104,9 @@ stark genug:
 <li>der Solver ist dort aktuell eher ein Experimentiergerüst als ein
 guter Problemlöser</li>
 </ul></li>
+<li>Diversität wird derzeit als <code>uniqueCandidateRatio</code> pro
+Generation mitgeführt. Das ist der Anteil einzigartiger
+Kandidaten-Fingerprints in der Population.</li>
 </ul>
 <p>Aktuelle Modellierungsentscheidungen:</p>
 <ul>
@@ -289,6 +130,15 @@ entfernt.</li>
 </ul>
 <p>Wichtige offene Punkte:</p>
 <ul>
+<li>Höchste Priorität:
+<ul>
+<li>Registry- und Worker-HTTP noch stärker um generische
+Transportmodelle herum härten</li>
+<li>weitere problemunabhängige Infrastruktur-Schnittstellen
+definieren</li>
+<li>die Problem-Registry später dynamisch statt statisch
+zusammensetzen</li>
+</ul></li>
 <li>Die Bibliothek sollte als Nächstes bessere Analyse-/Diagnosedaten
 liefern:
 <ul>
@@ -303,14 +153,64 @@ wahrscheinlich nicht aus.</li>
 </ul>
 <p>Lokale HTTP-Laufzeit:</p>
 <ul>
-<li><code>./run.sh server</code> startet einen lokalen HTTP-Server auf
-<code>127.0.0.1:8787</code></li>
-<li><code>./run.sh start ...</code> startet darüber einen Run</li>
-<li><code>./run.sh list</code> listet bekannte Runs</li>
-<li><code>./run.sh status &lt;runId&gt;</code> liefert Status und
-letzten Snapshot</li>
-<li><code>./run.sh best &lt;runId&gt;</code> liefert den aktuell besten
-Kandidaten mit Metriken</li>
+<li><code>./start.sh --problem ...</code> ist der einfache Einstieg:
+<ul>
+<li>startet bei Bedarf automatisch eine Registry auf Port
+<code>8788</code></li>
+<li>startet bei Bedarf automatisch einen passenden Worker ab Port
+<code>8789</code></li>
+<li>startet danach den gewünschten Run</li>
+</ul></li>
+<li><code>./watch.sh</code> zeigt nur aktive Runs der Default-Registry
+auf Port <code>8788</code>, inklusive Request-/GA-Metadaten</li>
+<li><code>./watch-all.sh</code> zeigt alle bekannten Runs der
+Default-Registry auf Port <code>8788</code></li>
+<li><code>./list.sh</code> listet alle Runs der Default-Registry auf
+Port <code>8788</code></li>
+<li><code>./status.sh &lt;runId&gt;</code> zeigt den vollständigen
+Status eines Runs auf der Default-Registry, inklusive
+Request-/GA-Metadaten</li>
+<li><code>./best.sh &lt;runId&gt;</code> zeigt den aktuell besten
+Kandidaten eines Runs auf der Default-Registry</li>
+<li><code>./pause.sh &lt;runId&gt;</code> pausiert einen Run auf der
+Default-Registry</li>
+<li><code>./resume.sh &lt;runId&gt;</code> setzt einen pausierten Run
+auf der Default-Registry fort</li>
+<li><code>./stop.sh &lt;runId&gt;</code> beendet einen Run auf der
+Default-Registry</li>
+<li><code>./shutdown.sh</code> beendet alle über die Default-Registry
+bekannten Worker und danach die Default-Registry selbst</li>
+<li><code>./run.sh start --problem ...</code> macht dasselbe ohne
+separates Einstiegsskript</li>
+<li><code>./run.sh registry</code> startet die Registry manuell im
+Hintergrund auf Default-Port <code>8788</code></li>
+<li><code>./run.sh registry --port N</code> überschreibt den
+Registry-Port</li>
+<li><code>./run.sh server --problem puzzle --registry-url URL</code>
+startet einen Worker manuell im Hintergrund</li>
+<li><code>./run.sh server --problem puzzle</code> wählt automatisch den
+ersten freien Worker-Port ab <code>8789</code></li>
+<li><code>./run.sh server --problem puzzle --port N</code> überschreibt
+den Worker-Port</li>
+<li><code>./run.sh server-status --port N</code> zeigt Status, Rolle und
+Runs eines Registry- oder Worker-Prozesses</li>
+<li><code>./run.sh server-stop --port N</code> beendet einen Registry-
+oder Worker-Prozess</li>
+<li><code>./run.sh server-info --port N</code> zeigt Rolle, PID, Host
+und Startzeit des Prozesses</li>
+<li><code>./run.sh start --problem puzzle ... --port N</code> nutzt den
+Registry-Port <code>N</code>, startet bei Bedarf Infrastruktur und legt
+dort den Run an</li>
+<li><code>./run.sh list --port N</code> listet bekannte Runs auf einem
+Worker oder aggregiert über die Registry</li>
+<li><code>./run.sh status &lt;runId&gt; --port N</code> liefert Status
+und letzten Snapshot</li>
+<li><code>./run.sh best &lt;runId&gt; --port N</code> liefert den
+aktuell besten Kandidaten mit Metriken</li>
+<li><code>./run.sh watch &lt;runId&gt; --port N</code> zeigt Status und
+Bestwert fortlaufend im Terminal</li>
+<li><code>./run.sh watch all --port N</code> zeigt alle Runs des
+angesprochenen Endpunkts; auf der Registry also workerübergreifend</li>
 <li><code>./run.sh pause &lt;runId&gt;</code> pausiert einen laufenden
 Run an der nächsten Generationsgrenze</li>
 <li><code>./run.sh resume &lt;runId&gt;</code> setzt einen pausierten
@@ -319,53 +219,55 @@ Run fort</li>
 oder pausierten Run</li>
 </ul>
 <p>Beispiel:</p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> server</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> start <span class="at">--size</span> 4 <span class="at">--generations</span> 20 <span class="at">--population</span> 50</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> list</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> status <span class="op">&lt;</span>runId<span class="op">&gt;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> best <span class="op">&lt;</span>runId<span class="op">&gt;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> pause <span class="op">&lt;</span>runId<span class="op">&gt;</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> resume <span class="op">&lt;</span>runId<span class="op">&gt;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> stop <span class="op">&lt;</span>runId<span class="op">&gt;</span></span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./start.sh --problem puzzle --size 4 --generations 20 --population 50
+./watch.sh
+./watch-all.sh
+./list.sh
+./status.sh &lt;runId&gt;
+./best.sh &lt;runId&gt;
+./run.sh watch &lt;runId&gt; --port 8788
+./pause.sh &lt;runId&gt;
+./resume.sh &lt;runId&gt;
+./stop.sh &lt;runId&gt;
+./shutdown.sh</code></pre>
+<p>TSP lokal:</p>
+<pre class="bash"><code>cd java-ga
+./run.sh --problem tsp --cities 40 --width 1000 --height 1000 --generations 500 --population 300</code></pre>
+<p>TSP über die Registry:</p>
+<pre class="bash"><code>cd java-ga
+./start.sh --problem tsp --cities 40 --width 1000 --height 1000 --generations 500 --population 300
+./watch.sh</code></pre>
 <p>Alternativ direkt per HTTP:</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://127.0.0.1:8787/health</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST <span class="st">&quot;http://127.0.0.1:8787/runs?size=4&amp;generations=20&amp;population=50&quot;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://127.0.0.1:8787/runs</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://127.0.0.1:8787/runs/<span class="op">&lt;</span>runId<span class="op">&gt;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://127.0.0.1:8787/runs/<span class="op">&lt;</span>runId<span class="op">&gt;</span>/best</span></code></pre></div>
+<pre class="bash"><code>curl http://127.0.0.1:8788/health
+curl -X POST &quot;http://127.0.0.1:8788/runs?problem=puzzle&amp;size=4&amp;generations=20&amp;population=50&quot;
+curl http://127.0.0.1:8788/runs
+curl http://127.0.0.1:8788/runs/&lt;runId&gt;
+curl http://127.0.0.1:8788/runs/&lt;runId&gt;/best</code></pre>
 <p>Build:</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./build.sh</span></span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./build.sh</code></pre>
 <p>JavaDoc:</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x javadoc.sh</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./javadoc.sh</span></span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+chmod +x javadoc.sh
+./javadoc.sh</code></pre>
 <p>Danach liegt die HTML-Doku unter <code>java-ga/javadoc/</code>.</p>
 <p>Self-Test:</p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> <span class="at">--self-test</span></span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./run.sh --self-test --problem puzzle
+./run.sh --self-test --problem tsp</code></pre>
 <p>Smoke-Run:</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span></span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./run.sh --problem puzzle</code></pre>
 <p>Andere Größe:</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> <span class="at">--size</span> 4</span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./run.sh --problem puzzle --size 4</code></pre>
 <p>Explizites Startbrett:</p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> <span class="at">--board</span> <span class="st">&quot;1 2 3 4 5 6 7 8 9 10 11 12 19 13 15 16 17 18 14 20 21 22 0 23 24&quot;</span></span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./run.sh --problem puzzle --board &quot;1 2 3 4 5 6 7 8 9 10 11 12 19 13 15 16 17 18 14 20 21 22 0 23 24&quot;</code></pre>
 <p>Größeres Suchbudget:</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> java-ga</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./run.sh</span> <span class="at">--size</span> 5 <span class="at">--generations</span> 1000 <span class="at">--population</span> 600</span></code></pre></div>
+<pre class="bash"><code>cd java-ga
+./run.sh --problem puzzle --size 5 --generations 1000 --population 600</code></pre>
 <p>Hinweis:</p>
 <ul>
 <li>Standard ist <code>--size 5</code>.</li>

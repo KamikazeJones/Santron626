@@ -20,7 +20,11 @@ pandoc \
   --from=gfm \
   --to=html5 \
   --standalone \
-  --metadata title="Java GA playground" \
+  --no-highlight \
+  --toc \
+  --toc-depth=2 \
+  --css docs/start.css \
+  --metadata pagetitle="Java GA playground" \
   "$DOCS_DIR/navigation-start.md" \
   "$ROOT_DIR/README.md" \
   -o "$START_PAGE"

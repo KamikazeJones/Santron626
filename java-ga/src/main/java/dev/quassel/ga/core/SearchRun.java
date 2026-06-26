@@ -17,6 +17,7 @@ public final class SearchRun<C> {
   private final List<RunSnapshot<C>> snapshots = new ArrayList<>();
   private final long startedAtMillis = System.currentTimeMillis();
   private RunStatus status = RunStatus.RUNNING;
+  private RunMetadata metadata;
   private RunResult<C> finalResult;
   private Throwable failure;
   private boolean pauseRequested;
@@ -84,6 +85,15 @@ public final class SearchRun<C> {
    */
   public synchronized RunResult<C> finalResult() {
     return finalResult;
+  }
+
+  /**
+   * Returns static metadata captured for this run.
+   *
+   * @return run metadata or {@code null}
+   */
+  public synchronized RunMetadata metadata() {
+    return metadata;
   }
 
   /**
@@ -163,6 +173,11 @@ public final class SearchRun<C> {
 
   synchronized void setFinalResult(RunResult<C> finalResult) {
     this.finalResult = finalResult;
+  }
+
+  /** Stores static metadata for this run. */
+  public synchronized void setMetadata(RunMetadata metadata) {
+    this.metadata = metadata;
   }
 
   synchronized void markStopped() {

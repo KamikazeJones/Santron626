@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"dev.quassel.ga.core"},{"l":"dev.quassel.ga.puzzle"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"dev.quassel.ga.app"},{"l":"dev.quassel.ga.core"},{"l":"dev.quassel.ga.puzzle"},{"l":"dev.quassel.ga.runtime"},{"l":"dev.quassel.ga.tsp"}];updateSearchResults();

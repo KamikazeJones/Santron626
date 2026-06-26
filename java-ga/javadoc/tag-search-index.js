@@ -1,1 +1,1 @@
-tagSearchIndex = [{"l":"Java GA playground","h":"Overview","d":"Section","u":"index.html#java-ga-playground"},{"l":"Navigation","h":"Overview","d":"Section","u":"index.html#navigation"}];updateSearchResults();
+tagSearchIndex = [{"l":"Architektur-Prinzipien","h":"Overview","d":"Section","u":"index.html#architektur-prinzipien"},{"l":"Java GA playground","h":"Overview","d":"Section","u":"index.html#java-ga-playground"}];updateSearchResults();

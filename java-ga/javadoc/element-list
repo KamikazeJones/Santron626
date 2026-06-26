@@ -1,2 +1,5 @@
+dev.quassel.ga.app
 dev.quassel.ga.core
 dev.quassel.ga.puzzle
+dev.quassel.ga.runtime
+dev.quassel.ga.tsp

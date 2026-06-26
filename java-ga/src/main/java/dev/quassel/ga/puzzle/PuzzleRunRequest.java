@@ -7,6 +7,8 @@ package dev.quassel.ga.puzzle;
  * @param seed random seed for generated boards and GA randomness
  * @param generations generation budget
  * @param population population size
+ * @param minLength minimum candidate length
+ * @param maxLength maximum candidate length
  * @param boardText optional explicit board override
  */
 public record PuzzleRunRequest(
@@ -14,6 +16,8 @@ public record PuzzleRunRequest(
     long seed,
     int generations,
     int population,
+    int minLength,
+    int maxLength,
     String boardText
 ) {
 }
