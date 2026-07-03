@@ -1,3 +1,22 @@
+# Mastermind 18
+# GUI-Listing fuer den Santron626-Programmbaustein.
+# Wie Mastermind 17, aber M1 und M9 werden vor jedem Guess automatisch
+# zurueckgesetzt.
+# Der geheime Code wird vor dem Start codiert in M8 versteckt.
+# Beispiel: 6413 -> 1024030
+# Vor dem ersten Start muss nur M0 auf 1 gesetzt werden.
+# Nach der vierten Guess-Ziffer haelt das Programm an.
+# Schwarz bedeutet: richtige Ziffer an richtiger Stelle.
+# Weiss bedeutet: richtige Ziffer an falscher Stelle.
+# RCL 1 zeigt die schwarzen Treffer an.
+# RCL 9 zeigt die weissen Treffer an.
+#
+# Unterschied zu Mastermind 16 und 17:
+# Fuer den naechsten Guess reicht R/S.
+# Das Programm setzt M1 wieder auf 0, M9 wieder auf 4 und M2 wieder auf 1.
+# Es muessen also nicht mehr nach jedem Guess Speicherzellen manuell gesetzt
+# werden.
+
 00 060 C/CE
 01 055 STO
 02 101 1

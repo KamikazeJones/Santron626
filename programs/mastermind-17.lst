@@ -1,3 +1,20 @@
+# Mastermind 17
+# GUI-Listing fuer den Santron626-Programmbaustein.
+# Wie Mastermind 16, aber mit kuerzerer Extraktionsroutine.
+# Der geheime Code wird vor dem Start codiert in M8 versteckt.
+# Beispiel: 6413 -> 1024030
+# Vor dem ersten Start: C/CE STO 1 4 STO 9
+# Nach der vierten Guess-Ziffer haelt das Programm an.
+# Schwarz bedeutet: richtige Ziffer an richtiger Stelle.
+# Weiss bedeutet: richtige Ziffer an falscher Stelle.
+# RCL 1 zeigt die schwarzen Treffer an.
+# RCL 9 zeigt die weissen Treffer an.
+#
+# Die Bedienung fuer den naechsten Guess ist wie bei Mastermind 16:
+# M1 und M9 werden nicht automatisch zurueckgesetzt.
+# Daher vor jedem neuen Guess wieder:
+# C/CE STO 1 4 STO 9
+
 00 101 1
 01 055 STO
 02 100 0
