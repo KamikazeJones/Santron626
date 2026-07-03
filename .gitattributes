@@ -1,0 +1,2 @@
+# Szenario-Dateien: keine Scilab-Erkennung, nicht als Quelltext zählen
+*.sce -linguist-detectable
