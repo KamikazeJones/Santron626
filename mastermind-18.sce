@@ -1,42 +1,58 @@
-# Mastermind - Ansatz 18
+# Mastermind 18
+# Mastermind fuer vier verschiedene Ziffern von 1 bis 6.
+# Schwarz bedeutet: richtige Ziffer an richtiger Stelle.
+# Weiss bedeutet: richtige Ziffer an falscher Stelle.
 #
-# Wie Ansatz 17, aber M1 und M9 werden vor jedem Guess automatisch
-# initialisiert:
-# - M1 = 0, schwarze Treffer
-# - M9 = 4, Hit-Vorrat; am Ende bleiben die weissen Treffer uebrig
+# Vorbereitung:
+# - M0 muss nach dem Laden des Programms einmalig auf 1 gesetzt werden:
+#   1 STO 0
+#   Danach bleibt M0 unveraendert; nicht pro Guess und nicht pro Code neu
+#   setzen.
+# - Der geheime Code wird codiert in M8 versteckt.
 #
-# Damit das noch in 72 Programmschritte passt, wird M0 nicht mehr vom Programm
-# gesetzt. M0 muss vor dem Spiel einmal auf 1 gesetzt werden und bleibt danach
-# unveraendert.
-#
-# Der geheime Code wird vor dem Start codiert in M8 versteckt.
-# Beispiel: 6413 -> 1024030
-#
-# Codierung:
-# - Ziffer 6 an Position 1: 1 * 10^6 = 1000000
-# - Ziffer 4 an Position 2: 2 * 10^4 =   20000
-# - Ziffer 1 an Position 3: 3 * 10^1 =      30
-# - Ziffer 3 an Position 4: 4 * 10^3 =    4000
+# Codierung des geheimen Codes:
+# Fuer jede Ziffer wird ihre Position als Stelle 10^Ziffer gespeichert.
+# Beispiel 1: Code 6413
+# - 6 steht an Position 1: 1 * 10^6 = 1000000
+# - 4 steht an Position 2: 2 * 10^4 =   20000
+# - 1 steht an Position 3: 3 * 10^1 =      30
+# - 3 steht an Position 4: 4 * 10^3 =    4000
 # - Summe:                            1024030
+# Zum Verstecken druecken: 1024030 STO 8
 #
-# Beispiel-Bewertung: Code 6413 gegen Guess 1234 ergibt 0 schwarz, 3 weiss.
+# Beispiel 2: Code 2561
+# - 2 steht an Position 1: 1 * 10^2 =     100
+# - 5 steht an Position 2: 2 * 10^5 =  200000
+# - 6 steht an Position 3: 3 * 10^6 = 3000000
+# - 1 steht an Position 4: 4 * 10^1 =      40
+# - Summe:                            3200140
+# Zum Verstecken des zweiten Codes M8 einfach ueberschreiben:
+# 3200140 STO 8
+# M0 bleibt 1.
 #
-# Nach der vierten GUESS-Ziffer haelt das Programm an:
-# - schwarz = richtige Ziffer an richtiger Stelle
-# - weiss   = richtige Ziffer an falscher Stelle
+# Spielablauf mit Code 6413 und Guess 1234:
+# 1 STO 0
+# 1024030 STO 8
+# Programm bei Schritt 00 starten.
+# Das Programm haelt bei der ersten Guess-Ziffer an.
+# 1 R/S
+# 2 R/S
+# 3 R/S
+# 4 R/S
+# Danach haelt das Programm mit dem Ergebnis an.
+# RCL 1 zeigt die schwarzen Treffer: 0
+# RCL 9 zeigt die weissen Treffer: 3
 #
-# RCL 1 zeigt die schwarzen Treffer.
-# RCL 9 zeigt die weissen Treffer.
-# Danach reicht R/S fuer den naechsten Guess; M1, M2 und M9 werden vom Programm
-# zurueckgesetzt.
+# Naechster Guess:
+# R/S druecken, dann die vier Guess-Ziffern wieder jeweils mit R/S eingeben.
+# M1 wird dabei automatisch auf 0 gesetzt, M9 automatisch auf 4 und M2 auf 1.
+# Anders als bei Mastermind 16 und 17 muessen diese Speicher nach einem Guess
+# nicht mehr von Hand zurueckgesetzt werden.
 #
-# Vorbedingungen vor dem ersten Guess:
-# - M0 = 1, interne Konstante
-# - M8 = codierter CODE
-#
-# Einschraenkung:
-# - CODE und GUESS verwenden nur die Ziffern 1 bis 6.
-# - Die aktuelle Full-Test-Abdeckung prueft CODE und GUESS ohne doppelte Ziffern.
+# Neues Spiel mit dem zweiten Code:
+# Wenn das Programm nach einem Ergebnis angehalten hat, 3200140 STO 8 druecken,
+# dann R/S. Das Programm springt zu Schritt 00, setzt M1/M2/M9 zurueck und
+# haelt bei der ersten Guess-Ziffer fuer den neuen Code an.
 
 :LOAD
 
