@@ -1,0 +1,95 @@
+# Mastermind 20 — automatische Ergebnisanzeige
+#
+# Vier verschiedene Geheimziffern und vier verschiedene Guess-Ziffern aus 1..6.
+# Nach der vierten Ziffer und R/S erscheint Schwarz.Weiss direkt im Display:
+# 2.1 bedeutet zwei schwarze und einen weissen Treffer; 4.0 bedeutet geloest.
+# Eine feste Nachkommastelle macht auch 0.0 und 4.0 eindeutig sichtbar.
+#
+# Vorbereitung: Nur den codierten Geheimcode in M8 speichern.
+# Fuer jede Geheimziffer d an Position p wird p*10^d addiert.
+# Beispiel 6413: 1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030.
+# Daher: 1024030 STO 8. M8 wird vom Programm nicht veraendert.
+#
+# Programm bei Zelle 00 starten. An jedem Eingabehalt eine Ziffer eingeben
+# und R/S druecken. Beispiel Guess 1234: 1 R/S; 2 R/S; 3 R/S; 4 R/S.
+# Fuer Geheimcode 6413 erscheint danach 0.3.
+# R/S am Ergebnis-Halt startet die naechste Runde mit frischen Zaehlern.
+# Fuer einen neuen Code vor diesem Neustart den codierten Wert in M8 speichern.
+#
+# Speicher: M0=1, M2=Guess-Position, M4=Arbeitsspeicher, M8=Geheimcode.
+# M9 sammelt 10*Schwarz+Weiss. M1 und M7 werden nicht verwendet.
+# M9 enthaelt damit eine andere Bewertung als in Mastermind 19.
+# Das Programm belegt 70 Zellen; PS 1 aendert nur das Anzeigeformat.
+#
+00 060 C/CE
+01 055 STO
+02 109 9
+03 101 1
+04 055 STO
+05 102 2
+06 055 STO
+07 100 0
+08 090 R/S
+09 013 /
+10 056 RCL
+11 108 8
+12 064 X<>Y
+13 043 10^X
+14 010 +
+15 109 9
+16 063 EXP
+17 109 9
+18 055 STO
+19 104 4
+20 011 -
+21 050 M+
+22 104 4
+23 056 RCL
+24 104 4
+25 010 +
+26 109 9
+27 063 EXP
+28 109 9
+29 011 -
+30 062 +/-
+31 096 SKP
+32 056 RCL
+33 100 0
+34 051 M-
+35 109 9
+36 056 RCL
+37 102 2
+38 012 *
+39 062 +/-
+40 011 -
+41 104 4
+42 064 X<>Y
+43 096 SKP
+44 056 RCL
+45 100 0
+46 043 10^X
+47 050 M+
+48 109 9
+49 101 1
+50 050 M+
+51 102 2
+52 056 RCL
+53 102 2
+54 080 =
+55 096 SKP
+56 093 GOTO
+57 100 0
+58 108 8
+59 043 10^X
+60 012 *
+61 056 RCL
+62 109 9
+63 080 =
+64 071 PS
+65 101 1
+66 090 R/S
+67 093 GOTO
+68 100 0
+69 100 0
+70 099
+71 099

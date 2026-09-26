@@ -6,7 +6,7 @@
 #
 # Vorbereitung:
 # - Der geheime Code wird codiert in M8 versteckt.
-# - M0 wird vom Programm zu Beginn jeder Runde auf 1 gesetzt.
+# - Das Programm setzt M0=1 und M2=1 bei jedem Rundenstart gemeinsam.
 #   Eine manuelle Initialisierung mit 1 STO 0 ist nicht noetig.
 #
 # Codierung des geheimen Codes:
@@ -31,6 +31,7 @@
 # Naechster Guess:
 # R/S druecken, dann die vier Guess-Ziffern wieder jeweils mit R/S eingeben.
 # M0, M1, M2 und M9 initialisiert das Programm bei jeder Runde automatisch.
+# Die gemeinsame Folge 1 STO 2 STO 0 setzt M2=M0=1 in fuenf Tasten.
 #
 # Neues Spiel mit einem anderen Code:
 # Den neuen codierten Wert in M8 speichern, dann nach einem Ergebnis R/S
@@ -42,11 +43,11 @@
 
 :LOAD
 
-# Rundenstart: Schwarz=0, SKP-Konstante M0=1, Weissvorrat=4, Position=1.
+# Rundenstart: Schwarz=0; Weissvorrat=4; M2=M0=1.
+# 1 STO 2 STO 0 speichert denselben Wert nacheinander in M2 und M0.
 C/CE STO 1
-1 STO 0
 4 STO 9
-1 STO 2
+1 STO 2 STO 0
 
 # Guess-Ziffer n lesen.
 %guess

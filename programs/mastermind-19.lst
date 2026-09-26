@@ -3,9 +3,9 @@
 # Schwarz bedeutet: richtige Ziffer an richtiger Stelle.
 # Weiss bedeutet: richtige Ziffer an falscher Stelle.
 #
-# Vorbereitung: Den Geheimcode codieren und in M8 speichern. M0 wird vom
-# Programm automatisch initialisiert; eine manuelle Eingabe von 1 STO 0 ist
-# nicht erforderlich.
+# Vorbereitung: Den Geheimcode codieren und in M8 speichern. M0 und M2 werden
+# vom Programm automatisch initialisiert; 1 STO 2 STO 0 speichert die 1
+# nacheinander in beide Register. Eine manuelle Eingabe ist nicht erforderlich.
 #
 # Codierung: Fuer eine Geheimziffer d an Position p wird p*10^d addiert.
 # Beispiel Code 6413:
@@ -17,6 +17,7 @@
 # Am Ergebnis-Halt enthaelt M1 die Anzahl Schwarz und M9 die Anzahl Weiss.
 # Mit RCL 1 und RCL 9 koennen die beiden Werte angezeigt werden.
 # R/S startet eine neue Runde; M0, M1, M2 und M9 werden dabei zurueckgesetzt.
+# Die kombinierte Speicherung 1 STO 2 STO 0 spart eine Programmzelle.
 # Fuer ein neues Spiel den neuen codierten Code vor dem Neustart mit STO 8
 # speichern.
 # M4 ist Arbeitsspeicher und wird veraendert. M7 wird nicht benoetigt.
@@ -24,71 +25,71 @@
 00 060 C/CE
 01 055 STO
 02 101 1
-03 101 1
+03 104 4
 04 055 STO
-05 100 0
-06 104 4
+05 109 9
+06 101 1
 07 055 STO
-08 109 9
-09 101 1
-10 055 STO
-11 102 2
-12 090 R/S
-13 013 /
-14 056 RCL
-15 108 8
-16 064 X<>Y
-17 043 10^X
-18 010 +
-19 109 9
-20 063 EXP
-21 109 9
-22 055 STO
-23 104 4
-24 011 -
-25 050 M+
-26 104 4
-27 056 RCL
-28 104 4
-29 010 +
-30 109 9
-31 063 EXP
-32 109 9
-33 011 -
-34 062 +/-
-35 096 SKP
-36 056 RCL
-37 100 0
-38 051 M-
-39 109 9
-40 056 RCL
-41 102 2
-42 012 *
-43 062 +/-
-44 011 -
-45 104 4
-46 064 X<>Y
-47 096 SKP
-48 056 RCL
-49 100 0
-50 051 M-
-51 109 9
-52 050 M+
+08 102 2
+09 055 STO
+10 100 0
+11 090 R/S
+12 013 /
+13 056 RCL
+14 108 8
+15 064 X<>Y
+16 043 10^X
+17 010 +
+18 109 9
+19 063 EXP
+20 109 9
+21 055 STO
+22 104 4
+23 011 -
+24 050 M+
+25 104 4
+26 056 RCL
+27 104 4
+28 010 +
+29 109 9
+30 063 EXP
+31 109 9
+32 011 -
+33 062 +/-
+34 096 SKP
+35 056 RCL
+36 100 0
+37 051 M-
+38 109 9
+39 056 RCL
+40 102 2
+41 012 *
+42 062 +/-
+43 011 -
+44 104 4
+45 064 X<>Y
+46 096 SKP
+47 056 RCL
+48 100 0
+49 051 M-
+50 109 9
+51 050 M+
+52 101 1
 53 101 1
-54 101 1
-55 050 M+
-56 102 2
-57 056 RCL
-58 102 2
-59 080 =
-60 096 SKP
-61 093 GOTO
+54 050 M+
+55 102 2
+56 056 RCL
+57 102 2
+58 080 =
+59 096 SKP
+60 093 GOTO
+61 101 1
 62 101 1
-63 102 2
-64 090 R/S
-65 093 GOTO
+63 090 R/S
+64 093 GOTO
+65 100 0
 66 100 0
-67 100 0
+67 099
 68 099
 69 099
 70 099

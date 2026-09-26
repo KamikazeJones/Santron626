@@ -155,6 +155,10 @@
     {
       "name": "Mastermind 19",
       "file": "mastermind-19.lst"
+    },
+    {
+      "name": "Mastermind 20 (automatische Bewertung)",
+      "file": "mastermind-20.lst"
     }
   ]
 }

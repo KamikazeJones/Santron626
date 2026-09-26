@@ -1,10 +1,11 @@
 # Strategie zur Verkuerzung von Mastermind 18
 
-Stand: 26. September 2026. Ziel ist die Zahl belegter Programmzellen bei
+Stand: 27. September 2026. Ziel ist die Zahl belegter Programmzellen bei
 gleichbleibender Spielbedienung. Vier verschiedene Ziffern aus 1..6 bilden den
 Code und einen regulaeren Guess. Mastermind 18 benoetigt M0=1 noch als
 manuelle Vorbereitung. Mastermind 19 setzt M0 selbst und beginnt ohne diesen
-Handgriff.
+Handgriff. Mastermind 20 zeigt nach der vierten Ziffer und R/S automatisch
+Schwarz.Weiss mit einer Nachkommastelle an.
 
 ## Ausgangspunkt und bereits gepruefte Kandidaten
 
@@ -63,15 +64,51 @@ Pruefergebnisse fuer Original, 69-Zellen- und 65-Zellen-Variante:
   Kombinationen aus Geheimcode und eingegebener Ziffer im JavaScript-Rechner,
   inklusive Erhalt von M0/M1/M2/M8/M9.
 
-Mastermind 19 uebernimmt die 65-Zellen-Variante und fuegt `1 STO 0` beim
-Rundenstart hinzu. Es belegt 67 Zellen und verlangt keine manuelle M0-
-Initialisierung. Sein Listing besteht den 129.600-Faelle-Test sowohl mit M0=0
-als auch mit M0=1. Im JavaScript-Rechner bestehen 1.080 Folgerunden, bei denen
-M0 vor jedem Neustart absichtlich auf einen falschen Wert gesetzt wird.
+Mastermind 19 uebernimmt die 65-Zellen-Variante. Die vorige Fassung setzte
+M0 mit `1 STO 0` beim Rundenstart und belegte 68 Zellen; sie bestand den
+129.600-Faelle-Test sowohl mit M0=0 als auch mit M0=1. Im JavaScript-Rechner
+bestanden 1.080 Folgerunden, bei denen M0 vor jedem Neustart absichtlich auf
+einen falschen Wert gesetzt wurde.
+
+Die aktuelle Fassung initialisiert M2 und M0 gemeinsam mit `1 STO 2 STO 0`.
+Der zweite STO speichert den unveraenderten X-Wert 1 in M0, so dass die
+erneute Eingabe der 1 entfaellt. Das spart eine weitere Zelle; das Listing
+belegt jetzt 67 Zellen. Die kombinierte STO-Folge wurde im Emulator einzeln
+geprueft: M2=1 und M0=1, ohne offenen Speicherparameter. Das aktualisierte
+Listing besteht ausserdem erneut den C-VM-Test fuer alle 129.600 Code/Guess-
+Kombinationen, sowohl mit anfangs M0=0 als auch mit M0=1.
 
 Die Kandidaten liegen waehrend dieser Sitzung unter
 `/tmp/mastermind18-without-input-store.lst` und
 `/tmp/mastermind18-extract-fused.lst`.
+
+## Automatische Ergebnisanzeige in Mastermind 20
+
+`mastermind-20.sce` benutzt einen gemeinsamen Bewertungszaehler in M9 und
+belegt 70 Zellen. M1 wird nicht mehr verwendet. Nach jeder Guess-Ziffer
+enthaelt M9 `10*Schwarz+Weiss` fuer die bisher eingegebenen Ziffern.
+
+Die bestehende SKP/RCL-Folge erzeugt die Schwarzmaske b=0 oder b=1.
+`10^X M+ 9` addiert daraufhin 1 oder 10 zum gemeinsamen Zaehler. Der
+vorherige Missing-Test zieht bei einer fehlenden Ziffer 1 ab:
+
+| Ziffer | Missing-Abzug | 10^b | Netto in M9 |
+| --- | ---: | ---: | ---: |
+| fehlt im Code | -1 | 1 | 0 |
+| vorhanden, falsche Position | 0 | 1 | 1 |
+| richtige Position | 0 | 10 | 10 |
+
+Am Schleifenende ist X=4-M2=-1. `10^X` liefert damit ohne neue Zahleneingabe
+den Faktor 0.1. `10^X * RCL 9 = PS 1` zeigt unmittelbar Schwarz.Weiss an:
+zum Beispiel 2.1 fuer zwei schwarze und einen weissen Treffer. PS 1 sorgt
+fuer die feste Nachkommastelle, auch bei 0.0 und 4.0. M9 behaelt den
+ganzzahligen kombinierten Wert. Ein R/S am Ergebnis startet die neue Runde.
+
+Der JavaScript-Test `node tools/test-mastermind20.js` prueft alle 129.600
+gueltigen Code/Guess-Kombinationen, die genaue Anzeige, Folgerunden mit
+absichtlich veraenderten Arbeitsspeichern, Codewechsel und den Erhalt von
+M1/M7/M8. Er vergleicht auch das Web-Listing und das kommentierte Listing
+mit der ausfuehrbaren Referenzdatei.
 
 ## Weshalb die neue Extraktion funktioniert
 

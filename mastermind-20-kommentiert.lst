@@ -1,0 +1,122 @@
+# Mastermind 20 — automatische Ergebnisanzeige
+#
+# Vier verschiedene Geheimziffern und vier verschiedene Guess-Ziffern aus 1..6.
+# Nach der vierten Ziffer und R/S erscheint Schwarz.Weiss direkt im Display:
+# 2.1 bedeutet zwei schwarze und einen weissen Treffer; 4.0 bedeutet geloest.
+# Eine feste Nachkommastelle macht auch 0.0 und 4.0 eindeutig sichtbar.
+#
+# Vorbereitung: Nur den codierten Geheimcode in M8 speichern.
+# Fuer jede Geheimziffer d an Position p wird p*10^d addiert.
+# Beispiel 6413: 1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030.
+# Daher: 1024030 STO 8. M8 wird vom Programm nicht veraendert.
+#
+# Programm bei Zelle 00 starten. An jedem Eingabehalt eine Ziffer eingeben
+# und R/S druecken. Beispiel Guess 1234: 1 R/S; 2 R/S; 3 R/S; 4 R/S.
+# Fuer Geheimcode 6413 erscheint danach 0.3.
+# R/S am Ergebnis-Halt startet die naechste Runde mit frischen Zaehlern.
+# Fuer einen neuen Code vor diesem Neustart den codierten Wert in M8 speichern.
+#
+# Speicher: M0=1, M2=Guess-Position, M4=Arbeitsspeicher, M8=Geheimcode.
+# M9 sammelt 10*Schwarz+Weiss. M1 und M7 werden nicht verwendet.
+# M9 enthaelt damit eine andere Bewertung als in Mastermind 19.
+# Das Programm belegt 70 Zellen; PS 1 aendert nur das Anzeigeformat.
+
+
+# Rundenstart: Bewertung=0; Position und SKP-Konstante gemeinsam auf 1.
+00 060 C/CE
+01 055 STO
+02 109 9
+03 101 1
+04 055 STO
+05 102 2
+06 055 STO
+07 100 0
+
+08 090 R/S
+
+# Position p der Guess-Ziffer d aus M8 extrahieren.
+# / und X<>Y bereiten M8/10^d vor. B=9*10^9 verwendet die interne
+# Genauigkeit von zehn Stellen, um Nachkommastellen und hoehere Ziffern
+# abzutrennen. M4 speichert erst B, dann die abgeschnittene Summe B+T.
+# T-S+B liefert p; das folgende Minus schliesst diese Addition ab.
+09 013 /
+10 056 RCL
+11 108 8
+12 064 X<>Y
+13 043 10^X
+14 010 +
+15 109 9
+16 063 EXP
+17 109 9
+18 055 STO
+19 104 4
+20 011 -
+21 050 M+
+22 104 4
+23 056 RCL
+24 104 4
+25 010 +
+26 109 9
+27 063 EXP
+28 109 9
+
+# Fehlende Ziffer: Bei p=0 laedt RCL 0 die 1, sonst setzt das uebrig
+# gebliebene Registerargument 0 den Wert X=0. M9 verliert bei Fehlen 1.
+29 011 -
+30 062 +/-
+31 096 SKP
+32 056 RCL
+33 100 0
+34 051 M-
+35 109 9
+
+# Schwarztest: -(p-n)^2 ist bei Schwarz null, sonst negativ.
+# X<>Y rettet Y=4 fuer den spaeteren Schleifentest und setzt den Test nach X.
+# SKP/RCL 0 erzeugt die Maske b=1 fuer Schwarz bzw. b=0 fuer Nicht-Schwarz.
+36 056 RCL
+37 102 2
+38 012 *
+39 062 +/-
+40 011 -
+41 104 4
+42 064 X<>Y
+43 096 SKP
+44 056 RCL
+45 100 0
+
+# Der neue Trick: 10^b ist 10 fuer Schwarz und 1 fuer Nicht-Schwarz.
+# M9 erhaelt damit pro Ziffer netto 10 (schwarz), 1 (weiss) oder 0 (fehlend).
+# Bei Fehlen hebt die hier addierte 1 den vorherigen Abzug wieder auf.
+# Die offene Subtraktion mit Y=4 bleibt dabei fuer den Schleifentest erhalten.
+46 043 10^X
+47 050 M+
+48 109 9
+49 101 1
+50 050 M+
+51 102 2
+52 056 RCL
+53 102 2
+54 080 =
+55 096 SKP
+56 093 GOTO
+57 100 0
+58 108 8
+
+# Nach Ziffer 4 ist X=4-M2=-1. 10^X liefert deshalb direkt den Faktor 0.1.
+# Multiplikation mit M9 macht aus 10*Schwarz+Weiss die Anzeige Schwarz.Weiss.
+# PS 1 erzwingt eine Nachkommastelle; M9 behaelt den ganzzahligen Wert.
+59 043 10^X
+60 012 *
+61 056 RCL
+62 109 9
+63 080 =
+64 071 PS
+65 101 1
+66 090 R/S
+67 093 GOTO
+68 100 0
+69 100 0
+
+# 70-71 sind freie Programmzellen.
+70 099
+71 099
