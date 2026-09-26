@@ -1,0 +1,208 @@
+# Mastermind 19 — detailliert kommentiertes Santron-626-Listing
+#
+# Zweck und Vorbereitung
+# ----------------------
+# Spiel mit vier verschiedenen Guess-Ziffern und vier verschiedenen Ziffern
+# im Geheimcode; beide liegen im Bereich 1..6.
+#
+# Vor dem Spiel wird nur der Geheimcode in M8 gesetzt. Beispiel fuer 6413:
+#   1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030
+# Daher: 1024030 STO 8
+# M0 muss nicht von Hand gesetzt werden: das Programm speichert bei jedem
+# Rundenstart selbst eine 1 in M0.
+#
+# Am Ergebnis-Halt enthaelt M1 die Anzahl Schwarz und M9 die Anzahl Weiss.
+# M8 bleibt der Code. M4 ist Arbeitsspeicher und wird bei jedem Guess
+# veraendert; M7 wird nicht verwendet.
+#
+# Die Bedienung: Programm starten, an jedem Eingabehalt eine Ziffer 1..6
+# eingeben und R/S druecken. Nach dem vierten Guess haelt das Programm fuer
+# das Ergebnis. R/S startet die naechste Runde mit frischen Zaehlern.
+#
+# Rechnerkonventionen, die fuer die Kommentare wichtig sind
+# ---------------------------------------------------------
+# X ist der angezeigte Wert; Y haelt bei einer offenen Grundoperation den
+# linken Operanden. Zum Beispiel: nach "p -" ist Y=p, die Subtraktion offen
+# und X der spaeter eingegebene rechte Operand. X<>Y tauscht nur X und Y;
+# eine offene Grundoperation bleibt offen.
+#
+# RCL, STO und M+/M- fuehren Speicherbefehle aus, ohne eine offene +,-,*,/
+# Rechnung abzuschliessen. Bei SKP ueberspringt ein negatives X die naechste
+# Programmtaste. Wird RCL uebersprungen, bleibt dessen Registerziffer als
+# naechste Programmtaste stehen; hier ist das eine 0, die X auf null setzt.
+#
+# Der Rechner haelt Rechenergebnisse intern auf zehn signifikante Stellen.
+# Das kann bei passend gewaehlten grossen Summanden Dezimalstellen
+# abschneiden. PS steuert das Anzeigeformat und aendert diesen internen Wert
+# nicht. EXP beginnt die Eingabe einer wissenschaftlichen Zehnerpotenz:
+# 9 EXP 9 gibt 9*10^9 ein.
+#
+# -- Rundenstart und Zaehlregister ------------------------------------------
+# 00-01: C/CE setzt X auf null; STO 1 initialisiert den Schwarzzaehler M1=0.
+00 060 C/CE
+01 055 STO
+# 02-03: Die 1 wird nach M0 gespeichert. M0 ist die Konstante fuer die
+#        bedingten Zaehlerupdates hinter SKP.
+02 101 1
+03 101 1
+# 04-05: M0 wird als Ziel von STO gewaehlt; hier also 1 STO 0.
+04 055 STO
+05 100 0
+# 06-08: M9 bekommt den Vorrat 4. Fuer jede Guess-Ziffer, die im Geheimcode
+#        fehlt, wird 1 abgezogen; fuer jeden schwarzen Treffer ebenso.
+06 104 4
+07 055 STO
+08 109 9
+# 09-11: M2 ist der Positionszaehler n. Die erste Guess-Ziffer ist an Stelle 1.
+09 101 1
+10 055 STO
+11 102 2
+#
+# -- Guess eingeben, Geheimcodeposition suchen und direkt bewerten ----------
+# 12: Eingabehalt. Der Benutzer tippt nun eine Guess-Ziffer d und drueckt R/S.
+12 090 R/S
+#
+# 13-18: 10^d waehlt in M8 die Stelle, an der die Position von d gespeichert
+#        ist. Fuer Code 6413 gilt M8=1024030; bei d=4 ist der Inhalt der
+#        Stelle 10^4 gleich 2.
+#
+# 13 / startet die Division mit Y=d als linkem Operanden.
+13 013 /
+# 14-15 RCL 8 holt M8 nach X. Jetzt gilt X=M8, Y=d und / ist offen.
+14 056 RCL
+15 108 8
+# 16 X<>Y vertauscht X und Y: X=d, Y=M8; die offene Division bleibt bestehen.
+#    Der Tausch ist wichtig, weil die naechste Taste 10^X X potenziert.
+#    Ohne ihn waere der Exponent M8 statt d.
+16 064 X<>Y
+# 17 bildet 10^d in X; Y=M8 bleibt als linker Divisionsoperand erhalten.
+17 043 10^X
+# 18 + schliesst die vorher offene Division ab: q=M8/10^d.
+#    Zugleich beginnt + fuer den folgenden Hilfswert B=9*10^9.
+18 010 +
+#
+# 19-25: Dezimalstellen-Trick fuer die Extraktion. Sei q=M8/10^d und
+#        f=floor(q). Bei gueltigen Codes ist 0<=q<432101.
+#        Die Zehn-Stellen-Genauigkeit wird verwendet, um erst q abzuschneiden
+#        und anschliessend die Einerstelle des ganzzahligen f abzutrennen.
+#
+# 19-21: 9 EXP 9 gibt B=9000000000 ein. STO 4 speichert B in M4. Die offene
+#        Addition q+B bleibt dabei erhalten.
+19 109 9
+20 063 EXP
+21 109 9
+22 055 STO
+23 104 4
+# 24 - schliesst q+B ab und beginnt danach eine Subtraktion.
+#    T=B+f ist zehnstellig: die Nachkommastellen von q verschwinden durch die
+#    interne zehnstellige Genauigkeit. X=T, Y=T und die Subtraktion ist offen.
+24 011 -
+# 25 M+ 4 addiert T zum vorher in M4 gespeicherten B. Das Ergebnis wird intern
+#    auf zehn signifikante Stellen abgeschnitten und in M4 gespeichert:
+#       S = 2*B + 10*floor(f/10)
+#    X=T, Y=T und die offene Subtraktion bleiben unveraendert.
+25 050 M+
+26 104 4
+#
+# 26-33: Die Differenz T-S ist -B plus die Einerziffer von f. Die zweite
+#        Addition von B holt genau diese Ziffer zurueck nach X.
+#
+# 26-28: RCL 4 holt S aus dem veraenderten M4.
+27 056 RCL
+28 104 4
+# 29 + schliesst T-S ab. Fuer B+T wird nun eine elfstellig angezeigte
+#    Groessenordnung auf zehn Stellen abgeschnitten; die Einerstelle von f
+#    faellt weg. Ergebnis T-S = -B + (f mod 10). + bleibt offen.
+29 010 +
+# 30-32: B=9*10^9 wird erneut eingegeben; die Addition mit T-S bleibt offen.
+30 109 9
+31 063 EXP
+32 109 9
+# 33 - schliesst die offene Addition B+(T-S) ab. X ist jetzt
+#       f - 10*floor(f/10),
+#    also die Ziffer an Stelle 10^d in M8. Diese Taste beginnt zugleich die
+#    Subtraktion fuer den Weiss/Missing-Test; p=X bleibt als Y erhalten.
+33 011 -
+# Beispiel M8=1024030 und d=4:
+#   q=102.403, f=102, T=9000000102, S=18000000100,
+#   T-S=-8999999998, B+(T-S)=2. Ergebnis p=2.
+#
+# -- Fehlende Guess-Ziffer erkennen -----------------------------------------
+# 34 +/- macht aus p den Wert -p. Die offene Subtraktion p-X bleibt erhalten.
+34 062 +/-
+# 35 SKP: falls p>0, ueberspringt es RCL 0. Die nachfolgende 0 setzt X auf 0.
+#    Falls p=0, wird RCL 0 ausgefuehrt und X=M0=1; die zugehoerige Register-
+#    ziffer 0 wird als Parameter des Speicherbefehls konsumiert.
+35 096 SKP
+36 056 RCL
+37 100 0
+# 38-39: M- 9 zieht X von M9 ab. Somit wird 1 abgezogen, wenn p=0, sonst 0.
+#        M9 startet bei 4 und wird spaeter auch fuer Schwarz vermindert.
+38 051 M-
+39 109 9
+#
+# -- Schwarz erkennen und Zaehler aktualisieren -----------------------------
+# 40-45: Berechnung von -(p-n)^2. Der Wert ist 0 genau dann, wenn p=n,
+#        andernfalls negativ. M2 enthaelt die aktuelle Guess-Position n.
+#
+# 40-41: RCL 2 holt n. Die noch offene Subtraktion p-X wird dadurch zu p-n.
+40 056 RCL
+41 102 2
+# 42 * schliesst p-n ab und beginnt die Multiplikation (p-n)*(...).
+42 012 *
+# 43 macht aus X=p-n den Wert -(p-n).
+43 062 +/-
+# 44 - schliesst die Multiplikation ab:
+#       (p-n)*(-(p-n)) = -(p-n)^2
+#    Zugleich beginnt eine neue Subtraktion mit diesem Null/Negativ-Testwert.
+44 011 -
+# 45 gibt 4 ein; X=4, Y=-(p-n)^2, die Subtraktion bleibt offen.
+45 104 4
+# 46 X<>Y tauscht: X=-(p-n)^2 fuer SKP, Y=4 als linker Operand fuer den
+#    Schleifentest. Der offene Subtraktionszustand bleibt erhalten.
+46 064 X<>Y
+# 47 SKP ueberspringt bei einem nichtschwarzen Guess (negativer Testwert) RCL.
+#    Dann setzt die folgende Taste 0 die Zaehler-Maske X=0. Bei p=n ist der
+#    Testwert null, SKP ueberspringt nicht: RCL 0 und die Registerziffer 0
+#    laden die Maske X=1.
+47 096 SKP
+48 056 RCL
+49 100 0
+# 50-51: M9 wird bei Schwarz um 1 vermindert, bei Nicht-Schwarz um 0.
+50 051 M-
+51 109 9
+# 52-53: Dieselbe Maske wird zu M1 addiert. M1 zaehlt schwarze Treffer.
+52 050 M+
+53 101 1
+# 54-56: Guess-Positionszaehler M2 wird um 1 erhoeht.
+54 101 1
+55 050 M+
+56 102 2
+#
+# -- Schleife beenden oder naechste Guess-Ziffer lesen ----------------------
+# Nach dem Inkrement ist M2 gleich 2, 3, 4 oder 5. Y=4 aus Schritt 46 bleibt
+# erhalten; die offene Subtraktion wird hier mit RCL 2 und = abgeschlossen.
+57 056 RCL
+58 102 2
+# 59 ergibt X=4-M2: nach Guess 1..3 positiv, nach Guess 4 gleich -1.
+59 080 =
+# 60-63: Fuer die ersten drei Stellen ist X nicht negativ und GOTO 12 laeuft.
+#        Nach der vierten Stelle ist X=-1; SKP ueberspringt das ganze GOTO 12.
+60 096 SKP
+61 093 GOTO
+62 101 1
+63 102 2
+#
+# -- Ergebnis-Halt und Neustart ---------------------------------------------
+# 64 haelt nach der vierten Guess-Ziffer. M1=schwarz, M9=weiss.
+64 090 R/S
+# 65-67: Nach dem Ergebnis springt R/S zum Rundenanfang. Dort werden M1, M0,
+#        M9 und M2 fuer den naechsten Guess oder Geheimcode neu initialisiert.
+65 093 GOTO
+66 100 0
+67 100 0
+# 68-71 sind freie Programmzellen; sie werden nicht erreicht.
+68 099
+69 099
+70 099
+71 099

@@ -1,0 +1,95 @@
+# Mastermind 19
+# Mastermind fuer vier verschiedene Ziffern von 1 bis 6.
+# Schwarz bedeutet: richtige Ziffer an richtiger Stelle.
+# Weiss bedeutet: richtige Ziffer an falscher Stelle.
+#
+# Vorbereitung: Den Geheimcode codieren und in M8 speichern. M0 wird vom
+# Programm automatisch initialisiert; eine manuelle Eingabe von 1 STO 0 ist
+# nicht erforderlich.
+#
+# Codierung: Fuer eine Geheimziffer d an Position p wird p*10^d addiert.
+# Beispiel Code 6413:
+#   1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030
+# Zum Verstecken: 1024030 STO 8
+#
+# Programm starten. Am Eingabehalt eine Guess-Ziffer 1..6 eingeben und R/S
+# druecken. Das fuer alle vier Guess-Ziffern wiederholen.
+# Am Ergebnis-Halt enthaelt M1 die Anzahl Schwarz und M9 die Anzahl Weiss.
+# Mit RCL 1 und RCL 9 koennen die beiden Werte angezeigt werden.
+# R/S startet eine neue Runde; M0, M1, M2 und M9 werden dabei zurueckgesetzt.
+# Fuer ein neues Spiel den neuen codierten Code vor dem Neustart mit STO 8
+# speichern.
+# M4 ist Arbeitsspeicher und wird veraendert. M7 wird nicht benoetigt.
+#
+00 060 C/CE
+01 055 STO
+02 101 1
+03 101 1
+04 055 STO
+05 100 0
+06 104 4
+07 055 STO
+08 109 9
+09 101 1
+10 055 STO
+11 102 2
+12 090 R/S
+13 013 /
+14 056 RCL
+15 108 8
+16 064 X<>Y
+17 043 10^X
+18 010 +
+19 109 9
+20 063 EXP
+21 109 9
+22 055 STO
+23 104 4
+24 011 -
+25 050 M+
+26 104 4
+27 056 RCL
+28 104 4
+29 010 +
+30 109 9
+31 063 EXP
+32 109 9
+33 011 -
+34 062 +/-
+35 096 SKP
+36 056 RCL
+37 100 0
+38 051 M-
+39 109 9
+40 056 RCL
+41 102 2
+42 012 *
+43 062 +/-
+44 011 -
+45 104 4
+46 064 X<>Y
+47 096 SKP
+48 056 RCL
+49 100 0
+50 051 M-
+51 109 9
+52 050 M+
+53 101 1
+54 101 1
+55 050 M+
+56 102 2
+57 056 RCL
+58 102 2
+59 080 =
+60 096 SKP
+61 093 GOTO
+62 101 1
+63 102 2
+64 090 R/S
+65 093 GOTO
+66 100 0
+67 100 0
+68 099
+69 099
+70 099
+71 099

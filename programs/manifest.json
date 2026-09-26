@@ -151,6 +151,10 @@
     {
       "name": "Mastermind 18",
       "file": "mastermind-18.lst"
+    },
+    {
+      "name": "Mastermind 19",
+      "file": "mastermind-19.lst"
     }
   ]
 }

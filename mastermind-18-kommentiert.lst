@@ -1,0 +1,180 @@
+# Mastermind 18 — kommentiertes Santron-626-Listing
+#
+# Spiel: vier verschiedene Ziffern 1..6. M8 enthaelt den codierten Geheimcode.
+# Eingabe: vier Guess-Ziffern, jeweils bestaetigt mit R/S.
+# Ausgabe: M1 = schwarz, M9 = weiss. Von 4 werden zuerst fehlende Guess-
+#          Ziffern und ausserdem schwarze Treffer abgezogen.
+#
+# Vorbereitung der Originalversion: einmalig 1 STO 0; danach M0 nicht aendern.
+# M0 enthaelt die Konstante 1. Bei SKP wird nur die Taste RCL uebersprungen:
+# die verbleibende Taste 0 gibt dann die Zahl 0 ein, statt M0 zu lesen.
+# M1, M2 und M9 werden zu Beginn jedes Durchlaufs intern initialisiert.
+# M4 und M7 sind Arbeits-/Scratch-Speicher; M8 ist der Geheimcode.
+#
+# Geheimcode-Kodierung: Fuer Ziffer d an Position p wird p*10^d addiert.
+# Beispiel 6413 -> 1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030, also
+# 1024030 STO 8.
+
+# -- Beginn eines Guess-/Rundendurchlaufs -----------------------------------
+# 00-02: X loeschen und M1 (schwarze Treffer) auf 0 setzen.
+00 060 C/CE
+01 055 STO
+02 101 1
+# 03-05: M9 auf 4 setzen. M9 startet als Vorrat fuer die vier Positionen;
+#        pro Position ohne passenden Code-Treffer wird 1 abgezogen.
+03 104 4
+04 055 STO
+05 109 9
+# 06-08: M2 (aktuelle Position n) auf 1 setzen.
+06 101 1
+07 055 STO
+08 102 2
+
+# -- Eine Guess-Ziffer lesen und ihre Position im Geheimcode holen ----------
+# 09-11: Auf Eingabe/Bestaetigung der Guess-Ziffer warten und sie zunaechst
+#        in M4 sichern. Die Extraktionsrechnung verwendet M4 anschliessend
+#        als Scratch und ueberschreibt diesen Eingabewert.
+09 090 R/S
+10 055 STO
+11 104 4
+# 12-25: Geheimcode-Positionen stehen als Dezimalstellen in M8: an der Stelle
+#        10^d steht die Position p der Ziffer d. Beispiel 6413 ist
+#        1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030.
+#        Die Folge berechnet daraus die Position der geratenen Ziffer d.
+#
+#        Der X<>Y-Kniff ist ein Registertausch: X ist die gerade angezeigte
+#        Zahl, Y der zweite Operand der noch laufenden Rechnung. Vor X<>Y
+#        gilt X=M8, Y=d und die Division ist noch OFFEN. Der Tausch ergibt
+#        X=d, Y=M8, damit 10^X also
+#        10^d gebildet wird; ohne den Tausch wuerde versehentlich M8 potenziert.
+#        Das ist besonders leicht zu verwechseln, weil X<>Y selbst keinen
+#        Zahlenwert berechnet, sondern nur vertauscht, welche Zahl die naechste
+#        Funktion (hier 10^X) verwendet.
+#
+#        + bei 17 fuehrt die Division q=M8/10^d aus und beginnt eine Addition.
+#        9 EXP 9 gibt B=9*10^9 ein; STO 4 merkt sich B. EXP ist die Exponent-
+#        Eingabe, keine Rundungstaste. + bei 23 berechnet q+B. Der Rechner
+#        schneidet intern auf zehn signifikante Stellen ab: bei diesem
+#        zehnstelligen Wert fallen alle Nachkommastellen von q weg.
+#        Damit steht T=B+floor(q) in X und Y; STO 7 sichert T in M7.
+#        Die neue Addition bleibt dabei offen. PS aendert nur die Anzeige
+#        und spielt bei diesen Abschneidungen keine Rolle.
+#        Am Ende steht in M7 die Position p, oder 0, falls d fehlt.
+#        Beispiel 6413: Eingabe 1 ergibt M7=3, 2 ergibt 0, 3 ergibt 4,
+#        4 ergibt 2. (Die Umwandlung ist fuer Ziffern 1..6 ausgelegt.)
+12 013 /
+13 056 RCL
+14 108 8
+15 064 X<>Y
+16 043 10^X
+17 010 +
+18 109 9
+19 063 EXP
+20 109 9
+21 055 STO
+22 104 4
+23 010 +
+24 055 STO
+25 107 7
+# 26-33: RCL 4 holt B. - bei 28 berechnet die offene Addition T+B und startet
+#        danach eine Subtraktion. T+B ist elfstellig; beim Abschneiden auf
+#        zehn Stellen geht jetzt die Einerstelle von T verloren. Es entsteht
+#        S=2*B+10*floor(floor(q)/10). RCL 4 und = berechnen U=S-B.
+#        M- 7 zieht U vom gesicherten T ab; M7=T-U ist die gesuchte Ziffer.
+#        = ist hier ein gewoehnlicher Rechenabschluss, kein Gleichheitstest.
+#        Beispiel M8=1024030, d=4: q=102.403, T=9000000102,
+#        S=18000000100, U=9000000100, M7=T-U=2.
+#        M7 ist die Position der geratenen Ziffer im Geheimcode; 0 bedeutet,
+#        dass sie fehlt. Das getrennte Scratch-Register vermeidet, M8 zu
+#        veraendern.
+26 056 RCL
+27 104 4
+28 011 -
+29 056 RCL
+30 104 4
+31 080 =
+32 051 M-
+33 107 7
+
+# -- Weisse Treffer zaehlen -------------------------------------------------
+# 34-42: Pruefen, ob die geratene Ziffer im Geheimcode vorkommt. Bei M7=0
+#        wird M0 als 1-Konstante geladen und M9 um 1 vermindert. Bei M7!=0
+#        ueberspringt SKP nur RCL; die verbleibende Taste 0 gibt X=0 ein.
+#        Deshalb zieht M- 9 genau 1 bei fehlender Ziffer und sonst 0 ab.
+#        - bei 36 hat zuvor Y=M7 gesetzt und eine Subtraktion vorbereitet;
+#        +/- macht X=-M7 fuer SKP. Die offene Subtraktion bleibt fuer den
+#        anschliessenden Schwarztest erhalten. Diese Folge setzt M0=1 voraus.
+34 056 RCL
+35 107 7
+36 011 -
+37 062 +/-
+38 096 SKP
+39 056 RCL
+40 100 0
+41 051 M-
+42 109 9
+
+# -- Schwarze Treffer zaehlen ------------------------------------------------
+# 43-59: Schwarztest. Sei p=M7 die Codeposition und n=M2 die Guess-Position.
+#        RCL 2 ersetzt X durch n. * bei 45 schliesst die offene Subtraktion
+#        p-n ab und beginnt eine Multiplikation mit Y=p-n. +/- dreht nur X
+#        um: X=-(p-n). - bei 47 berechnet daher (p-n)*(-(p-n))=-(p-n)^2
+#        und beginnt eine neue Subtraktion. Der Wert ist bei p=n null,
+#        sonst negativ. Weder 2*n noch eine Subtraktion von 4 wird berechnet.
+#
+#        Nach 4 gilt X=4, Y=-(p-n)^2 und die Subtraktion ist offen.
+#        X<>Y bei 49 liefert X=-(p-n)^2 fuer SKP und bewahrt Y=4 fuer den
+#        spaeteren Schleifentest. Bei p=n laedt RCL 0 die 1; sonst wird RCL
+#        uebersprungen und die Taste 0 gibt X=0 ein. M- 9 zieht diese Maske
+#        vom Weissvorrat ab, M+ 1 addiert dieselbe Maske zum Schwarzzaehler.
+#
+#        Speicheroperationen schliessen die offene Rechnung 4-X nicht ab.
+#        Die Maske wird spaeter von RCL 2 ersetzt; Y=4 bleibt dabei erhalten.
+#        Die beiden aufeinanderfolgenden 1 bei 56/57 sind NICHT doppelt:
+#        Schritt 56 ist der Zielregister-Parameter von M+ (M+ 1), Schritt 57
+#        ist der zu addierende Wert fuer M+ 2. Der erste M+ gehoert noch zum
+#        vorhergehenden bedingten Speicherupdate.
+43 056 RCL
+44 102 2
+45 012 *
+46 062 +/-
+47 011 -
+48 104 4
+49 064 X<>Y
+50 096 SKP
+51 056 RCL
+52 100 0
+53 051 M-
+54 109 9
+55 050 M+
+56 101 1
+57 101 1
+58 050 M+
+59 102 2
+
+# -- Naechste Position oder Ergebnis ----------------------------------------
+# 60-66: M2 wurde schon erhoeht: es ist jetzt 2, 3, 4 oder 5. RCL 2 und =
+#        schliessen die noch offene Rechnung mit Y=4 ab: X=4-M2.
+#        Fuer M2=2,3,4 ist X nicht negativ, also fuehrt SKP den Sprung nach 09
+#        aus. Nach der vierten Ziffer gilt M2=5 und X=-1: SKP ueberspringt
+#        den gesamten dreizelligen GOTO und erreicht den Ergebnis-Halt.
+60 056 RCL
+61 102 2
+62 080 =
+63 096 SKP
+64 093 GOTO
+65 100 0
+66 109 9
+# 67: Ergebnis-Halt. M1 und M9 koennen jetzt mit RCL 1 bzw. RCL 9 angesehen
+#     werden. R/S setzt den Programmablauf danach fort.
+67 090 R/S
+# 68-70: Nach dem Ergebnis zurueck an den Anfang (Schritt 00) springen.
+#        Dadurch werden M1/M2/M9 fuer den naechsten Guess bzw. ein neues Spiel
+#        neu gesetzt; M8 bleibt als Geheimcode erhalten.
+68 093 GOTO
+69 100 0
+70 100 0
+# 71: 099 ist die leere Programmtaste / freie Zelle am Ende des Listings.
+#     Sie wird von dieser Programmversion nicht ausgefuehrt, da Schritt 68-70
+#     zurueckspringen. Sie ist ein moeglicher Platz fuer eine zusaetzliche Taste.
+71 099
