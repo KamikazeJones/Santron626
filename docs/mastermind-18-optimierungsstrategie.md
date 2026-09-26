@@ -1,11 +1,11 @@
 # Strategie zur Verkuerzung von Mastermind 18
 
 Stand: 27. September 2026. Ziel ist die Zahl belegter Programmzellen bei
-gleichbleibender Spielbedienung. Vier verschiedene Ziffern aus 1..6 bilden den
-Code und einen regulaeren Guess. Mastermind 18 benoetigt M0=1 noch als
+gleichbleibender Spielbedienung. Die urspruenglichen Varianten wurden mit vier
+verschiedenen Ziffern aus 1..6 entwickelt und geprueft. Mastermind 18 benoetigt M0=1 noch als
 manuelle Vorbereitung. Mastermind 19 setzt M0 selbst und beginnt ohne diesen
 Handgriff. Mastermind 20 zeigt nach der vierten Ziffer und R/S automatisch
-Schwarz.Weiss mit einer Nachkommastelle an.
+Schwarz.Weiss mit einer Nachkommastelle an und erlaubt Ziffern aus 1..8.
 
 ## Ausgangspunkt und bereits gepruefte Kandidaten
 
@@ -85,18 +85,61 @@ Die Kandidaten liegen waehrend dieser Sitzung unter
 ## Automatische Ergebnisanzeige in Mastermind 20
 
 `mastermind-20.sce` benutzt einen gemeinsamen Bewertungszaehler in M9 und
-belegt 70 Zellen. M1 wird nicht mehr verwendet. Nach jeder Guess-Ziffer
-enthaelt M9 `10*Schwarz+Weiss` fuer die bisher eingegebenen Ziffern.
+belegt jetzt alle 72 Zellen. Vor jeder Eingabe zeigt `RCL 2` die Position
+1, 2, 3 oder 4. `PS 0` am Rundenstart entfernt die Nachkommastelle auch bei
+Folgerunden; `PS 1` am Ergebnis stellt die feste Nachkommastelle wieder her.
 
-Die bestehende SKP/RCL-Folge erzeugt die Schwarzmaske b=0 oder b=1.
-`10^X M+ 9` addiert daraufhin 1 oder 10 zum gemeinsamen Zaehler. Der
-vorherige Missing-Test zieht bei einer fehlenden Ziffer 1 ab:
+Fuer die Positionsanzeige wurde die Zaehlerrechnung verkuerzt. M9 startet bei
+36 und enthaelt nach der vierten Ziffer `10*Schwarz+Weiss`. M0 wird nicht
+verwendet. M1 dient ausschliesslich als Ziel fuer das Abziehen von 0; sein
+Wert bleibt erhalten.
 
-| Ziffer | Missing-Abzug | 10^b | Netto in M9 |
+Code und Guess bestehen jeweils aus vier verschiedenen Ziffern von 1 bis 8.
+Die Schleife laeuft weiterhin viermal, einmal pro Guess-Position. Die Ziffer
+waehlt ueber `10^d` direkt ihre Stelle im codierten Geheimcode; die acht
+moeglichen Ziffern werden nicht einzeln durchsucht.
+
+Beispiel fuer Code 8765:
+
+```text
+1*10^8 + 2*10^7 + 3*10^6 + 4*10^5 = 123400000
+Vorbereitung: 123400000 STO 8
+Guess 5678: 5 R/S; 6 R/S; 7 R/S; 8 R/S -> 0.4
+Guess 8765: 8 R/S; 7 R/S; 6 R/S; 5 R/S -> 4.0
+```
+
+Der groesste codierte Wert fuer Ziffern 1..8 ist 432100000. Er bleibt innerhalb
+der internen zehnstelligen Genauigkeit. Auch die Addition mit B=9*10^9 in der
+Extraktion bleibt zehnstellig: N/10^d ist fuer d>=1 hoechstens 43210000.
+
+Der Vorhandensein-Test verwendet `SKP M- 1 M+ 9`: Bei p=0 zieht `M- 1`
+nur 0 von M1 ab und X bleibt 0. Bei p>0 ueberspringt SKP das M-; seine
+Registerziffer 1 wird als normale Zahl eingegeben. M9 erhaelt somit 1 bei
+einer vorhandenen Ziffer und 0 bei einer fehlenden.
+
+Der Schwarztest erzeugt weiterhin X=-(p-n)^2. `SKP M- 9 M- 9` zieht bei
+Schwarz zweimal 0 ab. Andernfalls ueberspringt SKP das erste M-; die
+Registerziffer 9 setzt X=9, und das zweite M- zieht diese 9 ab.
+
+| Ziffer | Vorhandensein-Zuschlag | Nicht-Schwarz-Abzug | Netto in M9 |
 | --- | ---: | ---: | ---: |
-| fehlt im Code | -1 | 1 | 0 |
-| vorhanden, falsche Position | 0 | 1 | 1 |
-| richtige Position | 0 | 10 | 10 |
+| fehlt im Code | 0 | -9 | -9 |
+| vorhanden, falsche Position | 1 | -9 | -8 |
+| richtige Position | 1 | 0 | 1 |
+
+Mit S schwarzen, W weissen und F fehlenden Ziffern gilt S+W+F=4. Deshalb
+ergibt der Startvorrat 36 nach vier Ziffern genau die kombinierte Bewertung:
+
+```text
+M9 = 36 + S - 8*W - 9*F
+   = 36 + S - 8*W - 9*(4-S-W)
+   = 10*S + W
+```
+
+Nach k Ziffern verbleibt noch der Vorrat `9*(4-k)` neben der bisherigen
+Bewertung. Die Speicherung der Konstante M0=1 und die bisherige Umwandlung
+der Schwarzmaske durch 10^X entfallen. Das schafft Platz fuer PS 0 und die
+Positionsanzeige, waehrend die feste Ergebnisanzeige erhalten bleibt.
 
 Am Schleifenende ist X=4-M2=-1. `10^X` liefert damit ohne neue Zahleneingabe
 den Faktor 0.1. `10^X * RCL 9 = PS 1` zeigt unmittelbar Schwarz.Weiss an:
@@ -105,10 +148,17 @@ fuer die feste Nachkommastelle, auch bei 0.0 und 4.0. M9 behaelt den
 ganzzahligen kombinierten Wert. Ein R/S am Ergebnis startet die neue Runde.
 
 Der JavaScript-Test `node tools/test-mastermind20.js` prueft alle 129.600
-gueltigen Code/Guess-Kombinationen, die genaue Anzeige, Folgerunden mit
-absichtlich veraenderten Arbeitsspeichern, Codewechsel und den Erhalt von
+gueltigen Code/Guess-Kombinationen fuer Ziffern 1..6, die genaue Anzeige, Folgerunden mit
+absichtlich veraenderten Arbeitsspeichern, die Positionsanzeige 1, 2, 3, 4
+in jeder Runde, Codewechsel und den Erhalt von
 M1/M7/M8. Er vergleicht auch das Web-Listing und das kommentierte Listing
 mit der ausfuehrbaren Referenzdatei.
+
+Fuer die Erweiterung auf 1..8 wurden zusaetzlich alle 53.760 einzelnen
+Ziffernbewertungen geprueft: 1.680 Geheimcodes, je acht moegliche Guess-Ziffern
+an vier Positionen. Die Beispielspiele 8765 gegen 5678 und 8765 wurden ebenfalls
+geprueft. Ein vollstaendiger Test aller 2.822.400 Code/Guess-Kombinationen fuer
+1..8 wurde bisher nicht durchgefuehrt.
 
 ## Weshalb die neue Extraktion funktioniert
 

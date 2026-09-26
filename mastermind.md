@@ -1,5 +1,31 @@
 # Mastermind auf dem Santron 626
 
+## Aktuelle Version: Mastermind 20
+
+Geheimcode und Guess bestehen jeweils aus vier verschiedenen Ziffern von
+1 bis 8. Die vier Guess-Ziffern werden einzeln eingegeben, jeweils mit R/S
+bestaetigt. Vor jeder Eingabe zeigt der Rechner die Position 1, 2, 3 oder 4
+ohne Nachkommastelle an. Nach der vierten Bestaetigung erscheint die Bewertung automatisch
+als Schwarz.Weiss, zum Beispiel 2.1. 4.0 bedeutet geloest. Ein weiteres R/S
+startet die naechste Runde.
+
+Der Geheimcode wird vor dem Start codiert in M8 gespeichert: Fuer die Ziffer d
+an Position p wird p*10^d addiert. Beispiel Code 8765:
+
+```text
+1*10^8 + 2*10^7 + 3*10^6 + 4*10^5 = 123400000
+123400000 STO 8
+```
+
+Guess 5678 ergibt 0.4; Guess 8765 ergibt 4.0. Die Schleife verarbeitet vier
+Positionen. Die acht erlaubten Ziffern vergroessern nur die Auswahl.
+
+Das Programm belegt 72 Zellen. Quelltext: [mastermind-20.sce](mastermind-20.sce).
+Die Erklaerung der Rechenweise und die Testabdeckung stehen in der
+[Optimierungsnotiz](docs/mastermind-18-optimierungsstrategie.md).
+
+Die folgenden Abschnitte dokumentieren fruehere Entwuerfe.
+
 ## Zielbild
 
 Das erste lauffaehige Ziel soll bewusst einfach bleiben. Der Rechner erzeugt den

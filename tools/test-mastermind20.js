@@ -14,7 +14,7 @@ const resultPc = program.lastIndexOf(core.KEY_CODES["R/S"]) + 1;
 for (const file of ["programs/mastermind-20.lst", "mastermind-20-kommentiert.lst"]) {
   assert.deepEqual(core.parseProgramListing(fs.readFileSync(path.join(root, file), "utf8")).program, program, file);
 }
-assert.equal(program.filter(code => code !== 99).length, 70);
+assert.equal(program.filter(code => code !== 99).length, 72);
 
 const codes = [];
 for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++)
@@ -39,9 +39,10 @@ function startRound(calc) {
   calc.state.memories[9] = 999;
   resume(calc);
   assert.equal(calc.state.pc, inputPc);
-  assert.equal(calc.state.memories[0], 1);
+  assert.equal(calc.state.memories[0], -17);
   assert.equal(calc.state.memories[2], 1);
-  assert.equal(calc.state.memories[9], 0);
+  assert.equal(calc.state.memories[9], 36);
+  assert.equal(calc.displayText().trim(), "1.");
 }
 
 let cases = 0;
@@ -55,9 +56,13 @@ for (const code of codes) {
   calc.state.memories[8] = encoded;
   for (const guess of codes) {
     startRound(calc);
-    for (const digit of guess) {
+    for (const [index, digit] of guess.entries()) {
       calc.execute(String(digit));
       resume(calc);
+      if (index < 3) {
+        assert.equal(calc.state.pc, inputPc);
+        assert.equal(calc.displayText().trim(), `${index + 2}.`);
+      }
     }
     const black = guess.filter((digit, index) => digit === code[index]).length;
     const white = guess.filter(digit => code.includes(digit)).length - black;
@@ -75,4 +80,4 @@ for (const code of codes) {
     cases++;
   }
 }
-console.log(`PASS ${cases} code/guess combinations: automatic display, restart, code changes and matching listings.`);
+console.log(`PASS ${cases} code/guess combinations: input positions, automatic results, restart, code changes and matching listings.`);
