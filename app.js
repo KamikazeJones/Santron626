@@ -63,7 +63,6 @@ let serverProgramManifest = null;
 let programRenderDirty = true;
 let renderedProgramCursor = null;
 let renderedProgramCursorVisible = null;
-let lastPointerKeyTime = 0;
 let displayCells = [];
 let lastRenderedDisplay = null;
 
@@ -458,25 +457,10 @@ function stepProgram() {
 }
 
 document.addEventListener("click", (event) => {
-  if (performance.now() - lastPointerKeyTime < 500) return;
-  const button = event.target.closest("[data-key]");
-  if (!button) return;
-  pressKeyButton(button);
-});
-
-document.addEventListener("pointerdown", (event) => {
   const button = event.target.closest("[data-key]");
   if (!button) return;
   vibrateKeyFeedback();
-  event.preventDefault();
-  lastPointerKeyTime = performance.now();
-  requestAnimationFrame(() => pressKeyButton(button));
-});
-
-document.addEventListener("pointerup", (event) => {
-  const button = event.target.closest("[data-key]");
-  if (!button) return;
-  event.preventDefault();
+  pressKeyButton(button);
 });
 
 function pressKeyButton(button) {
