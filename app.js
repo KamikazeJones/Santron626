@@ -111,6 +111,7 @@ function makeKeypad() {
     button.type = "button";
     button.dataset.key = item.key;
     button.innerHTML = keyLabelHtml(item.label);
+    button.addEventListener("click", handleKeyButtonClick);
     wrap.append(shift, button);
     keypad.append(wrap);
   });
@@ -456,12 +457,10 @@ function stepProgram() {
   }
 }
 
-document.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-key]");
-  if (!button) return;
+function handleKeyButtonClick(event) {
   vibrateKeyFeedback();
-  pressKeyButton(button);
-});
+  pressKeyButton(event.currentTarget);
+}
 
 function pressKeyButton(button) {
   showKeyPress(button);
@@ -538,10 +537,14 @@ function showKeyPress(button) {
   }, 85);
 }
 
-function vibrateKeyFeedback() {
-  if (!("vibrate" in navigator)) return;
-  navigator.vibrate([18]);
+function vibrateKeyFeedback(duration = 120) {
+  if (typeof navigator.vibrate !== "function") return false;
+  return navigator.vibrate(duration);
 }
+
+document.querySelectorAll(".switch-row [data-key], .nav-row [data-key]").forEach((button) => {
+  button.addEventListener("click", handleKeyButtonClick);
+});
 
 document.querySelector("#vibrationTest").addEventListener("click", () => {
   const status = document.querySelector("#vibrationTestStatus");
@@ -550,7 +553,7 @@ document.querySelector("#vibrationTest").addEventListener("click", () => {
     return;
   }
   try {
-    const accepted = navigator.vibrate(120);
+    const accepted = vibrateKeyFeedback();
     status.textContent = accepted ? "Aufruf angenommen" : "Aufruf abgelehnt";
   } catch (error) {
     status.textContent = "Fehler beim Aufruf";
