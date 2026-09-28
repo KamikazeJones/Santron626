@@ -470,7 +470,7 @@ document.addEventListener("pointerdown", (event) => {
   vibrateKeyFeedback();
   event.preventDefault();
   lastPointerKeyTime = performance.now();
-  pressKeyButton(button);
+  requestAnimationFrame(() => pressKeyButton(button));
 });
 
 document.addEventListener("pointerup", (event) => {
