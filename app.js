@@ -559,6 +559,20 @@ function vibrateKeyFeedback() {
   navigator.vibrate([18]);
 }
 
+document.querySelector("#vibrationTest").addEventListener("click", () => {
+  const status = document.querySelector("#vibrationTestStatus");
+  if (typeof navigator.vibrate !== "function") {
+    status.textContent = "API nicht verfügbar";
+    return;
+  }
+  try {
+    const accepted = navigator.vibrate(120);
+    status.textContent = accepted ? "Aufruf angenommen" : "Aufruf abgelehnt";
+  } catch (error) {
+    status.textContent = "Fehler beim Aufruf";
+  }
+});
+
 document.querySelectorAll("input[name='mode']").forEach((input) => {
   input.addEventListener("change", () => {
     if (input.checked) state.mode = input.value;

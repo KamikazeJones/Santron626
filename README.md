@@ -55,3 +55,11 @@ Letzter offener Schritt:
 1. Den GUI-Smoke erneut gegen `https://192.168.2.122:8765` ausführen.
 2. Prüfen, ob der Browser-Fehler wegen des Zertifikats jetzt weg ist.
 3. Falls nötig, den Smoke ohne Service-Worker-Block testen.
+
+CORDIC-Rechenmodell:
+
+- `cordic.js` implementiert dezimale Näherungsverfahren mit den MCS7529-014-ROM-Konstanten.
+- `cordic.html` direkt im Browser öffnen: Double-/BCD-Vergleich, Schrittauswahl, Animation, Vektor- und Konvergenzdiagramme.
+- `cordic-bcd.js`: exakte Dezimalarithmetik mit begrenzten Mantissen und protokollierten Stellenverlusten; ein Präzisionsmodell.
+- API, Verfahren und Grenzen: [docs/cordic.md](docs/cordic.md).
+- Keine bitgenaue BCD-/Mikrocode-Emulation.

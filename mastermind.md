@@ -21,8 +21,12 @@ Guess 5678 ergibt 0.4; Guess 8765 ergibt 4.0. Die Schleife verarbeitet vier
 Positionen. Die acht erlaubten Ziffern vergroessern nur die Auswahl.
 
 Das Programm belegt 72 Zellen. Quelltext: [mastermind-20.sce](mastermind-20.sce).
+Das [detailliert kommentierte Listing](mastermind-20-kommentiert.lst) erklaert
+die einzelnen Zellbereiche, die Registerzustaende und die Speichertricks.
 Die Erklaerung der Rechenweise und die Testabdeckung stehen in der
 [Optimierungsnotiz](docs/mastermind-18-optimierungsstrategie.md).
+Die Verbesserung, durch die RCL 7 entfaellt, wird in
+[Extraktion ohne M7](docs/mastermind-extraktion-ohne-m7.md) Schritt fuer Schritt erklaert.
 
 Die folgenden Abschnitte dokumentieren fruehere Entwuerfe.
 

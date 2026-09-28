@@ -1,136 +1,284 @@
-# Mastermind 20 — automatische Ergebnisanzeige
+# Mastermind 20 — detailliert kommentiertes Santron-626-Listing
 #
-# Vier verschiedene Geheimziffern und vier verschiedene Guess-Ziffern aus 1..8.
-# Die Schleife laeuft weiterhin viermal: einmal pro Guess-Position.
-# Vor jeder Eingabe zeigt das Display die Position 1, 2, 3 oder 4 an.
-# Diese Positionsanzeige hat auch in Folgerunden keine Nachkommastelle.
-# Nach der vierten Ziffer und R/S erscheint Schwarz.Weiss direkt im Display:
-# 2.1 bedeutet zwei schwarze und einen weissen Treffer; 4.0 bedeutet geloest.
-# Eine feste Nachkommastelle macht auch 0.0 und 4.0 eindeutig sichtbar.
+# Bedienung und Vorbereitung
+# -------------------------
+# Geheimcode und Guess bestehen jeweils aus vier verschiedenen Ziffern 1..8.
+# Vor dem Start wird nur der codierte Geheimcode in M8 gespeichert.
+# Fuer eine Geheimziffer d an Position p wird p*10^d zur Codesumme addiert.
+# Beispiel Code 6413:
+#   N = 1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030
+#   Vorbereitung: 1024030 STO 8
+# Beispiel Code 8765:
+#   N = 1*10^8 + 2*10^7 + 3*10^6 + 4*10^5 = 123400000
+#   Vorbereitung: 123400000 STO 8
 #
-# Vorbereitung: Nur den codierten Geheimcode in M8 speichern.
-# Fuer jede Geheimziffer d an Position p wird p*10^d addiert.
-# Beispiel 6413: 1*10^6 + 2*10^4 + 3*10^1 + 4*10^3 = 1024030.
-# Daher: 1024030 STO 8. M8 wird vom Programm nicht veraendert.
-# Beispiel mit 7 und 8: Code 8765 wird als 123400000 gespeichert:
-# 1*10^8 + 2*10^7 + 3*10^6 + 4*10^5 = 123400000.
-# Daher: 123400000 STO 8. Guess 5678 ergibt 0.4; Guess 8765 ergibt 4.0.
+# Programm bei Zelle 00 starten. Vor jeder Eingabe erscheint die Position
+# 1, 2, 3 oder 4 ohne Nachkommastelle (mit dem normalen Dezimalpunkt des
+# Rechners). Eine Guess-Ziffer tippen, dann mit R/S bestaetigen.
+# Nach der vierten Bestaetigung erscheint Schwarz.Weiss: 2.1 bedeutet zwei
+# schwarze und einen weissen Treffer; 4.0 bedeutet geloest.
+# R/S am Ergebnis startet die naechste Runde. Fuer einen neuen Geheimcode
+# vorher den neuen codierten Wert mit STO 8 speichern.
 #
-# Programm bei Zelle 00 starten. An jedem Eingabehalt eine Ziffer eingeben
-# und R/S druecken. Beispiel Guess 1234: 1 R/S; 2 R/S; 3 R/S; 4 R/S.
-# Fuer Geheimcode 6413 erscheint danach 0.3.
-# R/S am Ergebnis-Halt startet die naechste Runde mit frischen Zaehlern.
-# Fuer einen neuen Code vor diesem Neustart den codierten Wert in M8 speichern.
+# Beispiel: Code 6413, Guess 1234 -> 0.3.
+# Beispiel: Code 8765, Guess 5678 -> 0.4; Guess 8765 -> 4.0.
+# Code und Guess duerfen keine doppelten Ziffern enthalten.
+# Alle 72 Programmzellen sind belegt.
 #
-# Speicher: M2=Guess-Position, M4=Arbeitsspeicher, M8=Geheimcode.
-# M9 startet bei 36 und enthaelt nach vier Ziffern 10*Schwarz+Weiss.
-# M1 dient als Ziel fuer das Abziehen von 0; sein Wert bleibt erhalten.
-# M0 und M7 werden nicht verwendet.
-# M9 enthaelt damit eine andere Bewertung als in Mastermind 19.
-# Das Programm belegt alle 72 Zellen. PS 0 und PS 1 aendern nur das Anzeigeformat.
-
-
-# Rundenstart: PS 0 schaltet zur Anzeige ohne Nachkommastellen zurueck
-# und beendet eine etwaige Zahleneingabe. Der Bewertungsvorrat ist 36.
+# Bezeichnungen und Register
+# -------------------------
+# d = eingegebene Guess-Ziffer, 1..8.
+# n = aktuelle Guess-Position, 1..4.
+# p = Position von d im Geheimcode, 1..4; p=0 bedeutet: d fehlt.
+# N = codierter Geheimcode.
+# B = 9000000000, Hilfszahl fuer die Ziffernextraktion.
+# q = N/10^d; f = ganzzahliger Anteil von q.
+# T = B+f; S = 2*B + 10*(ganzzahliger Anteil von f/10).
+#
+# M2: aktuelle Guess-Position n, wird pro Ziffer um 1 erhoeht.
+# M4: veraenderter Arbeitsspeicher; enthaelt zuerst B, danach S.
+# M8: Geheimcode N, bleibt unveraendert.
+# M9: Bewertungszaehler; startet bei 36, endet bei 10*Schwarz+Weiss.
+# M1: dient nur als Ziel fuer das Abziehen von 0; keine Initialisierung noetig.
+# M0, M3, M5, M6, M7: werden nicht verwendet.
+# Die Ergebnisbedeutung von M9 unterscheidet sich von Mastermind 19.
+#
+# Warum der Bewertungszaehler bei 36 startet
+# ----------------------------------------
+# Jede Ziffer veraendert M9 um +1 bei Schwarz, -8 bei Weiss oder -9 bei Fehlen.
+# Sei s=Schwarz, w=Weiss, a=Anzahl fehlender Ziffern. Nach vier Ziffern gilt:
+#   s+w+a = 4
+#   M9 = 36+s-8*w-9*a = 10*s+w
+# Nach k verarbeiteten Ziffern gilt allgemeiner:
+#   M9 = 9*(4-k) + 10*s_k + w_k
+# Der noch enthaltene Vorrat fuer jede unbearbeitete Position ist also 9.
+# Erst nach der vierten Ziffer ist M9 die fertige kombinierte Bewertung.
+#
+# Wichtige Rechnerkonventionen
+# ---------------------------
+# X ist der angezeigte Wert. Y haelt den linken Operanden einer offenen
+# Grundoperation. Nach "p -" wartet die Rechnung p-X auf den rechten Wert.
+# Eine neue Rechentaste schliesst die vorherige Grundoperation ab und beginnt
+# zugleich die naechste. RCL/STO/M+/M- schliessen diese Rechnung nicht ab.
+# X<>Y tauscht die Registerwerte, ohne die offene Grundoperation zu beenden.
+#
+# Ein Speicherbefehl braucht zwei Zellen: Befehl und Registerziffer.
+# Wird er normal ausgefuehrt, wird die Registerziffer als Parameter konsumiert.
+# SKP ueberspringt bei negativem X eine Zelle. Ueberspringt es den Befehl,
+# bleibt die Registerziffer stehen und wird als normale Zahleneingabe benutzt.
+# Bei einem folgenden GOTO ueberspringt SKP dagegen alle drei GOTO-Zellen.
+# X=0 ist nicht negativ und loest keinen Sprung aus.
+#
+# Ergebnisse werden intern auf zehn signifikante Stellen abgeschnitten.
+# PS 0/PS 1 bestimmen nur die angezeigten Nachkommastellen; sie veraendern
+# weder den internen Rechenwert noch die Genauigkeit der Extraktion.
+#
+# -- 00-08: Rundenstart -----------------------------------------------------
+# 00-01 PS 0: Anzeige ohne Nachkommastellen, auch nach einem Ergebnis in PS 1.
+# PS beendet die laufende Zahleneingabe; die folgenden 3 und 6 beginnen daher
+# eine neue Zahl. PS ist kein C/CE und loescht keine offene Grundoperation.
+# Beim normalen Rundenneustart ist die vorherige Rechnung durch Zelle 65
+# bereits abgeschlossen.
 00 071 PS
 01 100 0
+# 02-03 geben die Zahl 36 ein.
 02 103 3
 03 106 6
+# 04-05 speichern den Bewertungsvorrat 36 in M9; X bleibt 36.
 04 055 STO
 05 109 9
+# 06-08 geben 1 ein und speichern sie als erste Position in M2.
+# STO hat die vorherige Zahleneingabe beendet; die 1 wird nicht an 36 angehaengt.
 06 101 1
 07 055 STO
 08 102 2
-
-# M2 zeigt, welche Ziffer als Naechstes einzugeben ist. RCL beendet die
-# Zahleneingabe, damit die getippte Guess-Ziffer den Positionswert ersetzt.
+#
+# -- 09-11: Positionsanzeige und Guess-Eingabe -------------------------------
+# 09-10 RCL 2: X=n. Deshalb werden wirklich 1, 2, 3 und 4 angezeigt, nicht
+# die Zwischenwerte des Schleifentests. RCL beendet ebenfalls die Zahleneingabe.
+# Der Benutzer kann die Position deshalb durch genau eine Guess-Ziffer ersetzen.
 09 056 RCL
 10 102 2
+# 11 ist der Eingabehalt. Nach Eingabe von d und R/S geht es bei Zelle 12 weiter.
+# GOTO 09 kehrt zuerst zur Positionsanzeige zurueck, dann zu diesem Halt.
 11 090 R/S
-
-# Position p der Guess-Ziffer d aus M8 extrahieren.
-# / und X<>Y bereiten M8/10^d vor. B=9*10^9 verwendet die interne
-# Genauigkeit von zehn Stellen, um Nachkommastellen und hoehere Ziffern
-# abzutrennen. M4 speichert erst B, dann die abgeschnittene Summe B+T.
-# T-S+B liefert p; das folgende Minus schliesst diese Addition ab.
+#
+# -- 12-17: Geheimcode durch 10^d teilen ------------------------------------
+# 12 / startet mit X=d die Rechnung d/X: Y=d, Division offen.
 12 013 /
+# 13-14 RCL 8: X=N, Y=d. Die Division wird noch nicht ausgefuehrt.
 13 056 RCL
 14 108 8
+# 15 X<>Y: X=d, Y=N. Die offene Division lautet jetzt N/X.
+# Der Tausch bringt d fuer 10^X nach X und N als linken Operanden nach Y.
+# Ohne diesen Tausch wuerde die naechste Taste 10^N statt 10^d bilden.
 15 064 X<>Y
+# 16 10^X: X=10^d, Y=N; die Division N/10^d bleibt offen.
 16 043 10^X
+# 17 + fuehrt die Division aus: X=q, Y=q. Es beginnt zugleich q+X.
 17 010 +
+#
+# -- 18-25: Ganzzahl T und abgeschnittene Summe S bilden ----------------------
+# 18-20 geben B=9*10^9 ein. Die offene Addition q+B bleibt erhalten.
 18 109 9
 19 063 EXP
 20 109 9
+# 21-22 speichern B in M4, ohne q+B abzuschliessen.
 21 055 STO
 22 104 4
+# 23 - fuehrt q+B aus und beginnt eine Subtraktion.
+# B+q ist zehnstellig: die Nachkommastellen von q werden intern abgeschnitten.
+# Jetzt gilt X=T=B+f, Y=T und die offene Rechnung ist T-X.
 23 011 -
+# 24-25 M+ 4: M4 wird von B zu S=B+T veraendert.
+# Diese Summe ist elfstellig; zehn signifikante Stellen lassen ihre Einerstelle
+# weg. Daher S=2*B+10*(ganzzahliger Anteil von f/10).
+# Der entscheidende Speichertrick: T bleibt gleichzeitig in X und Y erhalten!
+# M+ 4 veraendert nur M4; die offene Subtraktion T-X bleibt bestehen.
 24 050 M+
 25 104 4
+#
+# -- 26-32: Gesuchte Codeposition direkt in X gewinnen -----------------------
+# 26-27 RCL 4: X=S, Y=T. Die offene Subtraktion lautet jetzt T-S.
 26 056 RCL
 27 104 4
+# 28 + berechnet U=T-S=-B+p. Jetzt X=U, Y=U, Addition U+X offen.
 28 010 +
+# 29-31 geben B erneut ein. X=B, Y=U; U+B bleibt offen.
 29 109 9
 30 063 EXP
 31 109 9
-
-# Vorhandene Ziffer: X=-p. Bei p=0 fuehrt M- 1 nur das Abziehen von 0 aus;
-# X bleibt 0. Bei p>0 ueberspringt SKP das M-; die Registerziffer 1 wird
-# als Zahl eingegeben. M+ 9 addiert deshalb 1 bei Vorhandensein, sonst 0.
+# 32 - berechnet U+B=p und beginnt sofort die Subtraktion p-X.
+# Jetzt gilt X=p und Y=p. Dieses Minus ersetzt ein separates abschliessendes =.
+# p kommt direkt aus der Extraktion in X; STO 7/M- 7/RCL 7 werden nicht gebraucht.
+# Beispiel N=1024030, d=4:
+#   q=102.403, f=102, T=9000000102, S=18000000100,
+#   U=-8999999998, U+B=2. Die 4 steht im Geheimcode an Position 2.
 32 011 -
+#
+# -- 33-38: Vorhandensein feststellen, 0 oder 1 zu M9 addieren ----------------
+# 33 +/-: X=-p. Y=p und die offene Subtraktion p-X bleiben erhalten.
 33 062 +/-
+# 34 SKP verzweigt anhand von -p:
+#   p=0: X=0, kein Skip -> M- 1 wird mit Parameter 1 ausgefuehrt.
+#   p>0: X<0, Skip -> nur Zelle 35 entfaellt; Zelle 36 bleibt eine Zahleneingabe.
 34 096 SKP
+# 35-36: Bei Fehlen zieht M- 1 nur 0 von M1 ab und X bleibt 0.
+# Bei Vorhandensein wird M- uebersprungen und die Taste 1 setzt X=1.
+# M1 bleibt erhalten; der Parametertrick erzeugt die Maske fuer Vorhandensein.
 35 051 M-
 36 101 1
+# 37-38 M+ 9 addiert die Maske: +1 bei vorhandener Ziffer, sonst +0.
+# Dabei bleibt Y=p erhalten, ebenso die noch offene Subtraktion p-X.
 37 050 M+
 38 109 9
-
-# Schwarztest: -(p-n)^2 ist bei Schwarz null, sonst negativ.
-# X<>Y rettet Y=4 fuer den spaeteren Schleifentest und setzt den Test nach X.
-# Bei Schwarz bleibt X=0: das erste M- 9 zieht 0 ab und verbraucht seine 9.
-# Andernfalls ueberspringt SKP das erste M-: dessen Registerziffer setzt X=9.
+#
+# -- 39-45: Schwarztest und Rettung des linken Schleifenoperanden 4 -----------
+# 39-40 RCL 2: X=n, Y=p. Die offene Rechnung ist jetzt p-n.
+# p wird aus Y weiterverwendet; ein erneutes RCL der Codeposition ist unnoetig.
 39 056 RCL
 40 102 2
+# 41 * berechnet D=p-n und beginnt D*X: X=D, Y=D.
 41 012 *
+# 42 +/- setzt X=-D; Y=D und die Multiplikation bleiben erhalten.
 42 062 +/-
+# 43 - berechnet D*(-D)=-D^2 und beginnt eine neue Subtraktion.
+# X=Y=t=-D^2. t=0 genau bei p=n, andernfalls ist t negativ.
+# Eine fehlende Ziffer hat p=0, n>=1 und ist deshalb ebenfalls Nicht-Schwarz.
 43 011 -
+# 44 gibt 4 ein: X=4, Y=t, offene Rechnung t-X.
 44 104 4
+# 45 X<>Y tauscht: X=t fuer den SKP-Test, Y=4 fuer die spaetere Schleife.
+# Die offene Subtraktion bleibt bestehen und lautet nun 4-X.
+# So kann X fuer die Zaehlerupdates benutzt werden, waehrend Y die 4 aufbewahrt.
 45 064 X<>Y
+#
+# -- 46-50: Bei Nicht-Schwarz 9 abziehen ------------------------------------
+# 46 SKP prueft t=-D^2:
+#   Schwarz: t=0 -> kein Skip, erster M- 9 wird normal ausgefuehrt.
+#   Nicht-Schwarz: t<0 -> nur M- in Zelle 47 wird uebersprungen.
 46 096 SKP
+# 47-48 erster M- 9:
+#   Schwarz: zieht X=0 ab und konsumiert 9 als Registerparameter. X bleibt 0.
+#   Nicht-Schwarz: 9 bleibt als normale Programmtaste stehen und setzt X=9.
+# Wieder wird ein Registerargument durch SKP zur Zahleneingabe umfunktioniert.
 47 051 M-
 48 109 9
-
-# Das zweite M- 9 zieht bei Nicht-Schwarz 9 ab, bei Schwarz weiterhin 0.
-# Pro Ziffer veraendert sich M9 netto um +1 (schwarz), -8 (weiss) oder
-# -9 (fehlend). Weil es genau vier Ziffern sind, gilt am Ende:
-# 36 + Schwarz - 8*Weiss - 9*Fehlend = 10*Schwarz + Weiss.
-# Die offene Subtraktion mit Y=4 bleibt dabei fuer den Schleifentest erhalten.
+# 49-50 zweiter M- 9 zieht nun X von M9 ab: 0 bei Schwarz, 9 bei Nicht-Schwarz.
+# Zusammen mit Zellen 37-38 ergibt das:
+#   Schwarz:  +1 - 0 = +1
+#   Weiss:    +1 - 9 = -8
+#   Fehlend:  +0 - 9 = -9
+# Y=4 und die offene Subtraktion 4-X bleiben erhalten.
 49 051 M-
 50 109 9
+#
+# -- 51-60: Position erhoehen und Schleife steuern ----------------------------
+# 51 gibt 1 ein: X=1. Sie dient nur zum Inkrementieren, nicht als Ergebnis.
 51 101 1
+# 52-53 M+ 2: M2 wird von n auf n+1 erhoeht. X=1, Y=4, Subtraktion offen.
 52 050 M+
 53 102 2
+# 54-55 RCL 2 holt n+1 nach X, waehrend Y weiterhin 4 enthaelt.
 54 056 RCL
 55 102 2
+# 56 = schliesst die seit Zelle 43 offene Subtraktion ab: X=4-(n+1).
+# Nach den vier Guess-Ziffern ergeben sich nacheinander 2, 1, 0 und -1.
+# Diese Werte dienen nur zum Schleifentest; Zellen 09-10 laden die richtige
+# Positionsnummer fuer die Anzeige der naechsten Eingabe.
 56 080 =
+# 57 SKP: Nach Guess 1..3 ist X>=0; GOTO 09 wird ausgefuehrt.
+# Nach Guess 4 ist X=-1; SKP ueberspringt GOTO mitsamt beiden Adressziffern,
+# also die drei Zellen 58-60. Es geht direkt mit Zelle 61 weiter.
 57 096 SKP
+# 58-60 GOTO 09: M2 steht jetzt auf 2, 3 oder 4. Dort zeigt RCL 2 diese
+# Position an und der Benutzer gibt die naechste Ziffer ein.
 58 093 GOTO
 59 100 0
 60 109 9
-
-# Nach Ziffer 4 ist X=4-M2=-1. 10^X liefert deshalb direkt den Faktor 0.1.
-# Multiplikation mit M9 macht aus 10*Schwarz+Weiss die Anzeige Schwarz.Weiss.
-# PS 1 erzwingt eine Nachkommastelle; M9 behaelt den ganzzahligen Wert.
+#
+# -- 61-68: Bewertung automatisch anzeigen ---------------------------------
+# Nach vier Ziffern: M2=5, X=-1, M9=10*Schwarz+Weiss, keine offene Rechnung.
+# 61 10^X macht aus -1 den Faktor 0.1. Eine neue Eingabe von .1 ist unnoetig.
 61 043 10^X
+# 62 * beginnt die Multiplikation mit Y=0.1.
 62 012 *
+# 63-64 RCL 9: X=10*Schwarz+Weiss, Y=0.1; Multiplikation offen.
 63 056 RCL
 64 109 9
+# 65 = berechnet Schwarz+Weiss/10. M9 behaelt den ganzzahligen kombinierten Wert.
 65 080 =
+# 66-67 PS 1 sorgt fuer genau eine sichtbare Nachkommastelle, auch bei 0.0/4.0.
+# Die Ziffer 1 hier ist ein Praezisionsparameter und keine neue Zahl.
+# Der Rechenwert aus Zelle 65 bleibt unveraendert.
 66 071 PS
 67 101 1
+# 68 ist der Ergebnis-Halt. Der Benutzer liest z.B. 0.3, 2.1 oder 4.0.
+# Nach erneutem R/S wird bei Zelle 69 fortgesetzt.
 68 090 R/S
+#
+# -- 69-71: Neue Runde ------------------------------------------------------
+# 69-71 GOTO 00: PS 0 stellt die Positionsanzeige wieder auf null Nachkommastellen.
+# M9 wird auf 36 und M2 auf 1 zurueckgesetzt; der naechste Halt zeigt Position 1.
+# M8 bleibt derselbe Geheimcode, solange der Benutzer keinen neuen speichert.
 69 093 GOTO
 70 100 0
 71 100 0
-
-# Alle 72 Programmzellen sind belegt.
+#
+# Vollstaendiger Bewertungsverlauf: Code 6413, Guess 1234
+# -----------------------------------------------------
+# Start: M9=36.
+# Guess-Ziffer d | Guess-Position n | Codeposition p | Art       | M9 danach
+#       1       |        1         |       3        | Weiss     |    28
+#       2       |        2         |       0        | Fehlend   |    19
+#       3       |        3         |       4        | Weiss     |    11
+#       4       |        4         |       2        | Weiss     |     3
+# Ergebnisanzeige: 0.3. M9=3, M2=5; M8 bleibt 1024030.
+#
+# Zum Vergleich: Vier schwarze Treffer erhoehen 36 viermal um 1 auf 40.
+# Die Ergebnisrechnung zeigt dann 4.0. Vier fehlende Ziffern ziehen viermal
+# 9 von 36 ab und liefern 0.0. Vier weisse Treffer ergeben 36-4*8=4 -> 0.4.
+#
+# Weiterfuehrende Erklaerung:
+# docs/mastermind-extraktion-ohne-m7.md beschreibt den Ersatz von RCL 7
+# und den Verlauf der offenen Rechenoperationen im Vergleich zur alten Routine.

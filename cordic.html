@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCS7529 · CORDIC Schritt für Schritt</title>
+<link rel="stylesheet" href="cordic.css">
+<script defer src="cordic-bcd.js"></script><script defer src="cordic.js"></script><script defer src="cordic-view.js"></script>
+</head>
+<body>
+<main>
+<header><a href="index.html">← Santron 626</a><span class="badge">MCS7529 / 014</span>
+<h1>CORDIC, Schritt für Schritt.</h1><p class="intro">Wie aus Dezimalverschiebungen und kleinen Drehungen eine Näherung entsteht.</p></header>
+<form id="parameters" class="panel controls">
+<label>Funktion<select id="function"><option>tan</option><option>sin</option><option>cos</option><option>atan</option><option>ln</option><option>log10</option><option>exp</option><option>pow10</option></select></label>
+<label>Eingabe<input id="input" type="number" value="30" step="any" required></label>
+<label>Winkeleinheit<select id="unit"><option value="deg">Grad</option><option value="rad">Radiant</option></select></label>
+<label>Dezimalstufen<select id="levels"><option value="10">10 · n = 0 … 9</option><option value="7">7 · n = 0 … 6</option><option value="4">4 · n = 0 … 3</option><option value="1">1 · n = 0</option></select></label>
+<label>BCD-Mantissenstellen<select id="precision"><option value="10">10 Stellen</option><option value="13">13 Stellen</option><option value="16">16 Stellen</option></select></label>
+<button type="submit">Vergleichen</button>
+</form>
+<p id="error" role="alert" hidden></p>
+<section id="visualization">
+<div class="results"><div><small>Double-Ergebnis</small><strong id="result"></strong></div><div><small>Math-Referenz</small><strong id="reference"></strong></div><div><small>Double − Referenz</small><strong id="difference"></strong></div><div><small>BCD-Modell-Ergebnis</small><strong id="bcd-result"></strong></div><div><small>BCD − Referenz</small><strong id="bcd-error"></strong></div><div><small>BCD − Double</small><strong id="bcd-difference"></strong></div></div>
+<p id="comparison-summary" class="note"></p>
+<div class="transport"><button id="first-difference">Erste Zustandsabweichung</button><button id="first-branch">Erste andere Schrittentscheidung</button></div>
+<div class="charts">
+<section class="panel"><h2 id="geometry-title">CORDIC-Vektor: Addition und Stellenverschiebung</h2><svg id="geometry" viewBox="0 0 600 330" role="img" aria-label="Rechenweg des Vektors"></svg><p id="geometry-note" class="note"></p></section>
+<section class="panel"><h2 id="convergence-title">Näherung und Referenz</h2><svg id="convergence" viewBox="0 0 600 330" role="img" aria-label="Konvergenz der Näherung über die Rechenschritte"></svg><p class="note"><span class="key teal"></span>Näherung <span class="key pink"></span>BCD-Modell <span class="key gold"></span>Math-Referenz · horizontal: Rechenschritt</p></section>
+</div>
+<section class="panel playback"><div class="transport"><button id="previous" aria-label="Vorheriger Schritt">←</button><button id="play">Abspielen</button><button id="next" aria-label="Nächster Schritt">→</button><button id="last">Zum Ergebnis</button><label>Tempo<select id="speed"><option value="600">Langsam</option><option value="200" selected>Normal</option><option value="60">Schnell</option></select></label><output id="position"></output></div>
+<label class="scrubber">Rechenschritt<input id="step" type="range" min="0" max="1" value="0"></label>
+<div class="step-heading"><span id="phase" class="badge"></span><strong id="operation"></strong></div>
+<div id="registers" class="registers"></div><p id="step-detail" class="note"></p>
+</section>
+<section class="panel comparison">
+<h2>Arithmetik im ausgewählten Schritt</h2>
+<p id="alignment-note" class="note"></p>
+<div class="table-wrap"><table><thead><tr><th>Zustand</th><th>Double</th><th>BCD-Modell (exakt)</th><th>BCD − Double</th></tr></thead><tbody id="state-comparison"></tbody></table></div>
+<details><summary>Mantissenziffern und Stellenverluste</summary><pre id="decimal-digits"></pre><div id="losses"></div></details>
+</section>
+<section class="panel comparison"><h2>Unterschied der Näherungen</h2><svg id="arithmetic-difference" viewBox="0 0 600 330" role="img" aria-label="BCD minus Double über die vergleichbaren Rechenschritte"></svg><p class="note">Vergleich derselben Phase, Dezimalstufe und Wiederholung. Einseitige Schritte werden als Lücken dargestellt.</p></section>
+<details id="protocol" class="panel"><summary>Zerlegung und vollständiges Schrittprotokoll</summary><p id="counts" class="note"></p><button id="export">JSON herunterladen</button><div class="table-wrap"><table><thead><tr><th>Schritt</th><th>Phase</th><th>n</th><th>Double x</th><th>BCD x</th><th>Double y</th><th>BCD y</th><th>Double z</th><th>BCD z</th><th>Double Näherung</th><th>BCD Näherung</th></tr></thead><tbody id="trace"></tbody></table></div></details>
+</section>
+<footer><p>Dieses Rechenmodell verwendet die Konstanten des MCS7529-014-ROMs und wiederholte Schritte zur Basis 10. Die Größen x, y und z sind algorithmische Zustände, keine direkten Abbildungen der Chipregister. Double und das BCD-Präzisionsmodell verwenden dieselben ROM-Konstanten. Das BCD-Modell rechnet mit exakten Dezimalzahlen und schneidet nach Operationen auf die gewählte Mantissenbreite ab. Die Breite ist eine Modellannahme; Registermasken, Takte und Mikrocode werden nicht bitgenau emuliert.</p><p>Grundlagen: <a href="https://www.richis-lab.de/MCS7529.htm">Dunkelwinds ROM-Analyse bei Richi’s Lab</a> · <a href="https://archived.hpcalc.org/laporte/TheSecretOfTheAlgorithms.htm">Jacques Laporte: The Secret of the Algorithms</a> · <a href="docs/cordic.md">Modul-Dokumentation</a></p></footer>
+</main>
+</body></html>

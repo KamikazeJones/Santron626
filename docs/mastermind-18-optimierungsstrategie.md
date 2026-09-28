@@ -162,6 +162,9 @@ geprueft. Ein vollstaendiger Test aller 2.822.400 Code/Guess-Kombinationen fuer
 
 ## Weshalb die neue Extraktion funktioniert
 
+Eine ausfuehrliche Erklaerung des Registerverlaufs und des entfallenden
+`RCL 7` steht in [Extraktion ohne M7](mastermind-extraktion-ohne-m7.md).
+
 Sei N der codierte Geheimcode und d die geratene Ziffer. Mit
 `/ RCL 8 X<>Y 10^X` wird die Division N/10^d vorbereitet. Das folgende `+`
 fuehrt sie aus. Fuer B = 9*10^9 werden dann zwei Zwischenwerte gebildet:
